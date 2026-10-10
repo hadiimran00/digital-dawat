@@ -72,6 +72,16 @@ export function defaultContent(category: CategoryId, language: "en" | "ur" = "en
         : "Join us for an evening of food, laughter and good company.",
     family1: couple && category === "wedding" ? (ur ? "مسٹر اور مسز خالد محمود اور اہلِ خانہ" : "Mr. & Mrs. Khalid Mehmood and family") : "",
     family2: couple && category === "wedding" ? (ur ? "مسٹر اور مسز نوید اقبال اور اہلِ خانہ" : "Mr. & Mrs. Naveed Iqbal and family") : "",
+    side1Label: category === "wedding" ? (ur ? "دولہا کی طرف" : "Groom's side") : "",
+    side2Label: category === "wedding" ? (ur ? "دلہن کی طرف" : "Bride's side") : "",
+    members1:
+      category === "wedding"
+        ? [
+            { name: ur ? "حمزہ محمود" : "Hamza Mehmood", phone: "+92 300 0000000" },
+            { name: ur ? "عریبہ محمود" : "Areeba Mehmood", phone: "" },
+          ]
+        : [],
+    members2: category === "wedding" ? [{ name: ur ? "حنا اقبال" : "Hina Iqbal", phone: "+92 300 0000001" }] : [],
     events,
     faq:
       category === "wedding"

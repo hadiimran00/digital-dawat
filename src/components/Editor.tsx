@@ -6,7 +6,7 @@ import { Plus, Trash2, X } from "lucide-react";
 import {
   defaultContent, newEvent, randomSlug, type InviteContent, type InviteEvent,
 } from "@/lib/content";
-import { ContentSchema, MAX_EVENTS, MAX_FAQ } from "@/lib/contentSchema";
+import { ContentSchema, MAX_EVENTS, MAX_FAQ, MAX_MEMBERS } from "@/lib/contentSchema";
 import { TEMPLATES, formatPKR, getTemplate } from "@/lib/templates";
 import { backendConfigured } from "@/lib/config";
 import { InviteCard } from "@/components/invite/InviteCard";
@@ -78,6 +78,10 @@ export function Editor() {
       closing: keep(content.closing, from.closing, to.closing),
       family1: keep(content.family1, from.family1, to.family1),
       family2: keep(content.family2, from.family2, to.family2),
+      side1Label: keep(content.side1Label, from.side1Label, to.side1Label),
+      side2Label: keep(content.side2Label, from.side2Label, to.side2Label),
+      members1: keep(content.members1, from.members1, to.members1),
+      members2: keep(content.members2, from.members2, to.members2),
       faq: keep(content.faq, from.faq, to.faq),
       events: content.events.map((e, i) => {
         const a = from.events[i];
@@ -177,6 +181,43 @@ export function Editor() {
             <input className="field" value={content.family2} maxLength={120} onChange={(e) => set({ family2: e.target.value })} />
           </label>
         </fieldset>
+
+        <section className="space-y-4" aria-label="Family contacts">
+          <h2 className="font-display text-2xl font-bold">Family contacts <span className="text-base font-normal text-foreground/70">(optional)</span></h2>
+          <p className="text-sm text-foreground/70">Guests see each side on its own tab, with a Call button next to anyone who has a phone number.</p>
+          {([1, 2] as const).map((side) => {
+            const key = side === 1 ? "members1" : "members2";
+            const labelKey = side === 1 ? "side1Label" : "side2Label";
+            const list = content[key];
+            const setList = (next: typeof list) => set({ [key]: next } as Partial<InviteContent>);
+            return (
+              <fieldset key={side} className="space-y-3 rounded-2xl border border-line bg-card p-4">
+                <legend className="px-1 text-sm font-semibold">Side {side}</legend>
+                <label className="block">Tab name
+                  <input className="field" value={content[labelKey]} maxLength={30} placeholder={side === 1 ? "Groom's side" : "Bride's side"} onChange={(e) => set({ [labelKey]: e.target.value } as Partial<InviteContent>)} />
+                </label>
+                {list.map((m, i) => (
+                  <div key={i} className="grid grid-cols-[1fr_1fr_auto] items-end gap-2">
+                    <label className="block text-sm">Name
+                      <input className="field" value={m.name} maxLength={60} onChange={(e) => setList(list.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
+                      {err(`${key}.${i}.name`)}
+                    </label>
+                    <label className="block text-sm">Phone (optional)
+                      <input className="field" inputMode="tel" value={m.phone} maxLength={20} placeholder="+92 300 0000000" onChange={(e) => setList(list.map((x, j) => (j === i ? { ...x, phone: e.target.value } : x)))} />
+                      {err(`${key}.${i}.phone`)}
+                    </label>
+                    <button type="button" className="press grid size-11 place-items-center rounded-full text-red-700" aria-label={`Remove ${m.name || "person"}`} onClick={() => setList(list.filter((_, j) => j !== i))}>
+                      <Trash2 className="size-4" aria-hidden />
+                    </button>
+                  </div>
+                ))}
+                <button type="button" className="btn btn-ghost" disabled={list.length >= MAX_MEMBERS} onClick={() => setList([...list, { name: "", phone: "" }])}>
+                  <Plus className="size-4" aria-hidden /> Add person
+                </button>
+              </fieldset>
+            );
+          })}
+        </section>
 
         <section className="space-y-4" aria-label="Events">
           <div className="flex items-center justify-between">

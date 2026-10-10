@@ -1,18 +1,28 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarPlus, ChevronDown, MapPin, Shirt } from "lucide-react";
 import type { Template } from "@/lib/templates";
 import {
   BISMILLAH, buildIcs, eventsDateText, formatEventDate, formatEventTime, type InviteContent, type InviteEvent,
 } from "@/lib/content";
+import { burst, type TapFx } from "@/lib/tapFx";
 import { ArtHero, InviteCard } from "./InviteCard";
+import { Families } from "./Families";
 import { Ornament, isTallOrnament } from "./Ornament";
 import { Rsvp } from "./Rsvp";
+import { ScratchReveal } from "./ScratchReveal";
 
 const eventStart = (e: InviteEvent) => new Date(`${e.date}T${e.time || "00:00"}:00`).getTime();
+const reducedMotion = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-function Countdown({ events, ur }: { events: InviteEvent[]; ur: boolean }) {
+/** Glass panels for the video-tape concept, ordinary cards otherwise. */
+const GLASS = "border-white/15 bg-black/45 text-white backdrop-blur-md";
+const PLAIN = "border-line bg-card";
+
+function Countdown({
+  events, ur, tape, scratchKind, accent, panel, muted,
+}: { events: InviteEvent[]; ur: boolean; tape: boolean; scratchKind: "static" | "foil" | null; accent: string; panel: string; muted: string }) {
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     const first = setTimeout(() => setNow(Date.now()), 0);
@@ -27,17 +37,33 @@ function Countdown({ events, ur }: { events: InviteEvent[]; ur: boolean }) {
   const h = Math.floor(diff / 3_600_000) % 24;
   const m = Math.floor(diff / 60_000) % 60;
   const labels = ur ? ["دن", "گھنٹے", "منٹ"] : ["Days", "Hours", "Minutes"];
+  const date = new Date(`${upcoming.date}T00:00:00`);
+  const loc = ur ? "ur-PK" : "en-GB";
   return (
     <section aria-label="Countdown">
+      {scratchKind && (
+        <ScratchReveal
+          kind={scratchKind}
+          accent={accent}
+          label={scratchKind === "static" ? "Scratch off the static to find the date" : "Scratch the gold to find the date"}
+          revealLabel={ur ? "ظاہر کریں" : "Reveal"}
+        >
+          <div className={`mb-4 rounded-2xl border p-5 text-center ${panel}`}>
+            <p className={`text-xs uppercase tracking-[0.25em] ${muted} ${tape ? "font-mono" : ""}`}>{date.toLocaleDateString(loc, { weekday: "long" })}</p>
+            <p className="font-display text-4xl font-bold">{date.toLocaleDateString(loc, { day: "numeric", month: "long" })}</p>
+            <p className={`${muted} ${tape ? "font-mono" : ""}`}>{date.getFullYear()}</p>
+          </div>
+        </ScratchReveal>
+      )}
       <div className="grid grid-cols-3 gap-2 text-center" role="timer" aria-label={`${d} days ${h} hours ${m} minutes to ${upcoming.title}`}>
         {[d, h, m].map((v, i) => (
-          <div key={i} className="rounded-xl border border-line bg-card py-3">
-            <p className="font-display text-3xl font-bold">{v}</p>
-            <p className="text-xs uppercase tracking-widest text-foreground/70">{labels[i]}</p>
+          <div key={i} className={`rounded-xl border py-3 ${panel}`}>
+            <p className={`text-3xl font-bold ${tape ? "font-mono" : "font-display"}`}>{String(v).padStart(i === 0 ? 1 : 2, "0")}</p>
+            <p className={`text-xs uppercase tracking-widest ${muted}`}>{labels[i]}</p>
           </div>
         ))}
       </div>
-      <p className="mt-2 text-center text-sm text-foreground/70">{ur ? `${upcoming.title} تک` : `Until ${upcoming.title}`}</p>
+      <p className={`mt-2 text-center text-sm ${muted}`}>{ur ? `${upcoming.title} تک` : `Until ${upcoming.title}`}</p>
     </section>
   );
 }
@@ -51,10 +77,60 @@ function downloadIcs(ev: InviteEvent, hosts: string) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+const SCENES: { orn: "jharokha" | "rosette" | "jali" | "bars" | "floral" | "crescent"; deg: number }[] = [
+  { orn: "jharokha", deg: 160 },
+  { orn: "rosette", deg: 200 },
+  { orn: "jali", deg: 140 },
+  { orn: "bars", deg: 180 },
+  { orn: "floral", deg: 220 },
+  { orn: "crescent", deg: 170 },
+];
+
+/** Fixed background "scenes" that cross-fade as the guest scrolls. Our own graphics, easy to swap for photos later. */
+function SceneBackdrop({ scene, t }: { scene: number; t: Template["theme"] }) {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden" style={{ background: t.bg }}>
+      {SCENES.map((s, i) => (
+        <div
+          key={i}
+          className="absolute inset-0 transition-opacity duration-500 ease-out"
+          style={{
+            opacity: scene === i ? 1 : 0,
+            background: `radial-gradient(120% 70% at 50% 18%, ${t.accent}33, transparent 60%), linear-gradient(${s.deg}deg, ${t.bg}, ${t.bg2})`,
+          }}
+        >
+          <Ornament
+            kind={s.orn}
+            className={`absolute left-1/2 -translate-x-1/2 opacity-[0.16] ${s.orn === "jharokha" ? "top-[2%] h-[96%] w-[96%]" : "top-[8%] w-[120%] max-w-none"}`}
+          />
+        </div>
+      ))}
+      {/* tape look: grain, scan lines and a vignette */}
+      <div className="absolute inset-0 opacity-30" style={{ background: "repeating-linear-gradient(0deg, rgba(0,0,0,0.55) 0 1px, transparent 1px 3px)" }} />
+      <div className="absolute inset-0" style={{ background: "radial-gradient(120% 90% at 50% 40%, transparent 45%, rgba(0,0,0,0.65))" }} />
+    </div>
+  );
+}
+
+/** Small "● REC  SECTION" label above each panel in the tape concept; nothing otherwise. */
+function Tag({ tape, label }: { tape: boolean; label: string }) {
+  if (!tape) return null;
+  return (
+    <p className="mb-2 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-white/75" aria-hidden>
+      <span><span className="text-red-400">●</span> REC</span><span>{label}</span>
+    </p>
+  );
+}
+
+const pad = (n: number) => String(n).padStart(2, "0");
+const timecode = (s: number) => `${Math.floor(s / 3600)}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`;
+
 /**
- * The full guest experience: loading screen -> "Tap to open" cover -> invitation, events, dress code, FAQ, RSVP.
+ * The full guest experience: "Tap to open" cover -> invitation, events, dress code, FAQ, RSVP.
  * `demo` shows a template with sample data and a disabled RSVP form.
  * It fills its parent (which must have a fixed height) so it can sit in a phone frame or fill the screen.
+ * Templates with the "tape" concept add a fixed scene layer, an on-screen display (play state, timecode, date stamp)
+ * and see-through panels.
  */
 export function InviteExperience({
   template, content, inviteId, demo = false,
@@ -62,22 +138,36 @@ export function InviteExperience({
   const t = template.theme;
   const ur = content.language === "ur";
   const loc = ur ? "ur-PK" : "en-GB";
+  const tape = template.concept === "tape";
   const [opened, setOpened] = useState(false);
   const [gone, setGone] = useState(false);
   const [guest, setGuest] = useState("");
   const [seats, setSeats] = useState<number | null>(null);
+  const [scene, setScene] = useState(0);
+  const [scrolled, setScrolled] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+  const scroller = useRef<HTMLDivElement>(null);
   const names = content.host2 ? `${content.host1} & ${content.host2}` : content.host1;
   const wa = content.contactPhone.replace(/\D/g, "");
   const tall = isTallOrnament(t.ornament);
   const ordered = useMemo(() => [...content.events].sort((a, b) => eventStart(a) - eventStart(b)), [content.events]);
 
+  const panel = tape ? GLASS : PLAIN;
+  const muted = tape ? "text-white/75" : "text-foreground/70";
+  const mono = tape ? "font-mono" : "";
+  const scratchKind: "static" | "foil" | null = tape ? "static" : template.motion === "scratch" ? "foil" : null;
+  const fx: TapFx = tape ? "flash" : template.motion === "sparkle" ? "sparkles" : "petals";
+  const fxCaption = ur
+    ? "کچھ دیکھنے کے لیے ٹیپ کریں"
+    : fx === "flash" ? "Tap anywhere for a camera flash" : fx === "sparkles" ? "Tap anywhere for sparkles" : "Tap anywhere for petals";
+
   useEffect(() => {
-    // personalised greeting: .../i?s=slug&g=Sarah%20%26%20Family
-    const g = new URLSearchParams(window.location.search).get("g");
+    // personalised greeting: .../i?s=slug&g=Sarah%20%26%20Family and reserved places: ...&n=2
+    const q = new URLSearchParams(window.location.search);
+    const g = q.get("g");
     // eslint-disable-next-line react-hooks/set-state-in-effect -- read the URL after mount (static export)
     if (g) setGuest(g.slice(0, 60));
-    // reserved places for this guest: ...&n=2
-    const n = Number(new URLSearchParams(window.location.search).get("n"));
+    const n = Number(q.get("n"));
     if (Number.isInteger(n) && n >= 1 && n <= 20) setSeats(n);
   }, []);
   useEffect(() => {
@@ -86,118 +176,182 @@ export function InviteExperience({
     return () => clearTimeout(id);
   }, [opened]);
 
-  const tape = template.concept === "tape";
+  // tape: timecode runs once the guest presses play
+  useEffect(() => {
+    if (!tape || !opened) return;
+    const i = setInterval(() => setSeconds((s) => s + 1), 1000);
+    return () => clearInterval(i);
+  }, [tape, opened]);
+
+  // tape: switch the background scene as sections scroll into view
+  useEffect(() => {
+    if (!tape || !scroller.current) return;
+    const root = scroller.current;
+    const io = new IntersectionObserver(
+      (entries) => {
+        const best = entries.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (best) setScene(Number((best.target as HTMLElement).dataset.scene ?? 0));
+      },
+      { root, threshold: [0.2, 0.5, 0.8], rootMargin: "-25% 0px -25% 0px" },
+    );
+    root.querySelectorAll("[data-scene]").forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, [tape]);
+
+  const onScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => setScrolled(e.currentTarget.scrollTop > 40), []);
+  const toTop = () => { setSeconds(0); scroller.current?.scrollTo({ top: 0, behavior: reducedMotion() ? "auto" : "smooth" }); };
+  const goTo = (i: number) =>
+    document.getElementById(`ev-${i}`)?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "center" });
+  const onTap = (e: React.PointerEvent) => {
+    if ((e.target as HTMLElement).closest("a,button,summary")) return;
+    burst(fx, e.clientX, e.clientY, fx === "sparkles" ? [t.accent, "#fff3c4"] : [t.accent, "#c2185b", "#e8b95c"]);
+  };
+
   const font = ur ? "var(--nf-urdu), serif" : "var(--nf-display), Georgia, serif";
   const hasDress = ordered.some((e) => e.dressCode);
+  const sceneAttr = (n: number) => (tape ? { "data-scene": n } : {});
+  const stamp = new Date(`${ordered[0].date}T00:00:00`).toLocaleDateString("en-GB", { month: "short", day: "2-digit", year: "numeric" }).toUpperCase().replace(/(\w+) (\d+) (\d+)/, "$1 $2 $3");
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-background" dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"}>
-      <div className={`h-full overflow-y-auto overscroll-contain ${opened ? "" : "overflow-hidden"}`}>
+      {tape && <SceneBackdrop scene={scene} t={t} />}
+
+      <div
+        ref={scroller}
+        onScroll={onScroll}
+        className={`relative z-[1] h-full overflow-y-auto overscroll-contain ${opened ? "" : "overflow-hidden"} ${tape ? "text-white" : ""}`}
+      >
         <div className="mx-auto max-w-md space-y-6 px-4 py-6">
-          <div className="overflow-hidden rounded-2xl shadow-xl"><InviteCard template={template} content={content} /></div>
+          <div {...sceneAttr(0)} className="overflow-hidden rounded-2xl shadow-xl"><InviteCard template={template} content={content} chrome={!tape} /></div>
+
+          {(content.family1 || content.family2 || content.members1.length > 0 || content.members2.length > 0) && (
+            <div {...sceneAttr(1)}><Tag tape={tape} label={ur ? "خاندان" : "Families"} /><Families content={content} ur={ur} glass={tape} /></div>
+          )}
 
           {(guest || demo) && (
-            <section className="rounded-2xl border border-line bg-card p-5 text-center">
+            <section {...sceneAttr(2)} className={`rounded-2xl border p-5 text-center ${panel}`}>
+              <Tag tape={tape} label={ur ? "پیغام" : "Message"} />
               <p className="font-display text-2xl font-bold">
                 {guest ? (ur ? `محترم ${guest}،` : `Dear ${guest},`) : ur ? "محترم مہمان،" : "Dear guest,"}
               </p>
-              <p className="mt-2 text-foreground/80">
+              <p className={`mt-2 ${tape ? "text-white/85" : "text-foreground/80"}`}>
                 {ur ? "ہمیں آپ کی میزبانی کا شرف ملے گا۔ ہم نے آپ کے لیے جگہ رکھی ہے۔" : "It would mean the world to have you with us. We have saved you a place."}
               </p>
-              {demo && !guest && (
-                <p className="mt-2 text-xs text-foreground/70">Each guest can get a link that greets them by name.</p>
+              {ordered.length > 1 && (
+                <nav aria-label={ur ? "تقاریب" : "Jump to an event"} className="mt-4 flex flex-wrap justify-center gap-2">
+                  {ordered.map((e, i) => (
+                    <button key={i} type="button" onClick={() => goTo(i)}
+                      className={`press min-h-11 rounded-full border px-4 text-sm font-semibold ${tape ? "border-white/30 font-mono uppercase tracking-wider hover:bg-white/10" : "border-line bg-white hover:border-gold"}`}>
+                      {e.title}
+                    </button>
+                  ))}
+                </nav>
               )}
+              {demo && !guest && <p className={`mt-3 text-xs ${muted}`}>Each guest can get a link that greets them by name.</p>}
             </section>
           )}
 
-          {(content.family1 || content.family2) && (
-            <section className="grid gap-3 text-center sm:grid-cols-2" aria-label="Families">
-              {[content.family1, content.family2].filter(Boolean).map((f) => (
-                <p key={f} className="rounded-2xl border border-line bg-card p-4 text-sm font-medium">{f}</p>
-              ))}
-            </section>
-          )}
-
-          <Countdown events={ordered} ur={ur} />
+          <div {...sceneAttr(3)}>
+            <Tag tape={tape} label={ur ? "الٹی گنتی" : "Countdown"} />
+            <Countdown events={ordered} ur={ur} tape={tape} scratchKind={scratchKind} accent={t.accent} panel={panel} muted={muted} />
+          </div>
 
           <section aria-label="Events" className="space-y-4">
             <h2 className="font-display text-3xl font-bold">{ur ? "تقاریب" : tape ? "Playlist" : ordered.length > 1 ? "Events" : "Event"}</h2>
             {ordered.map((e, i) => (
-              <article key={i} className="rounded-2xl border border-line bg-card p-5">
-                <p className={`text-xs uppercase tracking-widest text-foreground/70 ${tape ? "font-mono" : ""}`}>
-                  {ordered.length > 1 && `${tape ? "REEL " : ""}${String(i + 1).padStart(2, "0")} / ${String(ordered.length).padStart(2, "0")}`}
-                </p>
+              <article id={`ev-${i}`} key={i} {...sceneAttr(3)} onPointerDown={onTap} className={`rounded-2xl border p-5 ${panel}`}>
+                <Tag tape={tape} label={`${tape ? "Tape " : ""}${pad(i + 1)} / ${pad(ordered.length)}`} />
+                {!tape && ordered.length > 1 && <p className={`text-xs uppercase tracking-widest ${muted}`}>{pad(i + 1)} / {pad(ordered.length)}</p>}
                 <h3 className="font-display text-2xl font-bold">{e.title}</h3>
                 <p className="mt-1 font-semibold">{formatEventDate(e.date, loc)}{e.time && ` · ${formatEventTime(e.time)}`}</p>
                 {e.venue && <p>{e.venue}</p>}
-                {e.address && <p className="text-sm text-foreground/70">{e.address}</p>}
+                {e.address && <p className={`text-sm ${muted}`}>{e.address}</p>}
                 {seats && (
-                  <p className="mt-2 text-sm font-medium text-brand">{ur ? `${seats} مہمانوں کے لیے مدعو` : `${seats} ${seats === 1 ? "guest" : "guests"} invited`}</p>
+                  <p className={`mt-2 text-sm font-medium ${tape ? "font-mono uppercase text-amber-300" : "text-brand"}`}>{ur ? `${seats} مہمانوں کے لیے مدعو` : `${seats} ${seats === 1 ? "guest" : "guests"} invited`}</p>
                 )}
                 {e.dressCode && (
-                  <p className="mt-2 flex items-center gap-2 text-sm"><Shirt className="size-4 shrink-0 text-gold-deep" aria-hidden />{ur ? "ڈریس کوڈ: " : "Dress code: "}{e.dressCode}</p>
+                  <p className="mt-2 flex items-center gap-2 text-sm"><Shirt className={`size-4 shrink-0 ${tape ? "text-amber-300" : "text-gold-deep"}`} aria-hidden />{ur ? "ڈریس کوڈ: " : "Dress code: "}{e.dressCode}</p>
                 )}
                 <div className="mt-4 flex flex-wrap gap-2">
                   {e.mapUrl && (
-                    <a className="btn btn-ghost" href={e.mapUrl} target="_blank" rel="noopener noreferrer"><MapPin className="size-4" aria-hidden />{ur ? "مقام دیکھیں" : "Open location"}</a>
+                    <a className={`btn btn-ghost ${tape ? "!border-white/30 !bg-transparent !text-white" : ""}`} href={e.mapUrl} target="_blank" rel="noopener noreferrer"><MapPin className="size-4" aria-hidden />{ur ? "مقام دیکھیں" : "Open location"}</a>
                   )}
-                  <button type="button" className="btn btn-ghost" onClick={() => downloadIcs(e, names)}>
+                  <button type="button" className={`btn btn-ghost ${tape ? "!border-white/30 !bg-transparent !text-white" : ""}`} onClick={() => downloadIcs(e, names)}>
                     <CalendarPlus className="size-4" aria-hidden />{ur ? "کیلنڈر میں شامل کریں" : "Add to calendar"}
                   </button>
                 </div>
+                <p className={`mt-3 text-center text-[11px] uppercase tracking-[0.2em] ${muted} ${mono}`}>{fxCaption}</p>
               </article>
             ))}
-            {demo && !ordered.some((e) => e.mapUrl) && <p className="text-center text-sm text-foreground/70">Your map links appear here.</p>}
+            {demo && !ordered.some((e) => e.mapUrl) && <p className={`text-center text-sm ${muted}`}>Your map links appear here.</p>}
           </section>
 
           {hasDress && ordered.length > 1 && (
-            <section aria-label="Dress code" className="rounded-2xl border border-line bg-card p-5">
+            <section {...sceneAttr(4)} aria-label="Dress code" className={`rounded-2xl border p-5 ${panel}`}>
+              <Tag tape={tape} label={ur ? "پروگرام" : "Programme"} />
               <h2 className="font-display text-2xl font-bold">{ur ? "ڈریس کوڈ" : "Dress code"}</h2>
               <ul className="mt-3 space-y-1 text-sm">
                 {ordered.filter((e) => e.dressCode).map((e, i) => (
-                  <li key={i} className="flex justify-between gap-3"><span className="font-medium">{e.title}</span><span className="text-foreground/70">{e.dressCode}</span></li>
+                  <li key={i} className="flex justify-between gap-3"><span className="font-medium">{e.title}</span><span className={muted}>{e.dressCode}</span></li>
                 ))}
               </ul>
             </section>
           )}
 
           {content.faq.length > 0 && (
-            <section aria-label="Questions" className="space-y-2">
+            <section {...sceneAttr(4)} aria-label="Questions" className="space-y-2">
+              <Tag tape={tape} label="Q & A" />
               <h2 className="font-display text-2xl font-bold">{ur ? "عام سوالات" : "Good to know"}</h2>
               {content.faq.map((f, i) => (
-                <details key={i} className="group rounded-xl border border-line bg-card p-4">
+                <details key={i} className={`group rounded-xl border p-4 ${panel}`}>
                   <summary className="flex min-h-6 cursor-pointer list-none items-center justify-between gap-2 font-medium">
                     {f.q}<ChevronDown className="size-4 shrink-0 transition-transform duration-200 ease-out group-open:rotate-180" aria-hidden />
                   </summary>
-                  <p className="mt-2 text-sm text-foreground/80">{f.a}</p>
+                  <p className={`mt-2 text-sm ${tape ? "text-white/85" : "text-foreground/80"}`}>{f.a}</p>
                 </details>
               ))}
             </section>
           )}
 
           {wa && (
-            <a className="btn btn-ghost w-full" href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer">
+            <a className={`btn btn-ghost w-full ${tape ? "!border-white/30 !bg-black/45 !text-white" : ""}`} href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer">
               {ur ? "میزبان کو واٹس ایپ کریں" : "WhatsApp the hosts"}
             </a>
           )}
 
-          {content.rsvpEnabled && <Rsvp inviteId={inviteId} demo={demo} guestName={guest} seats={seats} />}
+          {content.rsvpEnabled && <div {...sceneAttr(5)}><Rsvp inviteId={inviteId} demo={demo} guestName={guest} seats={seats} /></div>}
 
           {tape && (
-            <div className="rounded-2xl bg-black p-5 text-center font-mono text-sm text-white">
-              <p className="tracking-widest" style={{ color: t.accent }}>■ END OF TAPE</p>
-              <button type="button" className="btn mt-3 border border-white/30 text-white"
-                onClick={(e) => (e.currentTarget.closest(".overflow-y-auto") as HTMLElement | null)?.scrollTo({ top: 0, behavior: "smooth" })}>
-                ◀◀ Rewind
-              </button>
+            <div {...sceneAttr(5)} className="rounded-2xl border border-white/15 bg-black p-5 text-center font-mono text-sm text-white">
+              <p className="tracking-widest" style={{ color: t.accent }}>■ STOP · END OF TAPE</p>
+              <p className="mt-2 text-white/80">{ur ? content.closing : "Thank you for watching. See you there."}</p>
+              <button type="button" className="btn mt-3 border border-white/30 text-white" onClick={toTop}>◀◀ Rewind</button>
             </div>
           )}
-          {content.closing && (
+          {content.closing && !tape && (
             <p className="py-6 text-center font-display text-2xl" style={{ fontFamily: font }}>{content.closing}<br /><span className="text-lg text-gold-deep">{names}</span></p>
           )}
-          <p className="pb-4 text-center text-xs text-foreground/70">Made with Digital Dawat</p>
+          <p className={`pb-16 text-center text-xs ${muted}`}>Made with Digital Dawat</p>
         </div>
       </div>
+
+      {/* tape: on-screen display (play state, timecode, viewfinder corners, date stamp, scroll hint) */}
+      {tape && opened && (
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-10 font-mono text-white [text-shadow:0_0_6px_rgba(0,0,0,0.8)]">
+          <p className="absolute left-5 top-4 text-sm font-bold tracking-[0.2em]">PLAY ▶</p>
+          <p className="absolute right-5 top-4 text-sm font-bold tracking-[0.15em]">SP {timecode(seconds)}</p>
+          {["left-4 top-4 border-l-2 border-t-2", "right-4 top-4 border-r-2 border-t-2", "bottom-4 left-4 border-b-2 border-l-2", "bottom-4 right-4 border-b-2 border-r-2"].map((c) => (
+            <span key={c} className={`absolute size-7 border-white/70 ${c}`} />
+          ))}
+          <p className="absolute bottom-6 right-7 text-sm font-bold tracking-[0.2em]" style={{ color: t.accent }}>{stamp}</p>
+          {!scrolled && (
+            <button type="button" tabIndex={-1} onClick={() => scroller.current?.scrollBy({ top: scroller.current.clientHeight * 0.8, behavior: reducedMotion() ? "auto" : "smooth" })}
+              className="pointer-events-auto absolute bottom-6 left-1/2 flex min-h-11 -translate-x-1/2 items-center gap-2 rounded-full border border-white/30 bg-black/60 px-5 text-xs font-bold tracking-[0.25em]">
+              SCROLL DOWN <ChevronDown className="size-4" />
+            </button>
+          )}
+        </div>
+      )}
 
       {!gone && (
         <div
@@ -214,28 +368,24 @@ export function InviteExperience({
           {tape && (
             <>
               <div aria-hidden className="pointer-events-none absolute inset-0 opacity-30" style={{ background: "repeating-linear-gradient(0deg, rgba(0,0,0,0.5) 0 1px, transparent 1px 3px)" }} />
-              <p aria-hidden className="absolute left-5 top-5 animate-pulse font-mono text-xs tracking-widest" style={{ color: t.accent }}>● REC</p>
-              <p aria-hidden className="absolute right-5 top-5 font-mono text-xs tracking-widest">❚❚ PAUSE SP</p>
+              <p aria-hidden className="absolute left-5 top-4 font-mono text-sm font-bold tracking-[0.2em]">❚❚ PAUSE</p>
+              {["left-4 top-12 border-l-2 border-t-2", "right-4 top-12 border-r-2 border-t-2", "bottom-12 left-4 border-b-2 border-l-2", "bottom-12 right-4 border-b-2 border-r-2"].map((c) => (
+                <span key={c} aria-hidden className={`absolute size-7 border-white/60 ${c}`} />
+              ))}
+              <p aria-hidden className="absolute left-7 top-16 font-mono text-xs tracking-widest" style={{ color: t.accent }}><span className="animate-pulse text-red-400">●</span> REC</p>
             </>
           )}
-          {(
-            <div className="rise relative flex flex-col items-center gap-4 px-8" style={template.art ? { textShadow: `0 0 8px ${t.bg}, 0 0 18px ${t.bg}` } : undefined}>
-              {content.bismillah && <p lang="ar" dir="rtl" className="text-2xl" style={{ color: t.accent, fontFamily: "var(--nf-naskh), serif", lineHeight: 1.9 }}>{BISMILLAH}</p>}
-              <p className="text-xs uppercase tracking-[0.3em]" style={{ color: t.accent }}>{content.headline}</p>
-              <h2 className="text-5xl leading-tight" style={{ fontFamily: font, fontWeight: 600 }}>{names}</h2>
-              <div className="h-px w-16" style={{ background: t.accent }} />
-              <p style={{ color: t.muted }}>{eventsDateText(content, loc)}</p>
-              <button
-                type="button"
-                onClick={() => setOpened(true)}
-                className="btn mt-6"
-                style={{ background: t.accent, color: t.bg }}
-              >
-                {ur ? "کھولنے کے لیے ٹیپ کریں" : tape ? "▶ Press play" : "Tap to open"}
-              </button>
-              <ChevronDown className="mt-2 size-5 opacity-60" aria-hidden />
-            </div>
-          )}
+          <div className="rise relative flex flex-col items-center gap-4 px-8" style={template.art ? { textShadow: `0 0 8px ${t.bg}, 0 0 18px ${t.bg}` } : undefined}>
+            {content.bismillah && <p lang="ar" dir="rtl" className="text-2xl" style={{ color: t.accent, fontFamily: "var(--nf-naskh), serif", lineHeight: 1.9 }}>{BISMILLAH}</p>}
+            <p className={`text-xs uppercase tracking-[0.3em] ${mono}`} style={{ color: t.accent }}>{tape && !ur ? "The wedding of" : content.headline}</p>
+            <h2 className="text-5xl leading-tight" style={{ fontFamily: font, fontWeight: 600 }}>{names}</h2>
+            <div className="h-px w-16" style={{ background: t.accent }} />
+            <p className={mono} style={{ color: tape ? t.accent : t.muted }}>{tape ? stamp : eventsDateText(content, loc)}</p>
+            <button type="button" onClick={() => setOpened(true)} className={`btn mt-6 ${tape ? "font-mono uppercase tracking-[0.25em]" : ""}`} style={{ background: t.accent, color: t.bg }}>
+              {ur ? "کھولنے کے لیے ٹیپ کریں" : tape ? "▶ Press play" : "Tap to open"}
+            </button>
+            <ChevronDown className="mt-2 size-5 opacity-60" aria-hidden />
+          </div>
         </div>
       )}
     </div>

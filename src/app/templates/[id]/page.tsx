@@ -77,7 +77,7 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
       />
       <Link
         href="/templates"
-        className="press fixed left-3 top-[calc(0.75rem+env(safe-area-inset-top,0px))] z-40 inline-flex min-h-11 items-center gap-1 rounded-full bg-black/55 px-4 text-sm font-medium text-white backdrop-blur"
+        className="press fixed left-3 top-[calc(0.75rem+env(safe-area-inset-top,0px))] z-40 hidden min-h-11 items-center gap-1 rounded-full bg-black/55 px-4 text-sm font-medium text-white backdrop-blur md:inline-flex"
       >
         <ArrowLeft className="size-4" aria-hidden /> Templates
       </Link>
@@ -133,7 +133,10 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
 
       {/* phones: always-visible buy bar */}
       <div className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 border-t border-line bg-background/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur md:hidden">
-        <div>
+        <Link href="/templates" aria-label="Back to all templates" className="press grid size-11 shrink-0 place-items-center rounded-full border border-line">
+          <ArrowLeft className="size-5" aria-hidden />
+        </Link>
+        <div className="mr-auto">
           <p className="font-semibold leading-tight">{t.name}</p>
           <p className="text-sm text-foreground/70">{formatPKR(t.price)} flat</p>
         </div>

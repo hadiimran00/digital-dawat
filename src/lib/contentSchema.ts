@@ -19,6 +19,17 @@ export const FaqSchema = z.object({
   a: z.string().trim().min(1, "Required").max(400),
 });
 
+/** A family member guests can call. The phone is optional. */
+export const MemberSchema = z.object({
+  name: z.string().trim().min(1, "Required").max(60),
+  phone: z
+    .string()
+    .trim()
+    .max(20)
+    .refine((v) => v === "" || /^\+?[0-9 ()-]{7,20}$/.test(v), "Use digits only, e.g. +92 300 0000000"),
+});
+
+export const MAX_MEMBERS = 5;
 export const MAX_EVENTS = 6;
 export const MAX_FAQ = 6;
 
@@ -31,6 +42,10 @@ export const ContentSchema = z.object({
   message: z.string().trim().max(400),
   family1: z.string().trim().max(120),
   family2: z.string().trim().max(120),
+  side1Label: z.string().trim().max(30).default(""),
+  side2Label: z.string().trim().max(30).default(""),
+  members1: z.array(MemberSchema).max(MAX_MEMBERS).default([]),
+  members2: z.array(MemberSchema).max(MAX_MEMBERS).default([]),
   events: z.array(EventSchema).min(1, "Add at least one event").max(MAX_EVENTS),
   faq: z.array(FaqSchema).max(MAX_FAQ),
   closing: z.string().trim().max(120),
@@ -40,3 +55,4 @@ export const ContentSchema = z.object({
 
 export type InviteContent = z.infer<typeof ContentSchema>;
 export type InviteEvent = z.infer<typeof EventSchema>;
+export type FamilyMember = z.infer<typeof MemberSchema>;

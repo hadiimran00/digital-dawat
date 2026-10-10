@@ -34,7 +34,7 @@ export function ArtHero({ art, bg }: { art: NonNullable<Template["art"]>; bg: st
  * (all sizes use container query units, so it is identical in thumbnails,
  * the editor preview and the public page).
  */
-export function InviteCard({ template, content }: { template: Template; content: InviteContent }) {
+export function InviteCard({ template, content, chrome = true }: { template: Template; content: InviteContent; chrome?: boolean }) {
   const t = template.theme;
   const ur = content.language === "ur";
   const e = content.events[0];
@@ -67,8 +67,12 @@ export function InviteCard({ template, content }: { template: Template; content:
         <>
           <div aria-hidden className="pointer-events-none absolute inset-0 z-10 opacity-30"
             style={{ background: "repeating-linear-gradient(0deg, rgba(0,0,0,0.5) 0 1px, transparent 1px 3px)" }} />
-          <p aria-hidden className="absolute left-[6cqw] top-[5cqw] z-10 font-mono" style={{ fontSize: "3.2cqw", color: t.accent, letterSpacing: "0.1em" }}>● REC</p>
-          <p aria-hidden className="absolute right-[6cqw] top-[5cqw] z-10 font-mono" style={{ fontSize: "3.2cqw", color: t.ink, letterSpacing: "0.1em" }}>SP 0:00:00</p>
+          {chrome && (
+            <>
+              <p aria-hidden className="absolute left-[6cqw] top-[5cqw] z-10 font-mono" style={{ fontSize: "3.2cqw", color: t.accent, letterSpacing: "0.1em" }}>● REC</p>
+              <p aria-hidden className="absolute right-[6cqw] top-[5cqw] z-10 font-mono" style={{ fontSize: "3.2cqw", color: t.ink, letterSpacing: "0.1em" }}>SP 0:00:00</p>
+            </>
+          )}
         </>
       )}
       <div
