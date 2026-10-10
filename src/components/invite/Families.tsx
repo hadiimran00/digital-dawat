@@ -62,7 +62,7 @@ export function Families({ content, ur, glass }: { content: InviteContent; ur: b
                   {m.phone && <span className="block text-xs opacity-80">{m.phone}</span>}
                 </span>
                 {m.phone && (
-                  <a className="btn btn-ghost min-h-11 shrink-0 text-sm" href={tel(m.phone)} aria-label={`${ur ? "کال کریں" : "Call"} ${m.name}`}>
+                  <a className={`btn btn-ghost min-h-11 shrink-0 text-sm ${glass ? "!border-white/30 !bg-transparent !text-white" : ""}`} href={tel(m.phone)} aria-label={`${ur ? "کال کریں" : "Call"} ${m.name}`}>
                     <Phone className="size-4" aria-hidden />{ur ? "کال" : "Call"}
                   </a>
                 )}

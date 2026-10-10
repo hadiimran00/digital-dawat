@@ -338,12 +338,14 @@ export function InviteExperience({
       {/* tape: on-screen display (play state, timecode, viewfinder corners, date stamp, scroll hint) */}
       {tape && opened && (
         <div aria-hidden className="pointer-events-none absolute inset-0 z-10 font-mono text-white [text-shadow:0_0_6px_rgba(0,0,0,0.8)]">
+          <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/70 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/70 to-transparent" />
           <p className="absolute left-5 top-4 text-sm font-bold tracking-[0.2em]">PLAY ▶</p>
           <p className="absolute right-5 top-4 text-sm font-bold tracking-[0.15em]">SP {timecode(seconds)}</p>
           {["left-4 top-4 border-l-2 border-t-2", "right-4 top-4 border-r-2 border-t-2", "bottom-4 left-4 border-b-2 border-l-2", "bottom-4 right-4 border-b-2 border-r-2"].map((c) => (
             <span key={c} className={`absolute size-7 border-white/70 ${c}`} />
           ))}
-          <p className="absolute bottom-6 right-7 text-sm font-bold tracking-[0.2em]" style={{ color: t.accent }}>{stamp}</p>
+          <p className="absolute bottom-6 right-7 rounded bg-black/55 px-2 py-0.5 text-sm font-bold tracking-[0.2em]" style={{ color: t.accent }}>{stamp}</p>
           {!scrolled && (
             <button type="button" tabIndex={-1} onClick={() => scroller.current?.scrollBy({ top: scroller.current.clientHeight * 0.8, behavior: reducedMotion() ? "auto" : "smooth" })}
               className="pointer-events-auto absolute bottom-6 left-1/2 flex min-h-11 -translate-x-1/2 items-center gap-2 rounded-full border border-white/30 bg-black/60 px-5 text-xs font-bold tracking-[0.25em]">
@@ -356,7 +358,7 @@ export function InviteExperience({
       {!gone && (
         <div
           data-open={opened}
-          className={`cover absolute inset-0 z-20 flex flex-col items-center text-center ${template.art ? "justify-end pb-28" : "justify-center"}`}
+          className={`cover absolute inset-0 z-20 flex flex-col items-center text-center ${template.art || tape ? "justify-end pb-28" : "justify-center"}`}
           style={{
             background: `linear-gradient(170deg, ${t.bg}, ${t.bg2})`,
             color: t.ink,
