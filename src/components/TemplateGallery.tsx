@@ -54,7 +54,7 @@ export function TemplateGallery({ limit, titleAs: Title = "h3" }: { limit?: numb
         <ul className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
           {shown.map((t) => (
             <li key={t.id} className="[contain-intrinsic-size:auto_480px] [content-visibility:auto]">
-              <div className="overflow-hidden rounded-2xl border border-line shadow-sm transition-shadow duration-200 ease-out hover:shadow-lg">
+              <div className="overflow-hidden rounded-2xl border border-line shadow-sm transition-[box-shadow,translate] duration-200 ease-out [@media(hover:hover)]:hover:-translate-y-1 [@media(hover:hover)]:hover:shadow-lg">
                 <HoverPreview template={t}>
                   <Link href={`/templates/${t.id}`} tabIndex={-1} aria-hidden="true" className="block">
                     {/* Pre-rendered thumbnail (npm run previews). A plain img because the site is a static export. */}
