@@ -50,7 +50,7 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
   const url = `${SITE_URL}/templates/${t.id}`;
 
   return (
-    <div className="pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-0">
+    <div className="pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -84,7 +84,7 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
 
       <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-[390px_1fr] md:px-4 md:py-12">
         {/* live demo: full screen on phones, a phone frame on larger screens */}
-        <div className="h-[100dvh] w-full md:sticky md:top-8 md:h-[min(780px,88vh)] md:self-start md:overflow-hidden md:rounded-[2.5rem] md:border-8 md:border-foreground/90 md:shadow-2xl">
+        <div className="h-[calc(100dvh-4.5rem-env(safe-area-inset-bottom,0px))] w-full md:sticky md:top-8 md:h-[min(780px,88vh)] md:self-start md:overflow-hidden md:rounded-[2.5rem] md:border-8 md:border-foreground/90 md:shadow-2xl">
           <InviteExperience template={t} content={defaultContent(t.category)} demo />
         </div>
 

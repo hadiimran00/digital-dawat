@@ -144,7 +144,7 @@ export function InviteExperience({
   const [guest, setGuest] = useState("");
   const [seats, setSeats] = useState<number | null>(null);
   const [scene, setScene] = useState(0);
-  const [scrolled, setScrolled] = useState(false);
+  const [atEnd, setAtEnd] = useState(false); // the scroll-down hint stays until the very bottom
   const [seconds, setSeconds] = useState(0);
   const scroller = useRef<HTMLDivElement>(null);
   const names = content.host2 ? `${content.host1} & ${content.host2}` : content.host1;
@@ -198,7 +198,10 @@ export function InviteExperience({
     return () => io.disconnect();
   }, [tape]);
 
-  const onScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => setScrolled(e.currentTarget.scrollTop > 40), []);
+  const onScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    setAtEnd(el.scrollTop + el.clientHeight >= el.scrollHeight - 48);
+  }, []);
   const toTop = () => { setSeconds(0); scroller.current?.scrollTo({ top: 0, behavior: reducedMotion() ? "auto" : "smooth" }); };
   const goTo = (i: number) =>
     document.getElementById(`ev-${i}`)?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "center" });
@@ -346,7 +349,7 @@ export function InviteExperience({
             <span key={c} className={`absolute size-7 border-white/70 ${c}`} />
           ))}
           <p className="absolute bottom-6 right-7 rounded bg-black/55 px-2 py-0.5 text-sm font-bold tracking-[0.2em]" style={{ color: t.accent }}>{stamp}</p>
-          {!scrolled && (
+          {!atEnd && (
             <button type="button" tabIndex={-1} onClick={() => scroller.current?.scrollBy({ top: scroller.current.clientHeight * 0.8, behavior: reducedMotion() ? "auto" : "smooth" })}
               className="pointer-events-auto absolute bottom-6 left-1/2 flex min-h-11 -translate-x-1/2 items-center gap-2 rounded-full border border-white/30 bg-black/60 px-5 text-xs font-bold tracking-[0.25em]">
               SCROLL DOWN <ChevronDown className="size-4" />
