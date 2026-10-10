@@ -15,10 +15,9 @@ interface Order {
   invites: { slug: string; template_id: string } | null;
 }
 
-type Method = "bank" | "jazzcash" | "easypaisa" | "sadapay";
+type Method = "bank" | "jazzcash" | "easypaisa";
 const METHODS: { id: Method; label: string }[] = [
-  { id: "sadapay", label: "SadaPay" },
-  { id: "bank", label: "Bank transfer" },
+  { id: "bank", label: "Online Bank Transfer" },
   { id: "jazzcash", label: "JazzCash" },
   { id: "easypaisa", label: "Easypaisa" },
 ];
@@ -31,7 +30,7 @@ function OrderInner() {
   const [order, setOrder] = useState<Order | null>(null);
   const methods = METHODS.filter((m) => paymentInfo[m.id]);
   const [picked, setPicked] = useState<Method | null>(null);
-  const method: Method = picked ?? methods[0]?.id ?? "sadapay";
+  const method: Method = picked ?? methods[0]?.id ?? "bank";
   const [ref, setRef] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [msg, setMsg] = useState("");

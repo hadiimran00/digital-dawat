@@ -26,14 +26,14 @@ const FEATURES = [
 const STEPS = [
   ["Pick a template", `${TEMPLATES.length} original designs for nikkah, mehndi, baraat, walima and more.`],
   ["Add your details", "Names, events, venues and dress codes, with a live preview as you type."],
-  ["Pay by SadaPay", "Send the amount and upload the receipt. We publish your invitation once we confirm it."],
+  ["Pay by online bank transfer", "Send the amount and upload the receipt. We publish your invitation once we confirm it."],
   ["Share your link", "Send it on WhatsApp, download your video, and watch the replies arrive."],
 ];
 
 const FAQ = [
   ["Do my guests need an app or an account?", "No. They open your link in their phone browser, tap to open the invitation, and reply on the same page."],
   ["Can I see the invitation before I pay?", "Yes. You edit and preview your own invitation first, and the price is shown on every template page."],
-  ["How do I pay?", "By SadaPay transfer to the account shown at checkout. Upload a screenshot of the receipt and we publish your invitation after we confirm the payment."],
+  ["How do I pay?", "By online bank transfer to the account shown at checkout. Upload a screenshot of the receipt and we publish your invitation after we confirm the payment."],
   ["Can I use Urdu?", "Yes. Switch the card to Urdu and the layout turns right to left. You can also type your own wording in either language."],
   ["Why is there no video button on my phone?", "Video export needs a recent browser that can encode MP4. Your invitation link works on any phone either way."],
 ];

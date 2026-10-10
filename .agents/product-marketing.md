@@ -9,7 +9,7 @@
 
 ## Product Overview
 **One-liner:** Beautiful web and video invitations for Pakistani weddings and celebrations, designed by you with a live preview, shared on WhatsApp, with RSVPs you can actually use.
-**What it does:** Customers pick an original template, edit names, events, venues, dress codes, Urdu or English text with a live preview, pay a flat price by SadaPay, and get a tap-to-open invitation link (countdown, events, map, add-to-calendar, FAQ, RSVP) plus a downloadable vertical video made in their browser. Hosts see RSVPs, guest counts and can export CSV, and create personalised links per guest ("Dear Sarah & Family", reserved places).
+**What it does:** Customers pick an original template, edit names, events, venues, dress codes, Urdu or English text with a live preview, pay a flat price by online bank transfer, and get a tap-to-open invitation link (countdown, events, map, add-to-calendar, FAQ, RSVP) plus a downloadable vertical video made in their browser. Hosts see RSVPs, guest counts and can export CSV, and create personalised links per guest ("Dear Sarah & Family", reserved places).
 **Product category:** Digital wedding invitations / e-invites (customers likely search "digital wedding card", "online nikkah invitation", "shadi card", "wedding invitation video", "e-card").
 **Product type:** Self-serve web product with manual payment review (marketplace of templates, productised service).
 **Business model and pricing:** One-time flat price per template, shown upfront, PKR. Currently Rs 999 (Eid, birthday) to Rs 3,999 (full-wedding templates). Includes web invite, video, RSVP, no per-guest fees. Prices are founder-set, **not yet validated with customers (to validate)**.
@@ -55,7 +55,7 @@ Consumer product; one buyer type is enough for now.
 - Tap-to-open invite with countdown, maps, add-to-calendar, FAQ; RSVP with guest counts and CSV export.
 - Personalised guest links (name greeting, reserved places).
 - Video invite rendered in the customer's own browser in four styles.
-- Pay with SadaPay and upload a receipt; invitation goes live after confirmation.
+- Pay by online bank transfer and upload a receipt; invitation goes live after confirmation.
 **How we do it differently:** Productised self-serve instead of a designer queue.
 **Why that's better:** Faster, cheaper, transparent. **(to validate)**
 **Why customers choose us:** Not yet known; no customers. **(to validate)**

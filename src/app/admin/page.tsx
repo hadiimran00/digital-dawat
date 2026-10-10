@@ -11,6 +11,8 @@ interface Row {
   invites: { slug: string; template_id: string; content: { host1: string; host2: string } } | null;
 }
 
+const METHOD_LABEL: Record<string, string> = { bank: "Online Bank Transfer", jazzcash: "JazzCash", easypaisa: "Easypaisa", sadapay: "SadaPay (older order)" };
+
 export default function Admin() {
   const user = useUser();
   const [rows, setRows] = useState<Row[] | null>(null);
@@ -82,7 +84,7 @@ export default function Admin() {
               </p>
               <p className="text-sm text-foreground/70">
                 {new Date(r.created_at).toLocaleString("en-GB")} · {r.status.replace("_", " ")}
-                {r.payment_method && ` · ${r.payment_method}`}{r.payment_reference && ` · ref ${r.payment_reference}`}
+                {r.payment_method && ` · ${METHOD_LABEL[r.payment_method] ?? r.payment_method}`}{r.payment_reference && ` · ref ${r.payment_reference}`}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">

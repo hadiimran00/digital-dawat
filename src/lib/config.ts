@@ -10,6 +10,5 @@ export const paymentInfo = {
   bank: process.env.NEXT_PUBLIC_PAY_BANK ?? "",
   jazzcash: process.env.NEXT_PUBLIC_PAY_JAZZCASH ?? "",
   easypaisa: process.env.NEXT_PUBLIC_PAY_EASYPAISA ?? "",
-  sadapay: process.env.NEXT_PUBLIC_PAY_SADAPAY ?? "",
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP ?? "",
 };
