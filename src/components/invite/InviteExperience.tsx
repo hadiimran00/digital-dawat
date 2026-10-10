@@ -224,7 +224,7 @@ export function InviteExperience({
         onScroll={onScroll}
         className={`relative z-[1] h-full overflow-y-auto overscroll-contain ${opened ? "" : "overflow-hidden"} ${tape ? "text-white" : ""}`}
       >
-        <div className="mx-auto max-w-md space-y-6 px-4 py-6">
+        <div className="mx-auto max-w-md space-y-6 px-4 pb-[calc(1.5rem+var(--frame-bottom,0px))] pt-[calc(1.5rem+var(--frame-top,0px))]">
           <div {...sceneAttr(0)} className="overflow-hidden rounded-2xl shadow-xl"><InviteCard template={template} content={content} chrome={!tape} /></div>
 
           {(content.family1 || content.family2 || content.members1.length > 0 || content.members2.length > 0) && (
@@ -341,17 +341,17 @@ export function InviteExperience({
       {/* tape: on-screen display (play state, timecode, viewfinder corners, date stamp, scroll hint) */}
       {tape && opened && (
         <div aria-hidden className="pointer-events-none absolute inset-0 z-10 font-mono text-white [text-shadow:0_0_6px_rgba(0,0,0,0.8)]">
-          <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/70 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/70 to-transparent" />
-          <p className="absolute left-5 top-4 text-sm font-bold tracking-[0.2em]">PLAY ▶</p>
-          <p className="absolute right-5 top-4 text-sm font-bold tracking-[0.15em]">SP {timecode(seconds)}</p>
-          {["left-4 top-4 border-l-2 border-t-2", "right-4 top-4 border-r-2 border-t-2", "bottom-4 left-4 border-b-2 border-l-2", "bottom-4 right-4 border-b-2 border-r-2"].map((c) => (
+          <div className="absolute inset-x-0 top-0 h-[calc(4rem+var(--frame-top,0px))] bg-gradient-to-b from-black/70 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-[calc(5rem+var(--frame-bottom,0px))] bg-gradient-to-t from-black/70 to-transparent" />
+          <p className="absolute left-5 top-[calc(1rem+var(--frame-top,0px))] text-sm font-bold tracking-[0.2em]">PLAY ▶</p>
+          <p className="absolute right-5 top-[calc(1rem+var(--frame-top,0px))] text-sm font-bold tracking-[0.15em]">SP {timecode(seconds)}</p>
+          {["left-4 top-[calc(1rem+var(--frame-top,0px))] border-l-2 border-t-2", "right-4 top-[calc(1rem+var(--frame-top,0px))] border-r-2 border-t-2", "bottom-[calc(1rem+var(--frame-bottom,0px))] left-4 border-b-2 border-l-2", "bottom-[calc(1rem+var(--frame-bottom,0px))] right-4 border-b-2 border-r-2"].map((c) => (
             <span key={c} className={`absolute size-7 border-white/70 ${c}`} />
           ))}
-          <p className="absolute bottom-6 right-7 rounded bg-black/55 px-2 py-0.5 text-sm font-bold tracking-[0.2em]" style={{ color: t.accent }}>{stamp}</p>
+          <p className="absolute bottom-[calc(1.5rem+var(--frame-bottom,0px))] right-7 rounded bg-black/55 px-2 py-0.5 text-sm font-bold tracking-[0.2em]" style={{ color: t.accent }}>{stamp}</p>
           {!atEnd && (
             <button type="button" tabIndex={-1} onClick={() => scroller.current?.scrollBy({ top: scroller.current.clientHeight * 0.8, behavior: reducedMotion() ? "auto" : "smooth" })}
-              className="pointer-events-auto absolute bottom-6 left-1/2 flex min-h-11 -translate-x-1/2 items-center gap-2 rounded-full border border-white/30 bg-black/60 px-5 text-xs font-bold tracking-[0.25em]">
+              className="pointer-events-auto absolute bottom-[calc(1.5rem+var(--frame-bottom,0px))] left-1/2 flex min-h-11 -translate-x-1/2 items-center gap-2 rounded-full border border-white/30 bg-black/60 px-5 text-xs font-bold tracking-[0.25em]">
               SCROLL DOWN <ChevronDown className="size-4" />
             </button>
           )}
@@ -373,11 +373,11 @@ export function InviteExperience({
           {tape && (
             <>
               <div aria-hidden className="pointer-events-none absolute inset-0 opacity-30" style={{ background: "repeating-linear-gradient(0deg, rgba(0,0,0,0.5) 0 1px, transparent 1px 3px)" }} />
-              <p aria-hidden className="absolute left-5 top-4 font-mono text-sm font-bold tracking-[0.2em]">❚❚ PAUSE</p>
-              {["left-4 top-12 border-l-2 border-t-2", "right-4 top-12 border-r-2 border-t-2", "bottom-12 left-4 border-b-2 border-l-2", "bottom-12 right-4 border-b-2 border-r-2"].map((c) => (
+              <p aria-hidden className="absolute left-5 top-[calc(1rem+var(--frame-top,0px))] font-mono text-sm font-bold tracking-[0.2em]">❚❚ PAUSE</p>
+              {["left-4 top-[calc(3rem+var(--frame-top,0px))] border-l-2 border-t-2", "right-4 top-[calc(3rem+var(--frame-top,0px))] border-r-2 border-t-2", "bottom-[calc(3rem+var(--frame-bottom,0px))] left-4 border-b-2 border-l-2", "bottom-[calc(3rem+var(--frame-bottom,0px))] right-4 border-b-2 border-r-2"].map((c) => (
                 <span key={c} aria-hidden className={`absolute size-7 border-white/60 ${c}`} />
               ))}
-              <p aria-hidden className="absolute left-7 top-16 font-mono text-xs tracking-widest" style={{ color: t.accent }}><span className="animate-pulse text-red-400">●</span> REC</p>
+              <p aria-hidden className="absolute left-7 top-[calc(4rem+var(--frame-top,0px))] font-mono text-xs tracking-widest" style={{ color: t.accent }}><span className="animate-pulse text-red-400">●</span> REC</p>
             </>
           )}
           <div className="rise relative flex flex-col items-center gap-4 px-8" style={template.art ? { textShadow: `0 0 8px ${t.bg}, 0 0 18px ${t.bg}` } : undefined}>

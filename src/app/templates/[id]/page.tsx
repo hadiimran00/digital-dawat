@@ -6,6 +6,7 @@ import { TEMPLATES, formatPKR, getTemplate, categoryLabel, type Template } from 
 import { defaultContent } from "@/lib/content";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { InviteExperience } from "@/components/invite/InviteExperience";
+import { PhoneFrame } from "@/components/PhoneFrame";
 import { JsonLd } from "@/components/JsonLd";
 
 export function generateStaticParams() {
@@ -82,10 +83,12 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
         <ArrowLeft className="size-4" aria-hidden /> Templates
       </Link>
 
-      <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-[390px_1fr] md:px-4 md:py-12">
-        {/* live demo: full screen on phones, a phone frame on larger screens */}
-        <div className="h-[calc(100dvh-4.5rem-env(safe-area-inset-bottom,0px))] w-full md:sticky md:top-8 md:h-[min(780px,88vh)] md:self-start md:overflow-hidden md:rounded-[2.5rem] md:border-8 md:border-foreground/90 md:shadow-2xl">
-          <InviteExperience template={t} content={defaultContent(t.category)} demo />
+      <div className="mx-auto grid max-w-5xl gap-10 md:grid-cols-[420px_1fr] md:px-4 md:py-12">
+        {/* live demo: full screen on phones, an iPhone-shaped frame on larger screens */}
+        <div className="md:sticky md:top-6 md:flex md:justify-center md:self-start">
+          <PhoneFrame margin={56} plainClassName="h-[calc(100dvh-4.5rem-env(safe-area-inset-bottom,0px))] w-full">
+            <InviteExperience template={t} content={defaultContent(t.category)} demo />
+          </PhoneFrame>
         </div>
 
         <div className="px-4 py-10 md:self-center md:py-0">

@@ -12,6 +12,7 @@ import { backendConfigured } from "@/lib/config";
 import { InviteCard } from "@/components/invite/InviteCard";
 import { InviteExperience } from "@/components/invite/InviteExperience";
 import { VideoExport } from "@/components/VideoExport";
+import { PhoneFrame } from "@/components/PhoneFrame";
 
 const draftKey = (id: string) => `dawat:draft:v2:${id}`;
 
@@ -331,10 +332,12 @@ export function Editor() {
 
       {previewing && (
         <div role="dialog" aria-modal="true" aria-label="Invitation preview" className="modal-overlay fixed inset-0 z-50 grid place-items-center bg-black/70 p-3">
-          <div className="modal-panel relative h-[min(780px,92dvh)] w-full max-w-[390px] overflow-hidden rounded-[2rem] border-8 border-foreground/90 bg-background shadow-2xl">
-            <InviteExperience template={template} content={content} demo />
+          <div className="modal-panel relative">
+            <PhoneFrame margin={32} plainClassName="h-[92dvh] w-[min(100vw-1.5rem,390px)] overflow-hidden rounded-[2rem] border-8 border-foreground/90">
+              <InviteExperience template={template} content={content} demo />
+            </PhoneFrame>
             <button type="button" onClick={() => setPreviewing(false)} aria-label="Close preview"
-              className="press absolute right-3 top-3 z-30 grid size-11 place-items-center rounded-full bg-black/60 text-white">
+              className="press absolute -right-3 -top-3 z-50 grid size-11 place-items-center rounded-full bg-black/70 text-white md:right-1 md:top-1">
               <X className="size-5" aria-hidden />
             </button>
           </div>
