@@ -17,3 +17,4 @@ Deliberately **not** used: any artwork from competitors' websites (copyrighted),
 
 - `public/audio/replay.mp3` (Replay template): supplied by the site owner from a YouTube Short (a downloaded clip, about 15 s, looped). The site owner states they hold the licence for it. Keep the licence on file.
 - `public/art/mehndi-stage.webp` (Replay template scenes): photograph supplied by the site owner, who states they hold the licence. Keep the licence on file.
+- `public/art/couple-hands.webp` (Replay demo, "The Couple" screen): photograph supplied by the site owner, who states they hold the licence. Keep the licence on file.

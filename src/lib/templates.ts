@@ -44,6 +44,8 @@ export interface Template {
   art?: { src: string; position: string; zoom: number; credit: string };
   /** Optional full-bleed photo behind the whole experience (tape concept). */
   backdrop?: { src: string; credit: string };
+  /** The template's own photos, used until the customer uploads their own. */
+  sample?: { couple?: string };
   /** Optional background track that starts when the guest opens the invitation (they can mute it). */
   music?: { src: string; title: string };
   theme: {
@@ -269,6 +271,7 @@ export const TEMPLATES: Template[] = [
     motion: "rise",
     concept: "tape",
     music: { src: "/audio/replay.mp3", title: "Replay" },
+    sample: { couple: "/art/couple-hands.webp" },
     backdrop: { src: "/art/mehndi-stage.webp", credit: "Mehndi stage photograph supplied by the site owner, who holds the licence." },
     name: "Replay",
     category: "wedding",

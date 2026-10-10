@@ -193,10 +193,10 @@ export function Editor() {
           <div className="space-y-4 rounded-2xl border border-line bg-card p-4">
             <PhotoField label="Cover photo" next={here}
               hint={template.concept === "tape" ? "Shown behind the whole invitation." : "Shown at the top of the card."}
-              value={content.coverPhoto} onChange={(url) => set({ coverPhoto: url })} />
+              value={content.coverPhoto} fallback={template.backdrop?.src ?? template.art?.src} onChange={(url) => set({ coverPhoto: url })} />
             {err("coverPhoto")}
             <PhotoField label="Couple photo" next={here} hint="A portrait of the two of you (or the host)."
-              value={content.couplePhoto} onChange={(url) => set({ couplePhoto: url })} />
+              value={content.couplePhoto} fallback={template.sample?.couple} onChange={(url) => set({ couplePhoto: url })} />
             {err("couplePhoto")}
           </div>
         </section>

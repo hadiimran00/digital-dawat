@@ -273,8 +273,8 @@ export function InviteExperience({
   // customer photos take the place of the template's own artwork
   const backdrop = content.coverPhoto || template.backdrop?.src;
   const coverArt = content.coverPhoto && !tape ? { src: content.coverPhoto, position: "50% 30%", zoom: 0, credit: "" } : template.art;
-  const eventPhotos = [...new Set(ordered.map((e) => e.photo).filter(Boolean))];
-  const couple = content.couplePhoto;
+  const couple = content.couplePhoto || template.sample?.couple || ""; // the customer's photo, or the template's own
+  const scenePhotos = [...new Set([...ordered.map((e) => e.photo), couple].filter(Boolean))];
 
   const font = ur ? "var(--nf-urdu), serif" : "var(--nf-display), Georgia, serif";
   const hasDress = ordered.some((e) => e.dressCode);
@@ -283,7 +283,7 @@ export function InviteExperience({
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-background" dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"} onPointerDown={onTap}>
-      {tape && <SceneBackdrop scene={scene} t={t} photo={backdrop} photos={eventPhotos} active={bgPhoto} />}
+      {tape && <SceneBackdrop scene={scene} t={t} photo={backdrop} photos={scenePhotos} active={bgPhoto} />}
 
       <div
         ref={scroller}
