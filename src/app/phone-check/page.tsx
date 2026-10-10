@@ -58,7 +58,7 @@ export default function PhoneCheck() {
     const start = performance.now();
     try {
       const { renderInviteVideo } = await import("@/lib/videoExport");
-      const blob = await renderInviteVideo(t, defaultContent(t.category), undefined, style);
+      const { blob } = await renderInviteVideo(t, defaultContent(t.category), undefined, style);
       const secs = ((performance.now() - start) / 1000).toFixed(1);
       setTests((r) => [...r, [`Video "${style}"`, `OK in ${secs}s, ${sizeKB(blob.size)}, ${blob.type}`]]);
       setVideoUrl(URL.createObjectURL(blob));

@@ -12,6 +12,7 @@ export function VideoExport({ template, content }: { template: Template; content
   const [url, setUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [style, setStyle] = useState<VideoStyle>(template.motion);
+  const [withMusic, setWithMusic] = useState(false);
 
   useEffect(() => {
     canExportMp4().then(setSupported);
@@ -22,8 +23,9 @@ export function VideoExport({ template, content }: { template: Template; content
     setError("");
     setProgress(0);
     try {
-      const blob = await renderInviteVideo(template, content, setProgress, style);
-      setUrl(URL.createObjectURL(blob));
+      const r = await renderInviteVideo(template, content, setProgress, style);
+      setWithMusic(r.withMusic);
+      setUrl(URL.createObjectURL(r.blob));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Video export failed.");
     } finally {
@@ -60,6 +62,11 @@ export function VideoExport({ template, content }: { template: Template; content
       {url && (
         <div className="mt-3 space-y-2">
           <video src={url} controls playsInline className="mx-auto w-full max-w-[300px] rounded-xl" />
+          {template.music && (
+            <p className="text-xs text-foreground/70">
+              {withMusic ? "Includes the template's music." : "This browser could not add the music, so the video is silent. Try Chrome or Edge on a computer."}
+            </p>
+          )}
           <a href={url} download={`invitation-${template.id}.mp4`} className="btn btn-primary w-full">
             <Download className="size-4" aria-hidden /> Download MP4
           </a>

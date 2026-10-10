@@ -1,6 +1,8 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
-import { BufferTarget, CanvasSource, Mp4OutputFormat, Output, QUALITY_HIGH, canEncodeVideo } from "mediabunny";
+import {
+  AudioBufferSource, BufferTarget, CanvasSource, Mp4OutputFormat, Output, QUALITY_HIGH, canEncodeAudio, canEncodeVideo, type AudioCodec,
+} from "mediabunny";
 import type { Template, VideoStyle } from "./templates";
 import { BISMILLAH, eventsDateText, eventsTitle, formatEventTime, type InviteContent } from "./content";
 import { Ornament, isTallOrnament } from "@/components/invite/Ornament";
@@ -47,6 +49,7 @@ function loadOrnament(t: Template): Promise<HTMLImageElement> {
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   const img = new Image();
+  img.crossOrigin = "anonymous";
   return new Promise((res, rej) => {
     img.onload = () => res(img);
     img.onerror = () => rej(new Error("artwork failed to load"));
@@ -69,6 +72,16 @@ function wrap(ctx: CanvasRenderingContext2D, text: string, maxW: number): string
   return lines;
 }
 
+function drawCover(ctx: CanvasRenderingContext2D, img: HTMLImageElement, x: number, y: number, w: number, h: number, zoom = 1, fx = 0.5, fy = 0.5) {
+  const s = Math.max(w / img.width, h / img.height) * zoom;
+  const iw = img.width * s;
+  const ih = img.height * s;
+  ctx.drawImage(img, x + (w - iw) * fx, y + (h - ih) * fy, iw, ih);
+}
+
+/** Seconds added at the end for the couple photo. */
+const COUPLE_SECS = 3.5;
+
 const ease = (x: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, x)), 3);
 
 export interface Animator {
@@ -88,15 +101,28 @@ export async function createAnimator(template: Template, content: InviteContent,
   const display = ur ? cssVar("--nf-urdu", "serif") : cssVar("--nf-display", "Georgia, serif");
   const body = ur ? cssVar("--nf-urdu", "serif") : cssVar("--nf-sans", "system-ui, sans-serif");
   const headFam = t.headingFont === "sans" && !ur ? body : display;
+  const tape = template.concept === "tape";
+  const script = cssVar("--nf-script", "cursive");
+  const goldNames = tape && !ur;
 
   await Promise.all([
     document.fonts.load(`600 48px ${headFam}`, content.host1),
     document.fonts.load(`400 24px ${body}`, content.message),
     content.bismillah ? document.fonts.load(`400 38px ${cssVar("--nf-naskh", "serif")}`, BISMILLAH) : Promise.resolve([]),
+    goldNames ? document.fonts.load(`400 80px ${script}`, content.host1) : Promise.resolve([]),
   ]).catch(() => {});
 
   const orn = t.ornament === "none" ? null : await loadOrnament(template);
-  const artImg = template.art ? await loadImage(template.art.src).catch(() => null) : null;
+  // the same photos as the web invite: the customer's own, or the template's
+  const customArt = !tape && content.coverPhoto ? { src: content.coverPhoto, position: "50% 30%", zoom: 0, credit: "" } : null;
+  const art = customArt ?? template.art;
+  const photoSrc = tape ? content.coverPhoto || template.backdrop?.src : undefined;
+  const coupleSrc = content.couplePhoto || template.sample?.couple;
+  const [artImg, photoImg, coupleImg] = await Promise.all([
+    art ? loadImage(art.src).catch(() => null) : null,
+    photoSrc ? loadImage(photoSrc).catch(() => null) : null,
+    coupleSrc ? loadImage(coupleSrc).catch(() => null) : null,
+  ]);
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
@@ -110,31 +136,56 @@ export async function createAnimator(template: Template, content: InviteContent,
   const dateStr = eventsDateText(content, ur ? "ur-PK" : "en-GB");
   const timeStr = single && e.time ? formatEventTime(e.time) : "";
   const arch = isTallOrnament(t.ornament);
-  const seconds = VIDEO_STYLES.find((v) => v.id === style)?.seconds ?? 8;
+  const cardSecs = VIDEO_STYLES.find((v) => v.id === style)?.seconds ?? 8;
+  const seconds = cardSecs + (coupleImg ? COUPLE_SECS : 0);
   /** Seconds the intro takes before the card's own text starts animating in. */
   const t0 = style === "envelope" ? 3.2 : 0;
   let dateRect = { x: 90, y: 900, w: W - 180, h: 160 };
 
   let artLayer: HTMLCanvasElement | null = null;
-  const drawBackground = () => {
+  let scan: HTMLCanvasElement | null = null;
+  const drawBackground = (sec: number) => {
     const g = ctx.createLinearGradient(0, 0, W * 0.3, H);
     g.addColorStop(0, t.bg);
     g.addColorStop(1, t.bg2);
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
-    if (artImg && template.art) {
+    if (photoImg) {
+      // full-bleed photo with a slow push-in, darkened so the lettering stays readable
+      drawCover(ctx, photoImg, 0, 0, W, H, 1.04 + 0.06 * (sec / seconds), 0.5, 0.2);
+      const d = ctx.createLinearGradient(0, 0, 0, H);
+      d.addColorStop(0, "rgba(12,8,5,0.45)");
+      d.addColorStop(0.5, "rgba(12,8,5,0.62)");
+      d.addColorStop(1, "rgba(12,8,5,0.85)");
+      ctx.fillStyle = d;
+      ctx.fillRect(0, 0, W, H);
+    }
+    if (tape) {
+      if (!scan) {
+        scan = document.createElement("canvas");
+        scan.width = W;
+        scan.height = H;
+        const c = scan.getContext("2d")!;
+        c.fillStyle = "rgba(0,0,0,0.22)";
+        for (let y = 0; y < H; y += 4) c.fillRect(0, y, W, 2);
+      }
+      ctx.drawImage(scan, 0, 0);
+    }
+    if (artImg && art) {
       // same placement as the on-screen card: top 64%, zoomed, fading out at the bottom
-      const a = template.art;
+      const a = art;
       const hh = Math.round(H * 0.64);
       if (!artLayer) {
         artLayer = document.createElement("canvas");
         artLayer.width = W;
         artLayer.height = hh;
         const c = artLayer.getContext("2d")!;
-        const iw = W * a.zoom;
-        const ih = (artImg.height / artImg.width) * iw;
         const [px, py] = a.position.split(" ").map((v) => parseFloat(v) / 100);
-        c.drawImage(artImg, (W - iw) * px, (hh - ih) * py, iw, ih);
+        if (a.zoom) {
+          const iw = W * a.zoom;
+          const ih = (artImg.height / artImg.width) * iw;
+          c.drawImage(artImg, (W - iw) * px, (hh - ih) * py, iw, ih);
+        } else drawCover(c, artImg, 0, 0, W, hh, 1, px, py);
         c.globalCompositeOperation = "destination-in";
         const m = c.createLinearGradient(0, 0, 0, hh);
         m.addColorStop(0, "#000");
@@ -157,7 +208,7 @@ export async function createAnimator(template: Template, content: InviteContent,
     ctx.globalAlpha = oa;
     ctx.translate(W / 2, (arch ? H * 0.03 : H * 0.05) + oh / 2);
     ctx.scale(scale, scale);
-    if (orn) ctx.drawImage(orn, -ow / 2, -oh / 2, ow, oh);
+    if (orn && !photoImg) ctx.drawImage(orn, -ow / 2, -oh / 2, ow, oh); // a photo replaces the ornament, as on the web invite
     ctx.restore();
 
     // staggered text blocks
@@ -171,12 +222,12 @@ export async function createAnimator(template: Template, content: InviteContent,
       ctx.restore();
     };
     const textW = arch ? W - 270 : W - 150;
-    const lines = (txt: string, font: string, color: string, lh: number, maxW = textW) => {
+    const lines = (txt: string, font: string, color: string | CanvasGradient, lh: number, maxW = textW) => {
       ctx.font = font;
       ctx.fillStyle = color;
-      // soft halo so text stays readable where it overlaps real artwork
-      ctx.shadowColor = template.art ? t.bg : "transparent";
-      ctx.shadowBlur = template.art ? 18 : 0;
+      // soft halo so text stays readable where it overlaps real artwork or a photo
+      ctx.shadowColor = photoImg ? "rgba(0,0,0,0.85)" : art ? t.bg : "transparent";
+      ctx.shadowBlur = photoImg || art ? 18 : 0;
       for (const l of wrap(ctx, txt, maxW)) {
         ctx.fillText(l, W / 2, y);
         y += lh;
@@ -196,7 +247,14 @@ export async function createAnimator(template: Template, content: InviteContent,
     block(1.4, () => {
       y += 70;
       const size = names.length > 22 ? 60 : 84;
-      lines(names, `600 ${size}px ${headFam}`, t.ink, size * (ur ? 1.9 : 1.1));
+      if (goldNames) {
+        const big = Math.round(size * 1.25);
+        const gold = ctx.createLinearGradient(0, y - big, 0, y + big * 1.2);
+        gold.addColorStop(0, "#fff1c9");
+        gold.addColorStop(0.45, "#e8c06a");
+        gold.addColorStop(1, "#b98a35");
+        lines(names, `400 ${big}px ${script}`, gold, big * 1.05);
+      } else lines(names, `600 ${size}px ${headFam}`, t.ink, size * (ur ? 1.9 : 1.1));
       return y;
     });
     block(2.3, () => {
@@ -384,8 +442,71 @@ export async function createAnimator(template: Template, content: InviteContent,
     ctx.restore();
   };
 
+  // ---- Couple photo: the closing shot, framed like a camcorder still --------------------
+  const stamp = new Date(`${e.date}T00:00:00`).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
+  const drawCouple = (sec: number) => {
+    const local = sec - (cardSecs - 0.4);
+    if (!coupleImg || local <= 0) return;
+    const a = ease(local / 0.8);
+    ctx.save();
+    ctx.globalAlpha = a;
+    drawCover(ctx, coupleImg, 0, 0, W, H, 1.15, 0.5, 0.4);
+    ctx.fillStyle = "rgba(12,8,5,0.72)";
+    ctx.fillRect(0, 0, W, H);
+    // tilted cream frame with the photo, settling into place
+    const fw = 540;
+    const fh = 675;
+    ctx.translate(W / 2, 560 + (1 - a) * 40);
+    ctx.rotate((-1.5 * Math.PI) / 180);
+    ctx.scale(0.94 + 0.06 * a, 0.94 + 0.06 * a);
+    ctx.shadowColor = "rgba(0,0,0,0.6)";
+    ctx.shadowBlur = 40;
+    ctx.fillStyle = "#efe3cc";
+    ctx.fillRect(-fw / 2 - 14, -fh / 2 - 14, fw + 28, fh + 28);
+    ctx.shadowBlur = 0;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(-fw / 2, -fh / 2, fw, fh);
+    ctx.clip();
+    drawCover(ctx, coupleImg, -fw / 2, -fh / 2, fw, fh, 1 + 0.03 * Math.min(1, local / COUPLE_SECS));
+    ctx.restore();
+    ctx.font = `700 22px ui-monospace, monospace`;
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#ef4444";
+    ctx.fillText("●", -fw / 2 + 20, -fh / 2 + 40);
+    ctx.fillStyle = "#fff";
+    ctx.fillText("REC", -fw / 2 + 48, -fh / 2 + 40);
+    ctx.fillText("SP", -fw / 2 + 20, fh / 2 - 22);
+    ctx.textAlign = "right";
+    ctx.fillStyle = t.accent;
+    ctx.fillText(stamp, fw / 2 - 20, fh / 2 - 22);
+    ctx.restore();
+    // names under the photo
+    ctx.save();
+    ctx.globalAlpha = ease((local - 0.5) / 0.8);
+    ctx.textAlign = "center";
+    if (!ur) {
+      const gold = ctx.createLinearGradient(0, 960, 0, 1080);
+      gold.addColorStop(0, "#fff1c9");
+      gold.addColorStop(0.45, "#e8c06a");
+      gold.addColorStop(1, "#b98a35");
+      ctx.fillStyle = gold;
+      ctx.font = `400 ${names.length > 22 ? 64 : 84}px ${script}`;
+    } else {
+      ctx.fillStyle = t.ink;
+      ctx.font = `600 60px ${headFam}`;
+    }
+    ctx.shadowColor = "rgba(0,0,0,0.8)";
+    ctx.shadowBlur = 16;
+    ctx.fillText(names, W / 2, 1040, W - 80);
+    ctx.font = `500 26px ${body}`;
+    ctx.fillStyle = t.accent;
+    ctx.fillText(dateStr, W / 2, 1110, W - 80);
+    ctx.restore();
+  };
+
   const draw = (sec: number) => {
-    drawBackground();
+    drawBackground(sec);
     if (style === "envelope") {
       drawEnvelope(sec);
       if (sec > t0 - 0.4) {
@@ -394,11 +515,12 @@ export async function createAnimator(template: Template, content: InviteContent,
         drawCard(Math.max(0, sec - t0));
         ctx.restore();
       }
-      return;
+    } else {
+      drawCard(sec);
+      if (style === "sparkle") drawSparkles(sec);
+      if (style === "scratch") drawScratch(sec);
     }
-    drawCard(sec);
-    if (style === "sparkle") drawSparkles(sec);
-    if (style === "scratch") drawScratch(sec);
+    drawCouple(sec);
   };
 
   const reset = () => {
@@ -407,9 +529,44 @@ export async function createAnimator(template: Template, content: InviteContent,
     foilFrom = 0;
   };
   // Dry run so the date block's position is known before the foil is created.
-  draw(20);
+  draw(Math.min(20, cardSecs - 0.5));
   reset();
   return { canvas, draw, reset, seconds };
+}
+
+/** The template's song, looped or cut to the video's length, with a short fade in and out. */
+async function renderMusic(src: string, seconds: number): Promise<AudioBuffer> {
+  const data = await (await fetch(src)).arrayBuffer();
+  const rate = 48000;
+  const ctx = new OfflineAudioContext(2, Math.ceil(rate * seconds), rate);
+  const song = await ctx.decodeAudioData(data);
+  const node = ctx.createBufferSource();
+  node.buffer = song;
+  node.loop = true;
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0, 0);
+  gain.gain.linearRampToValueAtTime(0.9, 0.4);
+  gain.gain.setValueAtTime(0.9, Math.max(0.5, seconds - 1.5));
+  gain.gain.linearRampToValueAtTime(0, seconds);
+  node.connect(gain).connect(ctx.destination);
+  node.start(0);
+  return ctx.startRendering();
+}
+
+/** AAC plays everywhere (WhatsApp, iPhone); Opus is the fallback; null means this browser cannot encode audio. */
+async function pickAudioCodec(): Promise<AudioCodec | null> {
+  try {
+    if (typeof AudioEncoder === "undefined") return null;
+    if (await canEncodeAudio("aac", { numberOfChannels: 2, sampleRate: 48000, bitrate: 128_000 })) return "aac";
+    if (await canEncodeAudio("opus", { numberOfChannels: 2, sampleRate: 48000, bitrate: 128_000 })) return "opus";
+  } catch {}
+  return null;
+}
+
+export interface RenderedVideo {
+  blob: Blob;
+  /** True when the template's music made it into the file. */
+  withMusic: boolean;
 }
 
 export async function renderInviteVideo(
@@ -417,12 +574,27 @@ export async function renderInviteVideo(
   content: InviteContent,
   onProgress?: (p: number) => void,
   style: VideoStyle = template.motion,
-): Promise<Blob> {
+): Promise<RenderedVideo> {
   const { canvas, draw, seconds } = await createAnimator(template, content, style);
-  const output = new Output({ format: new Mp4OutputFormat(), target: new BufferTarget() });
+  const output = new Output({ format: new Mp4OutputFormat({ fastStart: "in-memory" }), target: new BufferTarget() });
   const source = new CanvasSource(canvas, { codec: "avc", bitrate: QUALITY_HIGH });
   output.addVideoTrack(source, { frameRate: FPS });
+
+  let audio: { src: AudioBufferSource; buf: AudioBuffer } | null = null;
+  if (template.music) {
+    const codec = await pickAudioCodec();
+    const buf = codec ? await renderMusic(template.music.src, seconds).catch(() => null) : null;
+    if (codec && buf) {
+      audio = { src: new AudioBufferSource({ codec, bitrate: 128_000 }), buf };
+      output.addAudioTrack(audio.src);
+    }
+  }
+
   await output.start();
+  if (audio) {
+    await audio.src.add(audio.buf);
+    audio.src.close();
+  }
   const total = FPS * seconds;
   for (let i = 0; i < total; i++) {
     draw(i / FPS);
@@ -434,5 +606,5 @@ export async function renderInviteVideo(
   onProgress?.(1);
   const buf = (output.target as BufferTarget).buffer;
   if (!buf) throw new Error("Video encoding produced no data.");
-  return new Blob([buf], { type: "video/mp4" });
+  return { blob: new Blob([buf], { type: "video/mp4" }), withMusic: !!audio };
 }
