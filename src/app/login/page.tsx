@@ -6,7 +6,7 @@ import { backendConfigured, getSupabase } from "@/lib/supabase";
 import { NotConfigured } from "@/lib/useUser";
 
 function Login() {
-  const next = useSearchParams().get("next") ?? "/account/";
+  const next = useSearchParams().get("next") ?? "/account";
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
@@ -21,7 +21,7 @@ function Login() {
     setBusy(true);
     setError("");
     // Only same-site relative paths are allowed as the post-login target.
-    const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/account/";
+    const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/account";
     const { error } = await sb.auth.signInWithOtp({
       email: email.trim(),
       options: { emailRedirectTo: `${window.location.origin}${safeNext}` },

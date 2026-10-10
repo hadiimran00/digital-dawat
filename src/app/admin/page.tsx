@@ -87,7 +87,7 @@ export default function Admin() {
             </div>
             <div className="flex flex-wrap gap-2">
               {r.receipt_path && <button className="btn btn-ghost" onClick={() => viewReceipt(r.receipt_path!)}>View receipt</button>}
-              {r.invites && <a className="btn btn-ghost" href={`/i/?s=${r.invites.slug}`} target="_blank" rel="noopener noreferrer">Preview</a>}
+              {r.invites && <a className="btn btn-ghost" href={`/i?s=${r.invites.slug}`} target="_blank" rel="noopener noreferrer">Preview</a>}
               {r.status === "pending_review" && (
                 <>
                   <button className="btn btn-primary" onClick={() => review(r.id, true)}>Approve &amp; publish</button>

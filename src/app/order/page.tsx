@@ -50,7 +50,7 @@ function OrderInner() {
 
   if (!backendConfigured) return <NotConfigured />;
   if (user === undefined) return <p className="p-8 text-center">Loading…</p>;
-  if (user === null) return <p className="p-8 text-center"><Link className="underline" href={`/login/?next=${encodeURIComponent(`/order/?id=${id}`)}`}>Sign in</Link> to view your order.</p>;
+  if (user === null) return <p className="p-8 text-center"><Link className="underline" href={`/login?next=${encodeURIComponent(`/order?id=${id}`)}`}>Sign in</Link> to view your order.</p>;
   if (!order) return <p className="p-8 text-center">{msg || "Loading…"}</p>;
 
   const details = paymentInfo[method];
@@ -84,12 +84,12 @@ function OrderInner() {
       {order.status === "approved" && order.invites && (
         <div className="mt-6 rounded-xl border border-green-300 bg-green-50 p-5">
           <p className="font-semibold text-green-900">Payment confirmed. Your invitation is live.</p>
-          <Link className="btn btn-primary mt-3" href={`/i/?s=${order.invites.slug}`}>Open my invitation</Link>
+          <Link className="btn btn-primary mt-3" href={`/i?s=${order.invites.slug}`}>Open my invitation</Link>
         </div>
       )}
       {order.status === "pending_review" && (
         <p role="status" className="mt-6 rounded-xl border border-line bg-card p-5">
-          Receipt received. We’ll confirm your payment and publish your invitation. You can check back on <Link className="underline" href="/account/">My orders</Link>.
+          Receipt received. We’ll confirm your payment and publish your invitation. You can check back on <Link className="underline" href="/account">My orders</Link>.
         </p>
       )}
       {order.status === "rejected" && (

@@ -57,12 +57,12 @@ export function TemplateGallery({ limit }: { limit?: number }) {
             <li key={t.id}>
               <div className="overflow-hidden rounded-2xl border border-line shadow-sm transition-shadow duration-200 ease-out hover:shadow-lg">
                 <HoverPreview template={t}>
-                  <Link href={`/templates/${t.id}/`} aria-label={`${t.name}, ${categoryLabel(t.category)} template`} className="block">
+                  <Link href={`/templates/${t.id}`} aria-label={`${t.name}, ${categoryLabel(t.category)} template`} className="block">
                     <InviteCard template={t} content={defaultContent(t.category)} />
                   </Link>
                 </HoverPreview>
               </div>
-              <Link href={`/templates/${t.id}/`} className="block">
+              <Link href={`/templates/${t.id}`} className="block">
                 <div className="mt-3 flex items-start justify-between gap-2">
                   <div>
                     <h3 className="font-semibold">{t.name}</h3>
@@ -77,7 +77,7 @@ export function TemplateGallery({ limit }: { limit?: number }) {
       )}
       {limit && TEMPLATES.length > limit && (
         <div className="mt-8 text-center">
-          <Link href="/templates/" className="btn btn-ghost">Browse all {TEMPLATES.length} templates</Link>
+          <Link href="/templates" className="btn btn-ghost">Browse all {TEMPLATES.length} templates</Link>
         </div>
       )}
     </div>

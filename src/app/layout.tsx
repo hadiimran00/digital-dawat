@@ -2,15 +2,24 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, DM_Sans, Noto_Nastaliq_Urdu } from "next/font/google";
 import "./globals.css";
 import { SiteHeader, SiteFooter } from "@/components/Site";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const sans = DM_Sans({ variable: "--nf-sans", subsets: ["latin"] });
 const display = Cormorant_Garamond({ variable: "--nf-display", subsets: ["latin"], weight: ["500", "600", "700"] });
 const urdu = Noto_Nastaliq_Urdu({ variable: "--nf-urdu", subsets: ["arabic"], weight: ["400", "700"] });
 
 export const metadata: Metadata = {
-  title: { default: "Digital Dawat — Invitations for weddings & celebrations", template: "%s · Digital Dawat" },
+  metadataBase: new URL(SITE_URL),
+  title: { default: "Digital Dawat | Wedding invitations for WhatsApp", template: "%s | Digital Dawat" },
   description:
-    "Design beautiful web and video invitations for nikkah, mehndi, baraat, walima and more. Live preview, flat prices, RSVP tracking, share on WhatsApp.",
+    "Make a nikkah, mehndi, baraat or walima invitation with a live preview, flat PKR prices, RSVPs with guest counts and one link for WhatsApp. English and Urdu.",
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: "en_PK",
+    images: [{ url: "/og/default.jpg", width: 1200, height: 630, alt: "Digital Dawat wedding invitation templates" }],
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {

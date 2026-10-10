@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { TemplateGallery } from "@/components/TemplateGallery";
+import { TEMPLATES } from "@/lib/templates";
 
 export const metadata: Metadata = {
-  title: "Invitation templates",
-  description: "Browse nikkah, mehndi, baraat, walima, engagement, Eid, birthday and baby shower invitation templates.",
+  title: "Wedding invitation templates",
+  alternates: { canonical: "/templates" },
+  description: `Browse ${TEMPLATES.length} original invitation templates for nikkah, mehndi, baraat, walima and more. Hover a card to watch it move. Flat PKR prices.`,
 };
 
 export default function TemplatesPage() {

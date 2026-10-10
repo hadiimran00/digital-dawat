@@ -19,9 +19,9 @@ export function SiteHeader() {
           Digital Dawat<span className="text-gold">.</span>
         </Link>
         <nav aria-label="Main" className="flex items-center gap-1 text-sm font-medium sm:gap-4">
-          <Link href="/templates/" className="px-3 py-2">Templates</Link>
-          <Link href="/account/" className="whitespace-nowrap px-3 py-2">My orders</Link>
-          <Link href="/templates/" className="btn btn-primary hidden sm:inline-flex">Start creating</Link>
+          <Link href="/templates" className="px-3 py-2">Templates</Link>
+          <Link href="/account" className="whitespace-nowrap px-3 py-2">My orders</Link>
+          <Link href="/templates" className="btn btn-primary hidden sm:inline-flex">Start creating</Link>
         </nav>
       </div>
     </header>
@@ -36,8 +36,8 @@ export function SiteFooter() {
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-foreground/70 sm:flex-row sm:justify-between">
         <p>© {new Date().getFullYear()} Digital Dawat. Invitations for every celebration.</p>
         <nav aria-label="Footer" className="flex gap-4">
-          <Link href="/templates/">Templates</Link>
-          <Link href="/policies/">Pricing &amp; refunds</Link>
+          <Link href="/templates">Templates</Link>
+          <Link href="/policies">Pricing &amp; refunds</Link>
         </nav>
       </div>
     </footer>

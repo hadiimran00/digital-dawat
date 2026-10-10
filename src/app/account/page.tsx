@@ -34,14 +34,14 @@ export default function Account() {
 
   if (!backendConfigured) return <NotConfigured />;
   if (user === undefined) return <p className="p-8 text-center">Loading…</p>;
-  if (user === null) return <p className="p-8 text-center"><Link className="underline" href="/login/?next=/account/">Sign in</Link> to see your orders.</p>;
+  if (user === null) return <p className="p-8 text-center"><Link className="underline" href="/login?next=/account">Sign in</Link> to see your orders.</p>;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="font-display text-4xl font-bold text-brand">My orders</h1>
       <div className="mt-6 space-y-3">
         {rows === null && <p>Loading…</p>}
-        {rows?.length === 0 && <p>No orders yet. <Link className="underline" href="/templates/">Browse templates</Link>.</p>}
+        {rows?.length === 0 && <p>No orders yet. <Link className="underline" href="/templates">Browse templates</Link>.</p>}
         {rows?.map((r) => (
           <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-card p-4">
             <div>
@@ -51,11 +51,11 @@ export default function Account() {
             <div className="flex gap-2">
               {r.status === "approved" && r.invites && (
                 <>
-                  <Link className="btn btn-ghost" href={`/i/?s=${r.invites.slug}`}>Open</Link>
-                  <Link className="btn btn-ghost" href={`/rsvps/?s=${r.invites.slug}`}>RSVPs</Link>
+                  <Link className="btn btn-ghost" href={`/i?s=${r.invites.slug}`}>Open</Link>
+                  <Link className="btn btn-ghost" href={`/rsvps?s=${r.invites.slug}`}>RSVPs</Link>
                 </>
               )}
-              {r.status !== "approved" && <Link className="btn btn-primary" href={`/order/?id=${r.id}`}>{r.status === "pending_review" ? "View" : "Pay"}</Link>}
+              {r.status !== "approved" && <Link className="btn btn-primary" href={`/order?id=${r.id}`}>{r.status === "pending_review" ? "View" : "Pay"}</Link>}
             </div>
           </div>
         ))}
