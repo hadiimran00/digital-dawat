@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CalendarPlus, ChevronDown, MapPin, Shirt } from "lucide-react";
+import { CalendarPlus, ChevronDown, MapPin, Music, Shirt, VolumeX } from "lucide-react";
 import type { Template } from "@/lib/templates";
 import {
   BISMILLAH, buildIcs, eventsDateText, formatEventDate, formatEventTime, type InviteContent, type InviteEvent,
@@ -147,6 +147,8 @@ export function InviteExperience({
   const [atEnd, setAtEnd] = useState(false); // the scroll-down hint stays until the very bottom
   const [seconds, setSeconds] = useState(0);
   const scroller = useRef<HTMLDivElement>(null);
+  const song = useRef<HTMLAudioElement>(null);
+  const [songOff, setSongOff] = useState(false);
   const names = content.host2 ? `${content.host1} & ${content.host2}` : content.host1;
   const wa = content.contactPhone.replace(/\D/g, "");
   const tall = isTallOrnament(t.ornament);
@@ -202,6 +204,17 @@ export function InviteExperience({
     const el = e.currentTarget;
     setAtEnd(el.scrollTop + el.clientHeight >= el.scrollHeight - 48);
   }, []);
+  // Opening is a tap, so the browser lets the song start; a failure (blocked, offline) just leaves it silent.
+  const open = () => {
+    setOpened(true);
+    const a = song.current;
+    if (a) { a.volume = 0.7; a.play().catch(() => setSongOff(true)); }
+  };
+  const toggleSong = () => {
+    const a = song.current;
+    if (!a) return;
+    if (a.paused) { a.play().then(() => setSongOff(false)).catch(() => {}); } else { a.pause(); setSongOff(true); }
+  };
   const toTop = () => { setSeconds(0); scroller.current?.scrollTo({ top: 0, behavior: reducedMotion() ? "auto" : "smooth" }); };
   const goTo = (i: number) =>
     document.getElementById(`ev-${i}`)?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "center" });
@@ -358,6 +371,18 @@ export function InviteExperience({
         </div>
       )}
 
+      {template.music && (
+        <>
+          <audio ref={song} src={template.music.src} loop preload="none" />
+          {opened && (
+            <button type="button" onClick={toggleSong} aria-pressed={!songOff} aria-label={songOff ? "Play music" : "Mute music"}
+              className="press absolute bottom-[calc(3.5rem+var(--frame-bottom,0px))] left-4 z-30 grid size-11 place-items-center rounded-full border border-white/30 bg-black/60 text-white backdrop-blur">
+              {songOff ? <VolumeX className="size-5" aria-hidden /> : <Music className="size-5" aria-hidden />}
+            </button>
+          )}
+        </>
+      )}
+
       {!gone && (
         <div
           data-open={opened}
@@ -386,7 +411,7 @@ export function InviteExperience({
             <h2 className="text-5xl leading-tight" style={{ fontFamily: font, fontWeight: 600 }}>{names}</h2>
             <div className="h-px w-16" style={{ background: t.accent }} />
             <p className={mono} style={{ color: tape ? t.accent : t.muted }}>{tape ? stamp : eventsDateText(content, loc)}</p>
-            <button type="button" onClick={() => setOpened(true)} className={`btn mt-6 ${tape ? "font-mono uppercase tracking-[0.25em]" : ""}`} style={{ background: t.accent, color: t.bg }}>
+            <button type="button" onClick={open} className={`btn mt-6 ${tape ? "font-mono uppercase tracking-[0.25em]" : ""}`} style={{ background: t.accent, color: t.bg }}>
               {ur ? "کھولنے کے لیے ٹیپ کریں" : tape ? "▶ Press play" : "Tap to open"}
             </button>
             <ChevronDown className="mt-2 size-5 opacity-60" aria-hidden />

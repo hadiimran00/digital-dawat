@@ -42,6 +42,8 @@ export interface Template {
   concept?: "tape";
   /** Real artwork (public-domain / CC0) used as the hero image of the card. See CREDITS.md. */
   art?: { src: string; position: string; zoom: number; credit: string };
+  /** Optional background track that starts when the guest opens the invitation (they can mute it). */
+  music?: { src: string; title: string };
   theme: {
     bg: string;
     bg2: string;
@@ -264,6 +266,7 @@ export const TEMPLATES: Template[] = [
     id: "replay-wedding",
     motion: "rise",
     concept: "tape",
+    music: { src: "/audio/replay.mp3", title: "Replay" },
     name: "Replay",
     category: "wedding",
     tagline: "Your wedding week as a retro home-video tape.",

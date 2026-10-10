@@ -12,3 +12,7 @@ Real artwork used in templates comes from museum open-access collections release
 Licence status was read from the museum's open-access API (`share_license_status: "CC0"`) at the time of download.
 
 Deliberately **not** used: any artwork from competitors' websites (copyrighted), and manuscript pages containing religious text.
+
+## Audio
+
+- `public/audio/replay.mp3` (Replay template): supplied by the site owner from a YouTube Short (a downloaded clip, about 15 s, looped). Licence and rights holder are NOT confirmed. Replace it with a track that has a clear commercial licence before selling invitations that use it.
