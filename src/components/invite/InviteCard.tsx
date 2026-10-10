@@ -3,6 +3,9 @@ import type { Template } from "@/lib/templates";
 import { BISMILLAH, eventsDateText, eventsTitle, formatEventTime, type InviteContent } from "@/lib/content";
 import { Ornament, isTallOrnament } from "./Ornament";
 
+/** Brushed-gold fill for script names. */
+export const GOLD = "linear-gradient(180deg, #fff1c9 0%, #e8c06a 45%, #b98a35 100%)";
+
 const HEADING: Record<Template["theme"]["headingFont"], string> = {
   serif: "var(--nf-display), Georgia, serif",
   script: "var(--nf-display), Georgia, serif",
@@ -43,6 +46,7 @@ export function InviteCard({ template, content, chrome = true, clear = false }: 
   const tall = isTallOrnament(t.ornament);
   // soft halo so text stays readable where it overlaps real artwork
   const glow = template.art ? `0 0 6px ${t.bg}, 0 0 14px ${t.bg}, 0 0 22px ${t.bg}` : undefined;
+  const gold = template.concept === "tape" && !ur; // gold script lettering, like a home-video title card
   const names = content.host2 ? `${content.host1} & ${content.host2}` : content.host1;
   const style: CSSProperties = {
     background: clear
@@ -92,11 +96,12 @@ export function InviteCard({ template, content, chrome = true, clear = false }: 
         </p>
         <h2
           style={{
-            fontFamily: head,
-            fontSize: names.length > 22 ? "9cqw" : content.bismillah ? "10.5cqw" : "12cqw",
+            fontFamily: gold ? "var(--nf-script), cursive" : head,
+            ...(gold ? { backgroundImage: GOLD, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", paddingBottom: "1cqw" } : {}),
+            fontSize: gold ? (names.length > 22 ? "11cqw" : "15cqw") : names.length > 22 ? "9cqw" : content.bismillah ? "10.5cqw" : "12cqw",
             lineHeight: ur ? 1.8 : 1.05,
-            fontWeight: 600,
-            fontStyle: t.headingFont === "script" && !ur ? "italic" : "normal",
+            fontWeight: gold ? 400 : 600,
+            fontStyle: t.headingFont === "script" && !ur && !gold ? "italic" : "normal",
             overflowWrap: "anywhere",
           }}
         >

@@ -276,7 +276,7 @@ export const TEMPLATES: Template[] = [
     tags: ["retro", "vhs", "tape", "full wedding", "fun", "dark"],
     price: 3999,
     popular: true,
-    theme: { bg: "#0C0B14", bg2: "#1B1230", ink: "#F4F1FF", accent: "#FF4D7E", muted: "#9FA0C8", ornament: "bars", headingFont: "sans" },
+    theme: { bg: "#140C08", bg2: "#2A160C", ink: "#F6E7C8", accent: "#FF9A3C", muted: "#D9C29A", ornament: "bars", headingFont: "script" },
   },
   {
     id: "gulistan-nikkah",

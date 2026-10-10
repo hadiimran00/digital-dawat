@@ -73,7 +73,7 @@ function cheer(x: number, y: number) {
   el.style.cssText =
     `position:fixed;left:${Math.min(Math.max(x, 70), window.innerWidth - 70)}px;top:${y}px;z-index:61;pointer-events:none;` +
     "transform:translate(-50%,-50%);font:700 18px/1 ui-monospace,monospace;letter-spacing:.08em;color:#fff;" +
-    "text-shadow:0 0 8px #ff4f8b,0 0 18px #ff4f8b;white-space:nowrap";
+    "text-shadow:0 0 8px #ff9a3c,0 0 18px #ff9a3c;white-space:nowrap";
   document.body.appendChild(el);
   const drift = reduced() ? 0 : -80;
   el.animate(

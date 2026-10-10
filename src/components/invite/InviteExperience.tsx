@@ -7,7 +7,7 @@ import {
   BISMILLAH, buildIcs, eventsDateText, formatEventDate, formatEventTime, type InviteContent, type InviteEvent,
 } from "@/lib/content";
 import { burst, type TapFx } from "@/lib/tapFx";
-import { ArtHero, InviteCard } from "./InviteCard";
+import { ArtHero, GOLD, InviteCard } from "./InviteCard";
 import { Families } from "./Families";
 import { Ornament, isTallOrnament } from "./Ornament";
 import { Rsvp } from "./Rsvp";
@@ -127,6 +127,9 @@ function Tag({ tape, label }: { tape: boolean; label: string }) {
     </p>
   );
 }
+
+/** VHS colour split: a faint red and cyan ghost either side of tape lettering. */
+const VHS = "-1.5px 0 rgba(255,40,90,0.55), 1.5px 0 rgba(0,220,255,0.55)";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 const timecode = (s: number) => `${Math.floor(s / 3600)}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`;
@@ -359,7 +362,7 @@ export function InviteExperience({
 
       {/* tape: on-screen display (play state, timecode, viewfinder corners, date stamp, scroll hint) */}
       {tape && opened && (
-        <div aria-hidden className="pointer-events-none absolute inset-0 z-10 font-mono text-white [text-shadow:0_0_6px_rgba(0,0,0,0.8)]">
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-10 font-mono text-white" style={{ textShadow: `${VHS}, 0 0 6px rgba(0,0,0,0.8)` }}>
           <div className="absolute inset-x-0 top-0 h-[calc(4rem+var(--frame-top,0px))] bg-gradient-to-b from-black/70 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-[calc(5rem+var(--frame-bottom,0px))] bg-gradient-to-t from-black/70 to-transparent" />
           <p className="absolute left-5 top-[calc(1rem+var(--frame-top,0px))] text-sm font-bold tracking-[0.2em]">PLAY ▶</p>
@@ -401,7 +404,7 @@ export function InviteExperience({
             fontFamily: ur ? "var(--nf-urdu), serif" : "var(--nf-sans), system-ui, sans-serif",
           }}
         >
-          <Ornament kind={t.ornament} className={`pointer-events-none absolute left-1/2 top-[6%] -translate-x-1/2 opacity-30 ${tall ? "h-[88%] w-[88%]" : "w-[70%]"}`} />
+          {!(tape && template.backdrop) && <Ornament kind={t.ornament} className={`pointer-events-none absolute left-1/2 top-[6%] -translate-x-1/2 opacity-30 ${tall ? "h-[88%] w-[88%]" : "w-[70%]"}`} />}
           {template.art && <ArtHero art={template.art} bg={t.bg} />}
           {tape && (
             <>
@@ -415,11 +418,13 @@ export function InviteExperience({
           )}
           <div className="rise relative flex flex-col items-center gap-4 px-8" style={template.art ? { textShadow: `0 0 8px ${t.bg}, 0 0 18px ${t.bg}` } : undefined}>
             {content.bismillah && <p lang="ar" dir="rtl" className="text-2xl" style={{ color: t.accent, fontFamily: "var(--nf-naskh), serif", lineHeight: 1.9 }}>{BISMILLAH}</p>}
-            <p className={`text-xs uppercase tracking-[0.3em] ${mono}`} style={{ color: t.accent }}>{tape && !ur ? "The wedding of" : content.headline}</p>
-            <h2 className="text-5xl leading-tight" style={{ fontFamily: font, fontWeight: 600 }}>{names}</h2>
+            <p className={`text-xs uppercase tracking-[0.3em] ${mono}`} style={{ color: t.accent, ...(tape ? { textShadow: VHS } : {}) }}>{tape && !ur ? "The wedding of" : content.headline}</p>
+            {tape && !ur
+              ? <h2 className="pb-2 text-7xl leading-[1.05]" style={{ fontFamily: "var(--nf-script), cursive", fontWeight: 400, backgroundImage: GOLD, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{names}</h2>
+              : <h2 className="text-5xl leading-tight" style={{ fontFamily: font, fontWeight: 600 }}>{names}</h2>}
             <div className="h-px w-16" style={{ background: t.accent }} />
             <p className={mono} style={{ color: tape ? t.accent : t.muted }}>{tape ? stamp : eventsDateText(content, loc)}</p>
-            <button type="button" onClick={open} className={`btn mt-6 ${tape ? "font-mono uppercase tracking-[0.25em]" : ""}`} style={{ background: t.accent, color: t.bg }}>
+            <button type="button" onClick={open} className={`btn mt-6 ${tape ? "font-mono uppercase tracking-[0.25em]" : ""}`} style={{ background: t.accent, color: t.bg, ...(tape ? { boxShadow: "0 4px 0 #A8531A" } : {}) }}>
               {ur ? "کھولنے کے لیے ٹیپ کریں" : tape ? "▶ Press play" : "Tap to open"}
             </button>
             <ChevronDown className="mt-2 size-5 opacity-60" aria-hidden />
