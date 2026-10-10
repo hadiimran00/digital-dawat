@@ -13,7 +13,14 @@ export const metadata: Metadata = {
     "Design beautiful web and video invitations for nikkah, mehndi, baraat, walima and more. Live preview, flat prices, RSVP tracking, share on WhatsApp.",
 };
 
-export const viewport: Viewport = { themeColor: "#0f3d33", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover", // paint under the notch; content pads back with env(safe-area-inset-*)
+  interactiveWidget: "resizes-content", // keyboard shrinks the layout viewport, so 100dvh tracks it
+  colorScheme: "light",
+  themeColor: "#fbf7f0", // the colour at the very top of the page (header), not the brand colour
+};
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

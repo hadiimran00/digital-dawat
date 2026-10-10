@@ -287,11 +287,11 @@ export function Editor() {
       </aside>
 
       {previewing && (
-        <div role="dialog" aria-modal="true" aria-label="Invitation preview" className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-3">
-          <div className="relative h-[min(780px,92dvh)] w-full max-w-[390px] overflow-hidden rounded-[2rem] border-8 border-foreground/90 bg-background shadow-2xl">
+        <div role="dialog" aria-modal="true" aria-label="Invitation preview" className="modal-overlay fixed inset-0 z-50 grid place-items-center bg-black/70 p-3">
+          <div className="modal-panel relative h-[min(780px,92dvh)] w-full max-w-[390px] overflow-hidden rounded-[2rem] border-8 border-foreground/90 bg-background shadow-2xl">
             <InviteExperience template={template} content={content} demo />
             <button type="button" onClick={() => setPreviewing(false)} aria-label="Close preview"
-              className="absolute right-3 top-3 z-30 grid size-11 place-items-center rounded-full bg-black/60 text-white">
+              className="press absolute right-3 top-3 z-30 grid size-11 place-items-center rounded-full bg-black/60 text-white">
               <X className="size-5" aria-hidden />
             </button>
           </div>

@@ -73,7 +73,7 @@ export function HoverPreview({ template, children }: { template: Template; child
         onClick={() => (playing ? stop() : start())}
         aria-label={playing ? `Stop ${template.name} preview` : `Play ${template.name} preview`}
         aria-pressed={playing}
-        className="absolute bottom-2 right-2 z-10 grid size-11 place-items-center rounded-full bg-black/55 text-white backdrop-blur transition hover:bg-black/75"
+        className="absolute bottom-2 right-2 z-10 grid size-11 place-items-center press rounded-full bg-black/55 text-white backdrop-blur hover:bg-black/75"
       >
         {playing ? <Pause className="size-4" aria-hidden /> : <Play className="size-4" aria-hidden />}
       </button>

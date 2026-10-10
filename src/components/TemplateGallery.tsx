@@ -36,7 +36,7 @@ export function TemplateGallery({ limit }: { limit?: number }) {
                 type="button"
                 aria-pressed={cat === c.id}
                 onClick={() => setCat(c.id)}
-                className={`min-h-11 rounded-full border px-4 text-sm font-medium transition ${
+                className={`press min-h-11 rounded-full border px-4 text-sm font-medium ${
                   cat === c.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-card hover:border-gold"
                 }`}
               >
@@ -55,7 +55,7 @@ export function TemplateGallery({ limit }: { limit?: number }) {
         <ul className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
           {shown.map((t) => (
             <li key={t.id}>
-              <div className="overflow-hidden rounded-2xl border border-line shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+              <div className="overflow-hidden rounded-2xl border border-line shadow-sm transition-shadow duration-200 ease-out hover:shadow-lg">
                 <HoverPreview template={t}>
                   <Link href={`/templates/${t.id}/`} aria-label={`${t.name}, ${categoryLabel(t.category)} template`} className="block">
                     <InviteCard template={t} content={defaultContent(t.category)} />

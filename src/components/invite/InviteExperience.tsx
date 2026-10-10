@@ -86,7 +86,7 @@ export function InviteExperience({
   }, []);
   useEffect(() => {
     if (!opened) return;
-    const id = setTimeout(() => setGone(true), 1000);
+    const id = setTimeout(() => setGone(true), 560);
     return () => clearTimeout(id);
   }, [opened]);
 
@@ -96,7 +96,7 @@ export function InviteExperience({
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-background" dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"}>
-      <div className={`h-full overflow-y-auto ${opened ? "" : "overflow-hidden"}`}>
+      <div className={`h-full overflow-y-auto overscroll-contain ${opened ? "" : "overflow-hidden"}`}>
         <div className="mx-auto max-w-md space-y-6 px-4 py-6">
           <div className="overflow-hidden rounded-2xl shadow-xl"><InviteCard template={template} content={content} /></div>
 
@@ -171,7 +171,7 @@ export function InviteExperience({
               {content.faq.map((f, i) => (
                 <details key={i} className="group rounded-xl border border-line bg-card p-4">
                   <summary className="flex min-h-6 cursor-pointer list-none items-center justify-between gap-2 font-medium">
-                    {f.q}<ChevronDown className="size-4 shrink-0 transition group-open:rotate-180" aria-hidden />
+                    {f.q}<ChevronDown className="size-4 shrink-0 transition-transform duration-200 ease-out group-open:rotate-180" aria-hidden />
                   </summary>
                   <p className="mt-2 text-sm text-foreground/80">{f.a}</p>
                 </details>
@@ -205,11 +205,11 @@ export function InviteExperience({
 
       {!gone && (
         <div
-          className={`absolute inset-0 z-20 flex flex-col items-center text-center transition-transform duration-1000 ease-in-out ${template.art ? "justify-end pb-28" : "justify-center"}`}
+          data-open={opened}
+          className={`cover absolute inset-0 z-20 flex flex-col items-center text-center ${template.art ? "justify-end pb-28" : "justify-center"}`}
           style={{
             background: `linear-gradient(170deg, ${t.bg}, ${t.bg2})`,
             color: t.ink,
-            transform: opened ? "translateY(-100%)" : "none",
             fontFamily: ur ? "var(--nf-urdu), serif" : "var(--nf-sans), system-ui, sans-serif",
           }}
         >
@@ -234,7 +234,7 @@ export function InviteExperience({
               <button
                 type="button"
                 onClick={() => setOpened(true)}
-                className="btn mt-6 animate-pulse"
+                className="btn mt-6"
                 style={{ background: t.accent, color: t.bg }}
               >
                 {ur ? "کھولنے کے لیے ٹیپ کریں" : tape ? "▶ Press play" : "Tap to open"}

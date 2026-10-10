@@ -8,6 +8,9 @@
   --gold: #b8924a;
   --line: #e6dcc9;
   --card: #ffffff;
+  /* Motion tokens: strong custom curves (built-in CSS easings are too weak). */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @theme inline {
@@ -23,6 +26,11 @@
   --font-urdu: var(--nf-urdu), serif;
 }
 
+html {
+  -webkit-tap-highlight-color: transparent; /* no grey flash on tap; every control has its own :active state */
+  -webkit-text-size-adjust: 100%; /* no font inflation in landscape */
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -34,68 +42,102 @@ body {
   outline-offset: 2px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+/* Controls: no 300ms tap delay, no long-press text selection or callout. Content text stays selectable. */
+a,
+button,
+summary,
+label,
+[role="button"] {
+  touch-action: manipulation;
+}
+button,
+.btn,
+summary,
+[role="button"] {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 @layer components {
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  min-height: 44px;
-  padding: 0 1.25rem;
-  border-radius: 999px;
-  font-weight: 600;
-  transition: transform 0.15s, background 0.15s;
-  cursor: pointer;
-}
-.btn:active {
-  transform: scale(0.97);
-}
-.btn-primary {
-  background: var(--brand);
-  color: var(--brand-ink);
-}
-.btn-primary:hover {
-  background: #14503f;
-}
-.btn-ghost {
-  border: 1px solid var(--line);
-  background: var(--card);
-}
-.btn-ghost:hover {
-  border-color: var(--gold);
-}
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0 1.25rem;
+    border-radius: 999px;
+    font-weight: 600;
+    cursor: pointer;
+    /* named properties only (never `all`); press feedback is fast and ease-out */
+    transition: transform 160ms var(--ease-out), background-color 160ms var(--ease-out), border-color 160ms var(--ease-out);
+  }
+  .btn:active {
+    transform: scale(0.97);
+  }
+  .btn-primary {
+    background: var(--brand);
+    color: var(--brand-ink);
+  }
+  .btn-ghost {
+    border: 1px solid var(--line);
+    background: var(--card);
+  }
+  /* Hover only where hover exists, so touch devices never get a stuck hover state. */
+  @media (hover: hover) and (pointer: fine) {
+    .btn-primary:hover {
+      background: #14503f;
+    }
+    .btn-ghost:hover {
+      border-color: var(--gold);
+    }
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn:disabled:active {
+    transform: none;
+  }
+
+  /* Pressable non-.btn things (chips, radio cards, icon buttons) */
+  .press {
+    transition: transform 160ms var(--ease-out), background-color 160ms var(--ease-out), border-color 160ms var(--ease-out),
+      box-shadow 160ms var(--ease-out);
+  }
+  .press:active {
+    transform: scale(0.97);
+  }
+
+  .field {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 0.5rem 0.75rem;
+    background: var(--card);
+    font-size: 16px; /* 16px minimum: prevents iOS zooming the page on focus */
+    transition: border-color 150ms ease;
+  }
+  .field:focus {
+    border-color: var(--gold);
+  }
+
+  /* "Tap to open" cover: slides up like a drawer (ease-out family, under 600ms). */
+  .cover {
+    transition: transform 520ms var(--ease-drawer);
+  }
+  .cover[data-open="true"] {
+    transform: translateY(-100%);
+  }
 }
 
-.field {
-  width: 100%;
-  min-height: 44px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 0.5rem 0.75rem;
-  background: var(--card);
-  font-size: 16px; /* prevents iOS zoom on focus */
-}
-.field:focus {
-  border-color: var(--gold);
-}
-}
-
+/* One-shot entrance: opacity + small translate, ease-out, short. */
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -103,5 +145,61 @@ body {
   }
 }
 .rise {
-  animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: rise 450ms var(--ease-out) both;
+}
+
+/* Dialog: scales from 0.96 (never from 0) with opacity; overlay just fades. */
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.modal-panel {
+  animation: modal-in 200ms var(--ease-out) both;
+}
+.modal-overlay {
+  animation: fade-in 150ms ease-out both;
+}
+
+/*
+ * Reduced motion = fewer and gentler animations, not none: keep opacity fades that aid comprehension,
+ * remove movement, and stop anything that loops (an infinite animation squeezed to 0.01ms would strobe).
+ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-pulse {
+    animation: none !important;
+  }
+  .rise {
+    animation: fade-in 200ms ease-out both;
+  }
+  .modal-panel {
+    animation: fade-in 150ms ease-out both;
+  }
+  .cover {
+    transition: opacity 200ms ease-out;
+  }
+  .cover[data-open="true"] {
+    transform: none;
+    opacity: 0;
+  }
+  .btn:active,
+  .press:active {
+    transform: none;
+  }
 }

@@ -25,10 +25,10 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
   if (!t) notFound();
   const cta = `/create/?t=${t.id}`;
   return (
-    <div className="pb-24 md:pb-0">
+    <div className="pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-0">
       <Link
         href="/templates/"
-        className="fixed left-3 top-3 z-40 inline-flex min-h-11 items-center gap-1 rounded-full bg-black/55 px-4 text-sm font-medium text-white backdrop-blur"
+        className="press fixed left-3 top-[calc(0.75rem+env(safe-area-inset-top,0px))] z-40 inline-flex min-h-11 items-center gap-1 rounded-full bg-black/55 px-4 text-sm font-medium text-white backdrop-blur"
       >
         <ArrowLeft className="size-4" aria-hidden /> Templates
       </Link>
@@ -57,7 +57,7 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
       </div>
 
       {/* phones: always-visible buy bar */}
-      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 border-t border-line bg-background/95 px-4 py-3 backdrop-blur md:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 border-t border-line bg-background/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur md:hidden">
         <div>
           <p className="font-semibold leading-tight">{t.name}</p>
           <p className="text-sm text-foreground/70">{formatPKR(t.price)} flat</p>
