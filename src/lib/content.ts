@@ -36,11 +36,12 @@ const blankEvent = (kind: string, ur: boolean, date: string, time: string): Invi
     address: "",
     mapUrl: "",
     dressCode: ur ? k.dressUr : k.dressEn,
+    photo: "",
   };
 };
 
 export function newEvent(language: "en" | "ur" = "en"): InviteEvent {
-  return { title: language === "ur" ? "تقریب" : "New event", date: addDays(30), time: "19:00", venue: "", address: "", mapUrl: "", dressCode: "" };
+  return { title: language === "ur" ? "تقریب" : "New event", date: addDays(30), time: "19:00", venue: "", address: "", mapUrl: "", dressCode: "", photo: "" };
 }
 
 export function defaultContent(category: CategoryId, language: "en" | "ur" = "en"): InviteContent {
@@ -93,6 +94,8 @@ export function defaultContent(category: CategoryId, language: "en" | "ur" = "en
     closing: ur ? "آپ کی آمد کے منتظر" : "We can’t wait to celebrate with you",
     rsvpEnabled: true,
     contactPhone: "",
+    coverPhoto: "",
+    couplePhoto: "",
   };
 }
 

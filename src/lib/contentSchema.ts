@@ -1,4 +1,8 @@
 import { z } from "zod";
+import { isOurPhoto } from "./photos";
+
+/** A customer photo: empty, or a URL in our own storage bucket. */
+const Photo = z.string().trim().max(400).refine((v) => v === "" || isOurPhoto(v), "Please upload the photo again").default("");
 
 export const EventSchema = z.object({
   title: z.string().trim().min(1, "Required").max(60),
@@ -12,6 +16,7 @@ export const EventSchema = z.object({
     .max(500)
     .refine((v) => v === "" || /^https?:\/\//i.test(v), "Must start with http(s)://"),
   dressCode: z.string().trim().max(80),
+  photo: Photo,
 });
 
 export const FaqSchema = z.object({
@@ -51,6 +56,8 @@ export const ContentSchema = z.object({
   closing: z.string().trim().max(120),
   rsvpEnabled: z.boolean(),
   contactPhone: z.string().trim().max(20),
+  coverPhoto: Photo,
+  couplePhoto: Photo,
 });
 
 export type InviteContent = z.infer<typeof ContentSchema>;

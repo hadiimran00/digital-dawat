@@ -162,3 +162,15 @@ revoke execute on function public.enforce_order_amount() from public, anon, auth
 revoke execute on function public.lock_order_fields() from public, anon, authenticated;
 revoke execute on function public.review_order(uuid, boolean, text) from public, anon;
 grant execute on function public.review_order(uuid, boolean, text) to authenticated;
+
+-- Public bucket for customer invitation photos. Path convention: <user_id>/<random>.webp
+-- Public = guests can view by URL; there is no public SELECT policy, so nobody can list the bucket.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('invite-photos', 'invite-photos', true, 2097152, array['image/webp', 'image/jpeg'])
+on conflict (id) do update set public = true, file_size_limit = 2097152, allowed_mime_types = array['image/webp', 'image/jpeg'];
+create policy "owner uploads invite photo" on storage.objects for insert to authenticated
+  with check (bucket_id = 'invite-photos' and (storage.foldername(name))[1] = auth.uid()::text);
+create policy "owner reads own invite photos" on storage.objects for select to authenticated
+  using (bucket_id = 'invite-photos' and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin()));
+create policy "owner deletes own invite photo" on storage.objects for delete to authenticated
+  using (bucket_id = 'invite-photos' and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin()));

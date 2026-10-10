@@ -89,7 +89,7 @@ const SCENES: { orn: "jharokha" | "rosette" | "jali" | "bars" | "floral" | "cres
 /** Fixed background "scenes" that cross-fade as the guest scrolls. Our own graphics, easy to swap for photos later. */
 const PHOTO_POS = ["50% 18%", "50% 58%", "15% 40%", "85% 40%", "50% 90%", "50% 35%"];
 
-function SceneBackdrop({ scene, t, photo }: { scene: number; t: Template["theme"]; photo?: string }) {
+function SceneBackdrop({ scene, t, photo, photos = [], active = "" }: { scene: number; t: Template["theme"]; photo?: string; photos?: string[]; active?: string }) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden" style={{ background: t.bg }}>
       {SCENES.map((s, i) => (
@@ -97,7 +97,7 @@ function SceneBackdrop({ scene, t, photo }: { scene: number; t: Template["theme"
           key={i}
           className="absolute inset-0 transition-opacity duration-500 ease-out"
           style={{
-            opacity: scene === i ? 1 : 0,
+            opacity: scene === i && !active ? 1 : 0,
             background: photo
               ? `linear-gradient(rgba(12,8,5,0.52), rgba(12,8,5,0.68)), url(${photo}) ${PHOTO_POS[i]} / cover no-repeat`
               : `radial-gradient(120% 70% at 50% 18%, ${t.accent}33, transparent 60%), linear-gradient(${s.deg}deg, ${t.bg}, ${t.bg2})`,
@@ -110,6 +110,13 @@ function SceneBackdrop({ scene, t, photo }: { scene: number; t: Template["theme"
             />
           )}
         </div>
+      ))}
+      {photos.map((src) => (
+        <div
+          key={src}
+          className="absolute inset-0 transition-opacity duration-500 ease-out"
+          style={{ opacity: active === src ? 1 : 0, background: `linear-gradient(rgba(12,8,5,0.35), rgba(12,8,5,0.6)), url(${src}) 50% 30% / cover no-repeat` }}
+        />
       ))}
       {/* tape look: grain, scan lines and a vignette */}
       <div className="absolute inset-0 opacity-30" style={{ background: "repeating-linear-gradient(0deg, rgba(0,0,0,0.55) 0 1px, transparent 1px 3px)" }} />
@@ -129,10 +136,10 @@ function Tag({ tape, label, accent }: { tape: boolean; label: string; accent?: s
 }
 
 /** Tape concept: one full screen per section, content resting near the bottom so the photo shows above it. */
-function Screen({ tape, scene, id, framed = true, above, children }: { tape: boolean; scene: number; id?: string; framed?: boolean; above?: React.ReactNode; children: React.ReactNode }) {
+function Screen({ tape, scene, id, photo, framed = true, above, children }: { tape: boolean; scene: number; id?: string; photo?: string; framed?: boolean; above?: React.ReactNode; children: React.ReactNode }) {
   if (!tape) return <>{children}</>;
   return (
-    <div id={id} data-scene={scene} className="flex min-h-[100cqh] snap-start flex-col justify-end pb-[calc(5.5rem+var(--frame-bottom,0px))] pt-[calc(4.5rem+var(--frame-top,0px))]">
+    <div id={id} data-scene={scene} data-photo={photo || undefined} className="flex min-h-[100cqh] snap-start flex-col justify-end pb-[calc(5.5rem+var(--frame-bottom,0px))] pt-[calc(4.5rem+var(--frame-top,0px))]">
       {above}
       <div className="relative">
         {framed && ["-left-2 -top-2 border-l-2 border-t-2", "-right-2 -top-2 border-r-2 border-t-2", "-bottom-2 -left-2 border-b-2 border-l-2", "-bottom-2 -right-2 border-b-2 border-r-2"].map((c) => (
@@ -179,6 +186,7 @@ export function InviteExperience({
   const [guest, setGuest] = useState("");
   const [seats, setSeats] = useState<number | null>(null);
   const [scene, setScene] = useState(0);
+  const [bgPhoto, setBgPhoto] = useState("");
   const [atEnd, setAtEnd] = useState(false); // the scroll-down hint stays until the very bottom
   const [seconds, setSeconds] = useState(0);
   const scroller = useRef<HTMLDivElement>(null);
@@ -227,7 +235,11 @@ export function InviteExperience({
     const io = new IntersectionObserver(
       (entries) => {
         const best = entries.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (best) setScene(Number((best.target as HTMLElement).dataset.scene ?? 0));
+        if (best) {
+          const el = best.target as HTMLElement;
+          setScene(Number(el.dataset.scene ?? 0));
+          setBgPhoto(el.dataset.photo ?? "");
+        }
       },
       { root, threshold: [0.2, 0.5, 0.8], rootMargin: "-25% 0px -25% 0px" },
     );
@@ -258,6 +270,12 @@ export function InviteExperience({
     burst(fx, e.clientX, e.clientY, fx === "sparkles" ? [t.accent, "#fff3c4"] : [t.accent, "#c2185b", "#e8b95c"]);
   };
 
+  // customer photos take the place of the template's own artwork
+  const backdrop = content.coverPhoto || template.backdrop?.src;
+  const coverArt = content.coverPhoto && !tape ? { src: content.coverPhoto, position: "50% 30%", zoom: 0, credit: "" } : template.art;
+  const eventPhotos = [...new Set(ordered.map((e) => e.photo).filter(Boolean))];
+  const couple = content.couplePhoto;
+
   const font = ur ? "var(--nf-urdu), serif" : "var(--nf-display), Georgia, serif";
   const hasDress = ordered.some((e) => e.dressCode);
   const sceneAttr = (n: number) => (tape ? { "data-scene": n } : {});
@@ -265,7 +283,7 @@ export function InviteExperience({
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-background" dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"} onPointerDown={onTap}>
-      {tape && <SceneBackdrop scene={scene} t={t} photo={template.backdrop?.src} />}
+      {tape && <SceneBackdrop scene={scene} t={t} photo={backdrop} photos={eventPhotos} active={bgPhoto} />}
 
       <div
         ref={scroller}
@@ -275,7 +293,7 @@ export function InviteExperience({
         {tape ? (
         <div className="mx-auto max-w-md px-5">
           <Screen tape scene={0} framed={false}>
-            <div className="overflow-hidden rounded-md"><InviteCard template={template} content={content} chrome={false} clear={!!template.backdrop} /></div>
+            <div className="overflow-hidden rounded-md"><InviteCard template={template} content={content} chrome={false} clear={!!backdrop} /></div>
           </Screen>
 
           {(content.family1 || content.family2 || content.members1.length > 0 || content.members2.length > 0) && (
@@ -324,6 +342,7 @@ export function InviteExperience({
               tape
               scene={3}
               id={`ev-${i}`}
+              photo={e.photo}
               above={
                 <p aria-hidden className="mx-auto mb-5 w-fit rounded-sm border border-white/40 bg-black/55 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-white/90">
                   ✦ {ur ? fxCaption : "Tap anywhere for a photo flash"}
@@ -355,6 +374,20 @@ export function InviteExperience({
               </article>
             </Screen>
           ))}
+
+          {couple && (
+            <Screen tape scene={4} framed={false} photo={couple}>
+              <h2 className="mb-4 text-center font-mono text-2xl font-bold uppercase tracking-[0.2em]" style={{ textShadow: VHS }}>{ur ? "دولہا دلہن" : "The couple"}</h2>
+              <figure className="relative mx-auto w-[86%] rotate-[-1.5deg] border-[6px] border-[#efe3cc] bg-black shadow-2xl">
+                {/* eslint-disable-next-line @next/next/no-img-element -- static export, photo comes from our storage */}
+                <img src={couple} alt={ur ? "دولہا دلہن کی تصویر" : `Photo of ${names}`} className="aspect-[4/5] w-full object-cover" />
+                <span aria-hidden className="absolute left-3 top-2 font-mono text-[11px] font-bold tracking-[0.15em] text-white [text-shadow:0_0_4px_#000]"><span className="text-red-500">●</span> REC</span>
+                <span aria-hidden className="absolute bottom-2 left-3 font-mono text-[11px] font-bold text-white [text-shadow:0_0_4px_#000]">SP</span>
+                <span aria-hidden className="absolute bottom-2 right-3 font-mono text-[11px] font-bold tracking-[0.15em] [text-shadow:0_0_4px_#000]" style={{ color: t.accent }}>{stamp}</span>
+              </figure>
+              {!ur && <p className="mt-5 pb-1 text-center text-4xl" style={goldScript}>{names}</p>}
+            </Screen>
+          )}
 
           {hasDress && ordered.length > 1 && (
             <Screen tape scene={4}>
@@ -419,7 +452,13 @@ export function InviteExperience({
         </div>
         ) : (
         <div className="mx-auto max-w-md space-y-6 px-4 pb-[calc(1.5rem+var(--frame-bottom,0px))] pt-[calc(1.5rem+var(--frame-top,0px))]">
-          <div {...sceneAttr(0)} className="overflow-hidden rounded-2xl shadow-xl"><InviteCard template={template} content={content} chrome={!tape} clear={tape && !!template.backdrop} /></div>
+          <div {...sceneAttr(0)} className="overflow-hidden rounded-2xl shadow-xl"><InviteCard template={template} content={content} chrome={!tape} clear={tape && !!backdrop} /></div>
+          {couple && (
+            <figure className="overflow-hidden rounded-2xl border border-line bg-card shadow-sm">
+              {/* eslint-disable-next-line @next/next/no-img-element -- static export, photo comes from our storage */}
+              <img src={couple} alt={ur ? "تصویر" : `Photo of ${names}`} className="aspect-[4/5] w-full object-cover" />
+            </figure>
+          )}
 
           {(content.family1 || content.family2 || content.members1.length > 0 || content.members2.length > 0) && (
             <div {...sceneAttr(1)}><Tag tape={tape} label={ur ? "خاندان" : "Families"} /><Families content={content} ur={ur} glass={tape} /></div>
@@ -568,17 +607,17 @@ export function InviteExperience({
       {!gone && (
         <div
           data-open={opened}
-          className={`cover absolute inset-0 z-20 flex flex-col items-center text-center ${template.art || tape ? "justify-end pb-28" : "justify-center"}`}
+          className={`cover absolute inset-0 z-20 flex flex-col items-center text-center ${coverArt || tape ? "justify-end pb-28" : "justify-center"}`}
           style={{
-            background: tape && template.backdrop
-              ? `linear-gradient(to top, rgba(12,8,5,0.92) 18%, rgba(12,8,5,0.35) 62%, rgba(12,8,5,0.15)), url(${template.backdrop.src}) 50% 12% / cover no-repeat`
+            background: tape && backdrop
+              ? `linear-gradient(to top, rgba(12,8,5,0.92) 18%, rgba(12,8,5,0.35) 62%, rgba(12,8,5,0.15)), url(${backdrop}) 50% 12% / cover no-repeat`
               : `linear-gradient(170deg, ${t.bg}, ${t.bg2})`,
             color: t.ink,
             fontFamily: ur ? "var(--nf-urdu), serif" : "var(--nf-sans), system-ui, sans-serif",
           }}
         >
-          {!(tape && template.backdrop) && <Ornament kind={t.ornament} className={`pointer-events-none absolute left-1/2 top-[6%] -translate-x-1/2 opacity-30 ${tall ? "h-[88%] w-[88%]" : "w-[70%]"}`} />}
-          {template.art && <ArtHero art={template.art} bg={t.bg} />}
+          {!(tape && backdrop) && !(coverArt && content.coverPhoto) && <Ornament kind={t.ornament} className={`pointer-events-none absolute left-1/2 top-[6%] -translate-x-1/2 opacity-30 ${tall ? "h-[88%] w-[88%]" : "w-[70%]"}`} />}
+          {coverArt && <ArtHero art={coverArt} bg={t.bg} />}
           {tape && (
             <>
               <div aria-hidden className="pointer-events-none absolute inset-0 opacity-30" style={{ background: "repeating-linear-gradient(0deg, rgba(0,0,0,0.5) 0 1px, transparent 1px 3px)" }} />
@@ -589,7 +628,7 @@ export function InviteExperience({
               <p aria-hidden className="absolute left-7 top-[calc(4rem+var(--frame-top,0px))] font-mono text-xs tracking-widest" style={{ color: t.accent }}><span className="animate-pulse text-red-400">●</span> REC</p>
             </>
           )}
-          <div className="rise relative flex flex-col items-center gap-4 px-8" style={template.art ? { textShadow: `0 0 8px ${t.bg}, 0 0 18px ${t.bg}` } : undefined}>
+          <div className="rise relative flex flex-col items-center gap-4 px-8" style={coverArt ? { textShadow: `0 0 8px ${t.bg}, 0 0 18px ${t.bg}` } : undefined}>
             {content.bismillah && <p lang="ar" dir="rtl" className="text-2xl" style={{ color: t.accent, fontFamily: "var(--nf-naskh), serif", lineHeight: 1.9 }}>{BISMILLAH}</p>}
             <p className={`text-xs uppercase tracking-[0.3em] ${mono}`} style={{ color: t.accent, ...(tape ? { textShadow: VHS } : {}) }}>{tape && !ur ? "The wedding of" : content.headline}</p>
             {tape && !ur

@@ -13,6 +13,7 @@ import { InviteCard } from "@/components/invite/InviteCard";
 import { InviteExperience } from "@/components/invite/InviteExperience";
 import { VideoExport } from "@/components/VideoExport";
 import { PhoneFrame } from "@/components/PhoneFrame";
+import { PhotoField } from "@/components/PhotoField";
 
 const draftKey = (id: string) => `dawat:draft:v2:${id}`;
 
@@ -138,6 +139,7 @@ export function Editor() {
     }
   }
 
+  const here = `/create?t=${template.id}`;
   const err = (k: string) => (errors[k] ? <p role="alert" className="mt-1 text-sm text-red-700">{errors[k]}</p> : null);
 
   return (
@@ -182,6 +184,22 @@ export function Editor() {
             <input className="field" value={content.family2} maxLength={120} onChange={(e) => set({ family2: e.target.value })} />
           </label>
         </fieldset>
+
+        <section className="space-y-4" aria-label="Photos">
+          <h2 className="font-display text-2xl font-bold">Photos <span className="text-base font-normal text-foreground/70">(optional)</span></h2>
+          <p className="text-sm text-foreground/70">
+            Photos are resized on your phone before upload. Anyone with the invitation link can see them. You need to sign in to upload.
+          </p>
+          <div className="space-y-4 rounded-2xl border border-line bg-card p-4">
+            <PhotoField label="Cover photo" next={here}
+              hint={template.concept === "tape" ? "Shown behind the whole invitation." : "Shown at the top of the card."}
+              value={content.coverPhoto} onChange={(url) => set({ coverPhoto: url })} />
+            {err("coverPhoto")}
+            <PhotoField label="Couple photo" next={here} hint="A portrait of the two of you (or the host)."
+              value={content.couplePhoto} onChange={(url) => set({ couplePhoto: url })} />
+            {err("couplePhoto")}
+          </div>
+        </section>
 
         <section className="space-y-4" aria-label="Family contacts">
           <h2 className="font-display text-2xl font-bold">Family contacts <span className="text-base font-normal text-foreground/70">(optional)</span></h2>
@@ -262,6 +280,13 @@ export function Editor() {
                 <input className="field" inputMode="url" value={ev.mapUrl} onChange={(e) => setEvent(i, { mapUrl: e.target.value })} placeholder="https://maps.app.goo.gl/…" />
                 {err(`events.${i}.mapUrl`)}
               </label>
+              {template.concept === "tape" && (
+                <div className="sm:col-span-2">
+                  <PhotoField label="Event photo (optional)" next={here} hint="Shown behind this event's screen."
+                    value={ev.photo} onChange={(url) => setEvent(i, { photo: url })} />
+                  {err(`events.${i}.photo`)}
+                </div>
+              )}
             </fieldset>
           ))}
         </section>
@@ -333,7 +358,7 @@ export function Editor() {
       {previewing && (
         <div role="dialog" aria-modal="true" aria-label="Invitation preview" className="modal-overlay fixed inset-0 z-50 grid place-items-center bg-black/70 p-3">
           <div className="modal-panel relative">
-            <PhoneFrame margin={32} plainClassName="h-[92dvh] w-[min(100vw-1.5rem,390px)] overflow-hidden rounded-[2rem] border-8 border-foreground/90">
+            <PhoneFrame margin={32} plainClassName="h-[92dvh] w-[min(100vw-1.5rem,390px)] max-md:overflow-hidden max-md:rounded-[2rem] max-md:border-8 max-md:border-foreground/90">
               <InviteExperience template={template} content={content} demo />
             </PhoneFrame>
             <button type="button" onClick={() => setPreviewing(false)} aria-label="Close preview"
