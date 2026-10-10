@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "deploy": "next build && npx --yes wrangler@4.149.0 pages deploy out --project-name digital-dawat --branch main"
+    "deploy": "next build && npx --yes wrangler@4.149.0 pages deploy out --project-name digital-dawat --branch main",
+    "postbuild": "node scripts/fix-rsc-paths.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",

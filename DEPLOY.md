@@ -55,4 +55,5 @@ Then update the Supabase Site URL/redirects and `NEXT_PUBLIC_SITE_URL`, and rede
 - Supabase's built-in login email is rate limited; use your own email provider (SMTP) before launch.
 - WhatsApp link previews need a small Cloudflare Pages Function (not built yet).
 - Review before launch: the draft refund policy, the Urdu default wording, and template prices.
-- Prefetch requests for `__next.*.txt` files return 404 on static hosts. Pages still navigate correctly.
+- `npm run build` runs `scripts/fix-rsc-paths.mjs` afterwards, which copies Next.js route payload files to the dotted
+  paths the browser requests. Without it every prefetch 404s and each click becomes a full page load.
