@@ -43,3 +43,6 @@ next-env.d.ts
 
 # local tooling config (contains the Supabase project reference)
 /.mcp.json
+
+# Placeholder images from Pinterest for local review only. Never commit or deploy.
+/public/placeholder/

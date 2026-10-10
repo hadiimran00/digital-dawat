@@ -7,7 +7,7 @@ import type { InviteContent } from "@/lib/content";
 const tel = (p: string) => `tel:${p.replace(/[^\d+]/g, "")}`;
 
 /** The two families as tabs (or a single block), each with the people guests can call. */
-export function Families({ content, ur, glass }: { content: InviteContent; ur: boolean; glass: boolean }) {
+export function Families({ content, ur, glass, accent }: { content: InviteContent; ur: boolean; glass: boolean; accent?: string }) {
   const id = useId();
   const [active, setActive] = useState(0);
   const sides = [
@@ -42,6 +42,7 @@ export function Families({ content, ur, glass }: { content: InviteContent; ur: b
               aria-controls={`${id}-panel`}
               tabIndex={active === i ? 0 : -1}
               onClick={() => setActive(i)}
+              style={active === i && accent && !glass ? { background: accent, color: "#fff" } : undefined}
               className={`press min-h-11 px-3 text-sm font-semibold first:rounded-tl-2xl last:rounded-tr-2xl ${glass ? "font-mono uppercase tracking-wider" : ""} ${
                 active === i ? (glass ? "bg-white/15" : "bg-brand text-brand-ink") : "opacity-75"
               }`}

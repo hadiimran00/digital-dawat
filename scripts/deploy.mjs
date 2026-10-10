@@ -22,6 +22,12 @@ if (!existsSync("out")) {
   console.error("No ./out folder. Run the build first.");
   process.exit(1);
 }
+// Placeholder images and songs (public/placeholder) are for local review only and must never be published.
+if (existsSync("out/placeholder") && !process.argv.includes("--allow-placeholders")) {
+  console.error("Refusing to deploy: the build contains public/placeholder (unlicensed review assets).");
+  console.error("Replace them with licensed files (and point the templates at the new paths), or move them out of public/.");
+  process.exit(1);
+}
 
 const dir = mkdtempSync(join(tmpdir(), "dawat-deploy-"));
 try {

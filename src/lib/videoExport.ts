@@ -114,9 +114,10 @@ export async function createAnimator(template: Template, content: InviteContent,
 
   const orn = t.ornament === "none" ? null : await loadOrnament(template);
   // the same photos as the web invite: the customer's own, or the template's
-  const customArt = !tape && content.coverPhoto ? { src: content.coverPhoto, position: "50% 30%", zoom: 0, credit: "" } : null;
+  const customArt = !template.concept && content.coverPhoto ? { src: content.coverPhoto, position: "50% 30%", zoom: 0, credit: "" } : null;
   const art = customArt ?? template.art;
-  const photoSrc = tape ? content.coverPhoto || template.backdrop?.src : undefined;
+  const photoSrc = template.concept ? content.coverPhoto || template.backdrop?.src : undefined;
+  const light = template.concept === "ivory"; // dark lettering on a light, washed photo
   const coupleSrc = content.couplePhoto || template.sample?.couple;
   const [artImg, photoImg, coupleImg] = await Promise.all([
     art ? loadImage(art.src).catch(() => null) : null,
@@ -154,9 +155,9 @@ export async function createAnimator(template: Template, content: InviteContent,
       // full-bleed photo with a slow push-in, darkened so the lettering stays readable
       drawCover(ctx, photoImg, 0, 0, W, H, 1.04 + 0.06 * (sec / seconds), 0.5, 0.2);
       const d = ctx.createLinearGradient(0, 0, 0, H);
-      d.addColorStop(0, "rgba(12,8,5,0.45)");
-      d.addColorStop(0.5, "rgba(12,8,5,0.62)");
-      d.addColorStop(1, "rgba(12,8,5,0.85)");
+      d.addColorStop(0, light ? "rgba(251,246,238,0.45)" : "rgba(12,8,5,0.45)");
+      d.addColorStop(0.5, light ? "rgba(251,246,238,0.7)" : "rgba(12,8,5,0.62)");
+      d.addColorStop(1, light ? "rgba(251,246,238,0.88)" : "rgba(12,8,5,0.85)");
       ctx.fillStyle = d;
       ctx.fillRect(0, 0, W, H);
     }
@@ -226,7 +227,7 @@ export async function createAnimator(template: Template, content: InviteContent,
       ctx.font = font;
       ctx.fillStyle = color;
       // soft halo so text stays readable where it overlaps real artwork or a photo
-      ctx.shadowColor = photoImg ? "rgba(0,0,0,0.85)" : art ? t.bg : "transparent";
+      ctx.shadowColor = photoImg ? (light ? "rgba(255,250,240,0.9)" : "rgba(0,0,0,0.85)") : art ? t.bg : "transparent";
       ctx.shadowBlur = photoImg || art ? 18 : 0;
       for (const l of wrap(ctx, txt, maxW)) {
         ctx.fillText(l, W / 2, y);

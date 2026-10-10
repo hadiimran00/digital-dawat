@@ -49,7 +49,7 @@ export function InviteCard({ template, content, chrome = true, clear = false }: 
   const tall = isTallOrnament(t.ornament);
   // soft halo so text stays readable where it overlaps real artwork
   // a customer cover photo takes the place of the template artwork (or the tape backdrop)
-  const art = content.coverPhoto && template.concept !== "tape" ? { src: content.coverPhoto, position: "50% 30%", zoom: 0, credit: "" } : template.art;
+  const art = content.coverPhoto && !template.concept ? { src: content.coverPhoto, position: "50% 30%", zoom: 0, credit: "" } : template.art;
   const backdrop = content.coverPhoto || template.backdrop?.src;
   const glow = art ? `0 0 6px ${t.bg}, 0 0 14px ${t.bg}, 0 0 22px ${t.bg}` : undefined;
   const gold = template.concept === "tape" && !ur; // gold script lettering, like a home-video title card
@@ -57,8 +57,8 @@ export function InviteCard({ template, content, chrome = true, clear = false }: 
   const style: CSSProperties = {
     background: clear
       ? "linear-gradient(rgba(10,7,5,0.18), rgba(10,7,5,0.5))"
-      : template.concept === "tape" && backdrop
-        ? `linear-gradient(rgba(12,8,5,0.4), rgba(12,8,5,0.72)), url(${backdrop}) 50% 20% / cover no-repeat`
+      : template.concept && backdrop
+        ? `linear-gradient(${template.concept === "ivory" ? "rgba(251,246,238,0.55), rgba(251,246,238,0.85)" : template.concept === "royal" ? "rgba(42,10,14,0.45), rgba(42,10,14,0.8)" : "rgba(12,8,5,0.4), rgba(12,8,5,0.72)"}), url(${backdrop}) 50% 20% / cover no-repeat`
         : `linear-gradient(170deg, ${t.bg}, ${t.bg2})`,
     color: t.ink,
     containerType: "inline-size",
@@ -69,7 +69,7 @@ export function InviteCard({ template, content, chrome = true, clear = false }: 
 
   return (
     <div className="relative w-full overflow-hidden" style={style} dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"}>
-      {!clear && !(template.concept === "tape" && backdrop) && !(art && content.coverPhoto) && <Ornament
+      {!clear && !(template.concept && backdrop) && !(art && content.coverPhoto) && <Ornament
         kind={t.ornament}
         className={
           tall

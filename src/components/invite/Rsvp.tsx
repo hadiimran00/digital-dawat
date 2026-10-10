@@ -7,7 +7,7 @@ import { TAPE_GLASS } from "./InviteCard";
 export function Rsvp({ inviteId, demo = false, guestName = "", seats = null, tape = false, accent }: { inviteId?: string; demo?: boolean; guestName?: string; seats?: number | null; tape?: boolean; accent?: string }) {
   // tape concept: warm see-through panel, dark fields, monospaced title
   const box = tape ? `${TAPE_GLASS} !rounded-md [&_.field]:!border-white/30 [&_.field]:!bg-black/35 [&_.field]:!text-white` : "border-line bg-card text-foreground";
-  const on = tape ? { background: accent, color: "#1a0e06", borderColor: accent } : undefined;
+  const on = accent ? { background: accent, color: tape ? "#1a0e06" : "#fff", borderColor: accent } : undefined;
   const ghost = tape ? "!border-white/40 !bg-transparent !text-white" : "";
   const maxGuests = seats ?? 20;
   const [name, setName] = useState(guestName);

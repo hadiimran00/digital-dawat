@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, DM_Sans, Great_Vibes, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu } from "next/font/google";
+import { Cinzel, Cormorant_Garamond, DM_Sans, Great_Vibes, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu } from "next/font/google";
 import "./globals.css";
 import { SiteHeader, SiteFooter } from "@/components/Site";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const script = Great_Vibes({ variable: "--nf-script", subsets: ["latin"], weight: "400", preload: false, display: "swap" });
 const sans = DM_Sans({ variable: "--nf-sans", subsets: ["latin"] });
-const display = Cormorant_Garamond({ variable: "--nf-display", subsets: ["latin"], weight: ["600", "700"] });
+const display = Cormorant_Garamond({ variable: "--nf-display", subsets: ["latin"], weight: ["600", "700"], style: ["normal", "italic"] });
+const caps = Cinzel({ variable: "--nf-caps", subsets: ["latin"], weight: ["500", "700"], preload: false, display: "swap" });
 // The Urdu font is large (about 230 KiB) and only needed for Arabic-script text, so it is not preloaded;
 // it still downloads on demand with font-display: swap.
 const urdu = Noto_Nastaliq_Urdu({ variable: "--nf-urdu", subsets: ["arabic"], weight: ["400", "700"], preload: false, display: "swap" });
@@ -39,7 +40,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${sans.variable} ${display.variable} ${script.variable} ${urdu.variable} ${naskh.variable} h-full antialiased`}>
+    <html lang="en" className={`${sans.variable} ${display.variable} ${script.variable} ${caps.variable} ${urdu.variable} ${naskh.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-3">
           Skip to content

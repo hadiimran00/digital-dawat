@@ -192,7 +192,7 @@ export function Editor() {
           </p>
           <div className="space-y-4 rounded-2xl border border-line bg-card p-4">
             <PhotoField label="Cover photo" next={here}
-              hint={template.concept === "tape" ? "Shown behind the whole invitation." : "Shown at the top of the card."}
+              hint={template.concept ? "Shown behind the whole invitation." : "Shown at the top of the card."}
               value={content.coverPhoto} fallback={template.backdrop?.src ?? template.art?.src} onChange={(url) => set({ coverPhoto: url })} />
             {err("coverPhoto")}
             <PhotoField label="Couple photo" next={here} hint="A portrait of the two of you (or the host)."
@@ -280,7 +280,7 @@ export function Editor() {
                 <input className="field" inputMode="url" value={ev.mapUrl} onChange={(e) => setEvent(i, { mapUrl: e.target.value })} placeholder="https://maps.app.goo.gl/…" />
                 {err(`events.${i}.mapUrl`)}
               </label>
-              {template.concept === "tape" && (
+              {template.concept && (
                 <div className="sm:col-span-2">
                   <PhotoField label="Event photo (optional)" next={here} hint="Shown behind this event's screen."
                     value={ev.photo} onChange={(url) => setEvent(i, { photo: url })} />

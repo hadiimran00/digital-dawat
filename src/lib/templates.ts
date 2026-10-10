@@ -38,14 +38,21 @@ export interface Template {
   popular?: boolean;
   /** Default animation for this template's video and hover preview. */
   motion: VideoStyle;
-  /** Optional storytelling concept that changes the wording and look of the whole experience. */
-  concept?: "tape";
+  /**
+   * Optional storytelling concept: full-screen photo scenes, one section per screen.
+   * "tape" = retro home video, "royal" = palace doors and maroon glass, "ivory" = curtains and frosted cream.
+   */
+  concept?: "tape" | "royal" | "ivory";
   /** Real artwork (public-domain / CC0) used as the hero image of the card. See CREDITS.md. */
   art?: { src: string; position: string; zoom: number; credit: string };
   /** Optional full-bleed photo behind the whole experience (tape concept). */
   backdrop?: { src: string; credit: string };
   /** The template's own photos, used until the customer uploads their own. */
   sample?: { couple?: string };
+  /** Photo behind each section (royal / ivory). Event photos are keyed by event name (mehndi, nikkah, baraat, walima). */
+  scenes?: { families?: string; message?: string; countdown?: string; couple?: string; dress?: string; faq?: string; rsvp?: string; closing?: string; events?: Record<string, string> };
+  /** Image used for the opening gate: the doors (royal) or the curtain fabric (ivory). */
+  gate?: string;
   /** Optional background track that starts when the guest opens the invitation (they can mute it). */
   music?: { src: string; title: string };
   theme: {
@@ -303,6 +310,48 @@ export const TEMPLATES: Template[] = [
     price: 2499,
     art: { src: "/art/mughal-medallion.webp", position: "50% 46%", zoom: 1.5, credit: "Spread with floral medallion pattern, Mughal India (Deccan), embroidery. The Cleveland Museum of Art, Open Access (CC0)." },
     theme: { bg: "#FBF6EA", bg2: "#F1E6CF", ink: "#3C2A1E", accent: "#B0345A", muted: "#6E6A3A", ornament: "none", headingFont: "serif" },
+  },
+  // ---- Scene templates built from Ceremonia references. PLACEHOLDER images in /placeholder (Pinterest,
+  // git-ignored, not deployable). Replace with licensed photos before these templates go live. ----
+  {
+    id: "darbar-wedding",
+    motion: "sparkle",
+    concept: "royal",
+    name: "Shahi Darbar",
+    category: "wedding",
+    tagline: "Palace doors open onto your wedding week, in maroon and gold.",
+    tags: ["royal", "palace", "maroon", "gold", "full wedding", "mughal"],
+    price: 3999,
+    music: { src: "/placeholder/darbar-song.m4a", title: "Usne Jana Ki Tarif (placeholder)" },
+    gate: "/placeholder/bs-door.webp",
+    backdrop: { src: "/placeholder/bs-hall.webp", credit: "PLACEHOLDER (Pinterest)" },
+    sample: { couple: "/placeholder/bs-couple.webp" },
+    scenes: {
+      dress: "/placeholder/bs-corridor.webp", faq: "/placeholder/bs-corridor.webp", rsvp: "/placeholder/bs-corridor.webp", closing: "/placeholder/bs-closing.webp",
+      couple: "/placeholder/bs-corridor.webp",
+      events: { mehndi: "/placeholder/bs-mehndi.webp", nikkah: "/placeholder/bs-nikkah.webp", baraat: "/placeholder/bs-baraat.webp", walima: "/placeholder/bs-walima.webp" },
+    },
+    theme: { bg: "#2A0A0E", bg2: "#4A1218", ink: "#F7E7C6", accent: "#E8C06A", muted: "#D9BFA0", ornament: "none", headingFont: "serif" },
+  },
+  {
+    id: "wisaal-wedding",
+    motion: "rise",
+    concept: "ivory",
+    name: "Wisaal",
+    category: "wedding",
+    tagline: "An ivory curtain parts on a love story by the Taj.",
+    tags: ["ivory", "taj mahal", "romantic", "night", "fireworks", "full wedding"],
+    price: 3999,
+    music: { src: "/placeholder/wisaal-song.m4a", title: "Do Pal (placeholder)" },
+    gate: "/placeholder/dw-curtain.webp",
+    backdrop: { src: "/placeholder/dw-opening.webp", credit: "PLACEHOLDER (Pinterest)" },
+    sample: { couple: "/placeholder/dw-couple.webp" },
+    scenes: {
+      message: "/placeholder/dw-arch.webp", countdown: "/placeholder/dw-night.webp", couple: "/placeholder/dw-night.webp",
+      dress: "/placeholder/dw-lit.webp", faq: "/placeholder/dw-lit.webp", rsvp: "/placeholder/dw-night.webp", closing: "/placeholder/dw-moon.webp",
+      events: { mehndi: "/placeholder/dw-mehndi.webp", nikkah: "/placeholder/dw-arch.webp", baraat: "/placeholder/dw-baraat.webp", walima: "/placeholder/dw-walima.webp" },
+    },
+    theme: { bg: "#F6EFE4", bg2: "#EFE3D0", ink: "#4A1C20", accent: "#A8783A", muted: "#7A5A48", ornament: "none", headingFont: "serif" },
   },
 ];
 

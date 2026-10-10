@@ -137,6 +137,66 @@ summary,
   }
 }
 
+/* Scene gates: palace doors swing open (royal), curtains draw apart (ivory), then the gate fades away. */
+.gate {
+  transition: opacity 450ms ease-out 950ms;
+}
+.gate[data-open="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+.gate-l,
+.gate-r {
+  transition: transform 1100ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+.gate-l {
+  transform-origin: left center;
+}
+.gate-r {
+  transform-origin: right center;
+}
+.gate[data-open="true"] .gate-l {
+  transform: rotateY(-100deg);
+}
+.gate[data-open="true"] .gate-r {
+  transform: rotateY(100deg);
+}
+.curtain-l,
+.curtain-r {
+  transition: transform 1200ms var(--ease-drawer);
+}
+.curtain-l {
+  transform-origin: left center;
+}
+.curtain-r {
+  transform-origin: right center;
+}
+.gate[data-open="true"] .curtain-l {
+  transform: translateX(-85%) scaleX(0.35);
+}
+.gate[data-open="true"] .curtain-r {
+  transform: translateX(85%) scaleX(0.35);
+}
+.gate-ui {
+  transition: opacity 250ms ease-out;
+}
+.gate[data-open="true"] .gate-ui {
+  opacity: 0;
+}
+
+/* Scene photos drift very slowly, like a held camera. */
+@keyframes drift {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.07);
+  }
+}
+.scene-drift > div {
+  animation: drift 26s ease-in-out infinite alternate;
+}
+
 /* One-shot entrance: opacity + small translate, ease-out, short. */
 @keyframes rise {
   from {
@@ -197,6 +257,24 @@ summary,
   }
   .cover {
     transition: opacity 200ms ease-out;
+  }
+  .gate-l,
+  .gate-r,
+  .curtain-l,
+  .curtain-r {
+    transition: none;
+  }
+  .gate[data-open="true"] .gate-l,
+  .gate[data-open="true"] .gate-r,
+  .gate[data-open="true"] .curtain-l,
+  .gate[data-open="true"] .curtain-r {
+    transform: none;
+  }
+  .gate {
+    transition: opacity 250ms ease-out;
+  }
+  .scene-drift > div {
+    animation: none;
   }
   .cover[data-open="true"] {
     transform: none;
