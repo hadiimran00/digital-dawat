@@ -225,7 +225,7 @@ export function InviteExperience({
   const goTo = (i: number) =>
     document.getElementById(`ev-${i}`)?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "center" });
   const onTap = (e: React.PointerEvent) => {
-    if ((e.target as HTMLElement).closest("a,button,summary")) return;
+    if ((e.target as HTMLElement).closest("a,button,summary,input,textarea,select,label,canvas,[role=tab]")) return;
     burst(fx, e.clientX, e.clientY, fx === "sparkles" ? [t.accent, "#fff3c4"] : [t.accent, "#c2185b", "#e8b95c"]);
   };
 
@@ -235,7 +235,7 @@ export function InviteExperience({
   const stamp = new Date(`${ordered[0].date}T00:00:00`).toLocaleDateString("en-GB", { month: "short", day: "2-digit", year: "numeric" }).toUpperCase().replace(/(\w+) (\d+) (\d+)/, "$1 $2 $3");
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-background" dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"}>
+    <div className="relative h-full w-full overflow-hidden bg-background" dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"} onPointerDown={onTap}>
       {tape && <SceneBackdrop scene={scene} t={t} photo={template.backdrop?.src} />}
 
       <div
@@ -281,7 +281,7 @@ export function InviteExperience({
           <section aria-label="Events" className="space-y-4">
             <h2 className="font-display text-3xl font-bold">{ur ? "تقاریب" : tape ? "Playlist" : ordered.length > 1 ? "Events" : "Event"}</h2>
             {ordered.map((e, i) => (
-              <article id={`ev-${i}`} key={i} {...sceneAttr(3)} onPointerDown={onTap} className={`rounded-2xl border p-5 ${panel}`}>
+              <article id={`ev-${i}`} key={i} {...sceneAttr(3)} className={`rounded-2xl border p-5 ${panel}`}>
                 <Tag tape={tape} label={`${tape ? "Tape " : ""}${pad(i + 1)} / ${pad(ordered.length)}`} />
                 {!tape && ordered.length > 1 && <p className={`text-xs uppercase tracking-widest ${muted}`}>{pad(i + 1)} / {pad(ordered.length)}</p>}
                 <h3 className="font-display text-2xl font-bold">{e.title}</h3>
