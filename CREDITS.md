@@ -15,4 +15,5 @@ Deliberately **not** used: any artwork from competitors' websites (copyrighted),
 
 ## Audio
 
-- `public/audio/replay.mp3` (Replay template): supplied by the site owner from a YouTube Short (a downloaded clip, about 15 s, looped). Licence and rights holder are NOT confirmed. Replace it with a track that has a clear commercial licence before selling invitations that use it.
+- `public/audio/replay.mp3` (Replay template): supplied by the site owner from a YouTube Short (a downloaded clip, about 15 s, looped). The site owner states they hold the licence for it. Keep the licence on file.
+- `public/art/mehndi-stage.webp` (Replay template scenes): photograph supplied by the site owner, who states they hold the licence. Keep the licence on file.

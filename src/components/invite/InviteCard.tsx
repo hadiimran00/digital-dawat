@@ -34,7 +34,8 @@ export function ArtHero({ art, bg }: { art: NonNullable<Template["art"]>; bg: st
  * (all sizes use container query units, so it is identical in thumbnails,
  * the editor preview and the public page).
  */
-export function InviteCard({ template, content, chrome = true }: { template: Template; content: InviteContent; chrome?: boolean }) {
+/** `clear` lets a photo behind the card show through (used when the template has a full-bleed backdrop). */
+export function InviteCard({ template, content, chrome = true, clear = false }: { template: Template; content: InviteContent; chrome?: boolean; clear?: boolean }) {
   const t = template.theme;
   const ur = content.language === "ur";
   const e = content.events[0];
@@ -44,7 +45,7 @@ export function InviteCard({ template, content, chrome = true }: { template: Tem
   const glow = template.art ? `0 0 6px ${t.bg}, 0 0 14px ${t.bg}, 0 0 22px ${t.bg}` : undefined;
   const names = content.host2 ? `${content.host1} & ${content.host2}` : content.host1;
   const style: CSSProperties = {
-    background: `linear-gradient(170deg, ${t.bg}, ${t.bg2})`,
+    background: clear ? "linear-gradient(rgba(10,7,5,0.18), rgba(10,7,5,0.5))" : `linear-gradient(170deg, ${t.bg}, ${t.bg2})`,
     color: t.ink,
     containerType: "inline-size",
     aspectRatio: "9 / 16",
@@ -54,14 +55,14 @@ export function InviteCard({ template, content, chrome = true }: { template: Tem
 
   return (
     <div className="relative w-full overflow-hidden" style={style} dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"}>
-      <Ornament
+      {!clear && <Ornament
         kind={t.ornament}
         className={
           tall
             ? "absolute left-1/2 top-[3%] h-[94%] w-[88%] -translate-x-1/2 opacity-40"
             : "absolute left-1/2 top-[5%] w-[62%] -translate-x-1/2 opacity-30"
         }
-      />
+      />}
       {template.art && <ArtHero art={template.art} bg={t.bg} />}
       {template.concept === "tape" && (
         <>

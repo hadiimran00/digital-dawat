@@ -87,7 +87,9 @@ const SCENES: { orn: "jharokha" | "rosette" | "jali" | "bars" | "floral" | "cres
 ];
 
 /** Fixed background "scenes" that cross-fade as the guest scrolls. Our own graphics, easy to swap for photos later. */
-function SceneBackdrop({ scene, t }: { scene: number; t: Template["theme"] }) {
+const PHOTO_POS = ["50% 18%", "50% 58%", "15% 40%", "85% 40%", "50% 90%", "50% 35%"];
+
+function SceneBackdrop({ scene, t, photo }: { scene: number; t: Template["theme"]; photo?: string }) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 z-0 overflow-hidden" style={{ background: t.bg }}>
       {SCENES.map((s, i) => (
@@ -96,13 +98,17 @@ function SceneBackdrop({ scene, t }: { scene: number; t: Template["theme"] }) {
           className="absolute inset-0 transition-opacity duration-500 ease-out"
           style={{
             opacity: scene === i ? 1 : 0,
-            background: `radial-gradient(120% 70% at 50% 18%, ${t.accent}33, transparent 60%), linear-gradient(${s.deg}deg, ${t.bg}, ${t.bg2})`,
+            background: photo
+              ? `linear-gradient(rgba(12,8,5,0.52), rgba(12,8,5,0.68)), url(${photo}) ${PHOTO_POS[i]} / cover no-repeat`
+              : `radial-gradient(120% 70% at 50% 18%, ${t.accent}33, transparent 60%), linear-gradient(${s.deg}deg, ${t.bg}, ${t.bg2})`,
           }}
         >
-          <Ornament
-            kind={s.orn}
-            className={`absolute left-1/2 -translate-x-1/2 opacity-[0.16] ${s.orn === "jharokha" ? "top-[2%] h-[96%] w-[96%]" : "top-[8%] w-[120%] max-w-none"}`}
-          />
+          {!photo && (
+            <Ornament
+              kind={s.orn}
+              className={`absolute left-1/2 -translate-x-1/2 opacity-[0.16] ${s.orn === "jharokha" ? "top-[2%] h-[96%] w-[96%]" : "top-[8%] w-[120%] max-w-none"}`}
+            />
+          )}
         </div>
       ))}
       {/* tape look: grain, scan lines and a vignette */}
@@ -230,7 +236,7 @@ export function InviteExperience({
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-background" dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"}>
-      {tape && <SceneBackdrop scene={scene} t={t} />}
+      {tape && <SceneBackdrop scene={scene} t={t} photo={template.backdrop?.src} />}
 
       <div
         ref={scroller}
@@ -238,7 +244,7 @@ export function InviteExperience({
         className={`relative z-[1] h-full overflow-y-auto overscroll-contain ${opened ? "" : "overflow-hidden"} ${tape ? "text-white" : ""}`}
       >
         <div className="mx-auto max-w-md space-y-6 px-4 pb-[calc(1.5rem+var(--frame-bottom,0px))] pt-[calc(1.5rem+var(--frame-top,0px))]">
-          <div {...sceneAttr(0)} className="overflow-hidden rounded-2xl shadow-xl"><InviteCard template={template} content={content} chrome={!tape} /></div>
+          <div {...sceneAttr(0)} className="overflow-hidden rounded-2xl shadow-xl"><InviteCard template={template} content={content} chrome={!tape} clear={tape && !!template.backdrop} /></div>
 
           {(content.family1 || content.family2 || content.members1.length > 0 || content.members2.length > 0) && (
             <div {...sceneAttr(1)}><Tag tape={tape} label={ur ? "خاندان" : "Families"} /><Families content={content} ur={ur} glass={tape} /></div>
@@ -388,7 +394,9 @@ export function InviteExperience({
           data-open={opened}
           className={`cover absolute inset-0 z-20 flex flex-col items-center text-center ${template.art || tape ? "justify-end pb-28" : "justify-center"}`}
           style={{
-            background: `linear-gradient(170deg, ${t.bg}, ${t.bg2})`,
+            background: tape && template.backdrop
+              ? `linear-gradient(to top, rgba(12,8,5,0.92) 18%, rgba(12,8,5,0.35) 62%, rgba(12,8,5,0.15)), url(${template.backdrop.src}) 50% 12% / cover no-repeat`
+              : `linear-gradient(170deg, ${t.bg}, ${t.bg2})`,
             color: t.ink,
             fontFamily: ur ? "var(--nf-urdu), serif" : "var(--nf-sans), system-ui, sans-serif",
           }}
