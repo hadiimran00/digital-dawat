@@ -18,3 +18,33 @@ Deliberately **not** used: any artwork from competitors' websites (copyrighted),
 - `public/audio/replay.mp3` (Replay template): supplied by the site owner from a YouTube Short (a downloaded clip, about 15 s, looped). The site owner states they hold the licence for it. Keep the licence on file.
 - `public/art/mehndi-stage.webp` (Replay template scenes): photograph supplied by the site owner, who states they hold the licence. Keep the licence on file.
 - `public/art/couple-hands.webp` (Replay demo, "The Couple" screen): photograph supplied by the site owner, who states they hold the licence. Keep the licence on file.
+
+## Shahi Darbar and Wisaal (scene templates)
+
+Images were found on Pinterest; the songs were supplied by the site owner from YouTube Shorts. On 2026-10-11 the site
+owner stated that they hold the licence for all of these files. Keep the licences on file. The source of each file is
+listed so it can be traced or replaced.
+
+| File | Template | Source |
+|---|---|---|
+| `public/art/bs-door.webp` | Shahi Darbar | https://i.pinimg.com/736x/48/db/d0/48dbd0466c68c4e5f1adf290f5f3d3a3.jpg |
+| `public/art/bs-hall.webp` | Shahi Darbar | https://i.pinimg.com/736x/73/37/03/7337036082ffe02fc5d4ebe3b01a10e6.jpg |
+| `public/art/bs-corridor.webp` | Shahi Darbar | https://i.pinimg.com/736x/b1/0c/9d/b10c9da615cd5094eabe1bbad6ad1621.jpg |
+| `public/art/bs-mehndi.webp` | Shahi Darbar | https://i.pinimg.com/736x/f4/bf/bb/f4bfbb2092cdbc0a2ba78c16be8a17a4.jpg |
+| `public/art/bs-nikkah.webp` | Shahi Darbar | https://i.pinimg.com/736x/85/b6/34/85b634cb27390ce76fb98c5625b9f1ca.jpg |
+| `public/art/bs-baraat.webp` | Shahi Darbar | https://i.pinimg.com/736x/44/5d/19/445d192bf7fc50019658381befd011d1.jpg |
+| `public/art/bs-walima.webp` | Shahi Darbar | https://i.pinimg.com/736x/23/d8/ab/23d8abbfba81ea106f4b7b6776ff81dc.jpg |
+| `public/art/bs-closing.webp` | Shahi Darbar | https://i.pinimg.com/736x/1d/dd/2b/1ddd2b18f6a5ac109728bf299f193691.jpg |
+| `public/art/bs-couple.webp` | Shahi Darbar | https://i.pinimg.com/736x/fd/26/de/fd26de1a134c9aaa00177d9b98017353.jpg |
+| `public/art/dw-curtain.webp` | Wisaal | https://i.pinimg.com/736x/0f/03/24/0f03244f97af1a96ed4357839b5bf14f.jpg |
+| `public/art/dw-opening.webp` | Wisaal | https://i.pinimg.com/736x/74/1f/0d/741f0d14bb30e2f0bb1e45402c681b06.jpg |
+| `public/art/dw-arch.webp` | Wisaal | https://i.pinimg.com/736x/61/8b/e8/618be8ee80329e8dedce74049c7c4578.jpg |
+| `public/art/dw-night.webp` | Wisaal | https://i.pinimg.com/736x/b8/1c/0d/b81c0d6847facc1a66304cb648a14baa.jpg |
+| `public/art/dw-lit.webp` | Wisaal | https://i.pinimg.com/736x/00/3f/28/003f2866ce4b2b5d6baec0f9a2187a69.jpg |
+| `public/art/dw-moon.webp` | Wisaal | https://i.pinimg.com/736x/45/5b/01/455b01d04dd90c4e1d40be89932ec3dc.jpg |
+| `public/art/dw-mehndi.webp` | Wisaal | https://i.pinimg.com/736x/ed/b4/c2/edb4c2535bf1d2cc42a63f696da813f8.jpg |
+| `public/art/dw-baraat.webp` | Wisaal | https://i.pinimg.com/736x/f5/1a/12/f51a129e5f7d6d337be551741dd654a9.jpg |
+| `public/art/dw-walima.webp` | Wisaal | https://i.pinimg.com/736x/24/ac/57/24ac5723386d863cf944f0e15cd80e89.jpg |
+| `public/art/dw-couple.webp` | Wisaal | https://i.pinimg.com/736x/2f/7c/6f/2f7c6ff82162e0ff32afe320c5fa5ebf.jpg |
+| `public/audio/darbar-song.m4a` ("Usne Jana Ki Tarif", Rahat Fateh Ali Khan) | Shahi Darbar | YouTube Short td0pBIa_MgY, supplied by the site owner |
+| `public/audio/wisaal-song.m4a` ("Do Pal") | Wisaal | YouTube Short hpt6yAFwMkQ, supplied by the site owner |

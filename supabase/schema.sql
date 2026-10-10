@@ -141,9 +141,7 @@ create policy "owner or admin reads receipt" on storage.objects for select to au
 --   insert into public.admins select id from auth.users where email = 'you@example.com';
 -- Seed prices (keep in sync with src/lib/templates.ts):
 insert into public.template_prices values
- ('zamurd-nikkah',2499),('gulab-nikkah',2499),('haldi-mehndi',1999),('mehr-mehndi',1999),
- ('shahi-baraat',2999),('chandni-walima',2499),('mangni-engagement',1999),('hilal-eid',999),
- ('rang-birthday',999),('nanha-baby',1499)
+ ('wedding',2499),('gulab-nikkah',2499),('haldi-mehndi',1999),('mehr-mehndi',1999),('shahi-baraat',2999),('chandni-walima',2499),('mangni-engagement',1999),('hilal-eid',999),('rang-birthday',999),('nanha-baby',1499),('mehrab-wedding',3999),('jharokha-baraat',2999),('noor-nikkah',2499),('jali-walima',2499),('rangmahal-mehndi',1999),('dholki-raat',1499),('sitara-engagement',1999),('roshan-eid',999),('chaand-baby',1499),('gulzar-birthday',999),('replay-wedding',3999),('gulistan-nikkah',2999),('bagh-walima',2499),('darbar-wedding',3999),('wisaal-wedding',3999)
 on conflict (template_id) do update set price_pkr = excluded.price_pkr;
 
 -- Table privileges for the API roles (row-level security above still decides which rows).
