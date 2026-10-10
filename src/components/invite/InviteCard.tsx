@@ -45,7 +45,11 @@ export function InviteCard({ template, content, chrome = true, clear = false }: 
   const glow = template.art ? `0 0 6px ${t.bg}, 0 0 14px ${t.bg}, 0 0 22px ${t.bg}` : undefined;
   const names = content.host2 ? `${content.host1} & ${content.host2}` : content.host1;
   const style: CSSProperties = {
-    background: clear ? "linear-gradient(rgba(10,7,5,0.18), rgba(10,7,5,0.5))" : `linear-gradient(170deg, ${t.bg}, ${t.bg2})`,
+    background: clear
+      ? "linear-gradient(rgba(10,7,5,0.18), rgba(10,7,5,0.5))"
+      : template.backdrop
+        ? `linear-gradient(rgba(12,8,5,0.4), rgba(12,8,5,0.72)), url(${template.backdrop.src}) 50% 20% / cover no-repeat`
+        : `linear-gradient(170deg, ${t.bg}, ${t.bg2})`,
     color: t.ink,
     containerType: "inline-size",
     aspectRatio: "9 / 16",
@@ -55,7 +59,7 @@ export function InviteCard({ template, content, chrome = true, clear = false }: 
 
   return (
     <div className="relative w-full overflow-hidden" style={style} dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"}>
-      {!clear && <Ornament
+      {!clear && !template.backdrop && <Ornament
         kind={t.ornament}
         className={
           tall
