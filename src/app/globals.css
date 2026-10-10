@@ -1,26 +1,107 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fbf7f0;
+  --foreground: #1d2a26;
+  --brand: #0f3d33;
+  --brand-ink: #f6ebd0;
+  --gold: #b8924a;
+  --line: #e6dcc9;
+  --card: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-gold: var(--gold);
+  --color-line: var(--line);
+  --color-card: var(--card);
+  --font-sans: var(--nf-sans), system-ui, sans-serif;
+  --font-display: var(--nf-display), Georgia, serif;
+  --font-urdu: var(--nf-urdu), serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--nf-sans), system-ui, sans-serif;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer components {
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0 1.25rem;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: transform 0.15s, background 0.15s;
+  cursor: pointer;
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn-primary {
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+.btn-primary:hover {
+  background: #14503f;
+}
+.btn-ghost {
+  border: 1px solid var(--line);
+  background: var(--card);
+}
+.btn-ghost:hover {
+  border-color: var(--gold);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.field {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.5rem 0.75rem;
+  background: var(--card);
+  font-size: 16px; /* prevents iOS zoom on focus */
+}
+.field:focus {
+  border-color: var(--gold);
+}
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
