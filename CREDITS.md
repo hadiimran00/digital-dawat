@@ -6,8 +6,8 @@ Real artwork used in templates comes from museum open-access collections release
 
 | File | Work | Source | Used in |
 |---|---|---|---|
-| `public/art/mughal-floral.jpg` | *Vase with flower arrangement and scrollwork*, Mughal India, Lucknow, c. 1750–1800 | The Cleveland Museum of Art, Open Access (accession 2013.354), CC0 | Template "Gulistan" |
-| `public/art/mughal-medallion.jpg` | *Spread with floral medallion pattern*, Mughal India (Deccan), embroidery | The Cleveland Museum of Art, Open Access (accession 1916.1359), CC0 | Template "Bagh" |
+| `public/art/mughal-floral.webp` | *Vase with flower arrangement and scrollwork*, Mughal India, Lucknow, c. 1750–1800 | The Cleveland Museum of Art, Open Access (accession 2013.354), CC0 | Template "Gulistan" |
+| `public/art/mughal-medallion.webp` | *Spread with floral medallion pattern*, Mughal India (Deccan), embroidery | The Cleveland Museum of Art, Open Access (accession 1916.1359), CC0 | Template "Bagh" |
 
 Licence status was read from the museum's open-access API (`share_license_status: "CC0"`) at the time of download.
 

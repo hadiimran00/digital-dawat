@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSupabase } from "@/lib/supabase";
 
 /** Guest reply form. In demo mode it is fully visible but disabled, so buyers can see what guests get. */
 export function Rsvp({ inviteId, demo = false, guestName = "", seats = null }: { inviteId?: string; demo?: boolean; guestName?: string; seats?: number | null }) {
@@ -23,8 +22,10 @@ export function Rsvp({ inviteId, demo = false, guestName = "", seats = null }: {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (demo || !inviteId) return;
+    const { getSupabase } = await import("@/lib/supabase");
     const sb = getSupabase();
-    if (demo || !sb || !inviteId) return;
+    if (!sb) return;
     if (!name.trim()) return setError("Please enter your name.");
     setState("busy");
     setError("");
@@ -50,7 +51,7 @@ export function Rsvp({ inviteId, demo = false, guestName = "", seats = null }: {
       {attending && (
         <label className="block">Number of guests (including you)
           <input type="number" min={1} max={maxGuests} disabled={demo} className="field" value={guests} onChange={(e) => setGuests(Math.min(maxGuests, Math.max(1, Number(e.target.value) || 1)))} />
-          {seats && <span className="text-sm text-foreground/60">{seats} {seats === 1 ? "place is" : "places are"} reserved for you.</span>}
+          {seats && <span className="text-sm text-foreground/70">{seats} {seats === 1 ? "place is" : "places are"} reserved for you.</span>}
         </label>
       )}
       <label className="block">Message (optional)

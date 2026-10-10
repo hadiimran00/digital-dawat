@@ -89,11 +89,11 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
         </div>
 
         <div className="px-4 py-10 md:self-center md:py-0">
-          <p className="text-sm font-semibold uppercase tracking-widest text-gold">{categoryLabel(t.category)}</p>
+          <p className="text-sm font-semibold uppercase tracking-widest text-gold-deep">{categoryLabel(t.category)}</p>
           <h1 className="font-display text-5xl font-bold text-brand">{t.name}</h1>
           <p className="mt-3 text-lg text-foreground/70">{t.tagline}</p>
           <p className="mt-6 text-3xl font-bold">{formatPKR(t.price)}</p>
-          <p className="text-sm text-foreground/60">One payment per invitation. Guests are not charged and there is no per-guest fee.</p>
+          <p className="text-sm text-foreground/70">One payment per invitation. Guests are not charged and there is no per-guest fee.</p>
 
           <h2 className="mt-8 font-display text-2xl font-bold">About this design</h2>
           <p className="mt-2 text-sm text-foreground/80">
@@ -112,7 +112,7 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
             <li>✓ A personal link for each guest, with their name and reserved places</li>
             <li>✓ One link to share on WhatsApp, and a vertical video to download</li>
           </ul>
-          <Link href={cta} className="btn btn-primary mt-8 hidden md:inline-flex">Customise this template</Link>
+          <Link href={cta} prefetch={false} className="btn btn-primary mt-8 hidden md:inline-flex">Customise this template</Link>
 
           {related.length > 0 && (
             <nav aria-label="Related templates" className="mt-10">
@@ -137,7 +137,7 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
           <p className="font-semibold leading-tight">{t.name}</p>
           <p className="text-sm text-foreground/70">{formatPKR(t.price)} flat</p>
         </div>
-        <Link href={cta} className="btn btn-primary">Customise</Link>
+        <Link href={cta} prefetch={false} className="btn btn-primary">Customise</Link>
       </div>
     </div>
   );

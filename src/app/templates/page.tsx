@@ -13,7 +13,7 @@ export default function TemplatesPage() {
     <div className="mx-auto max-w-6xl px-4 py-12">
       <h1 className="font-display text-5xl font-bold text-brand">Templates</h1>
       <p className="mb-8 mt-2 text-foreground/70">Pick a design, then make it yours. Prices are flat and shown upfront.</p>
-      <TemplateGallery />
+      <TemplateGallery titleAs="h2" />
     </div>
   );
 }

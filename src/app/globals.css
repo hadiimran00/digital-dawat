@@ -6,6 +6,8 @@
   --brand: #0f3d33;
   --brand-ink: #f6ebd0;
   --gold: #b8924a;
+  --gold-light: #d9b96b; /* gold on dark green: 6.4:1 */
+  --gold-deep: #8a6420; /* gold text on cream/white: 5.0:1 */
   --line: #e6dcc9;
   --card: #ffffff;
   /* Motion tokens: strong custom curves (built-in CSS easings are too weak). */
@@ -19,6 +21,8 @@
   --color-brand: var(--brand);
   --color-brand-ink: var(--brand-ink);
   --color-gold: var(--gold);
+  --color-gold-light: var(--gold-light);
+  --color-gold-deep: var(--gold-deep);
   --color-line: var(--line);
   --color-card: var(--card);
   --font-sans: var(--nf-sans), system-ui, sans-serif;

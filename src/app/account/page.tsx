@@ -46,7 +46,7 @@ export default function Account() {
           <div key={r.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-card p-4">
             <div>
               <p className="font-semibold">{getTemplate(r.invites?.template_id ?? "")?.name ?? "Invitation"} · {formatPKR(r.amount_pkr)}</p>
-              <p className="text-sm text-foreground/60">{new Date(r.created_at).toLocaleDateString("en-GB")} · {LABEL[r.status] ?? r.status}</p>
+              <p className="text-sm text-foreground/70">{new Date(r.created_at).toLocaleDateString("en-GB")} · {LABEL[r.status] ?? r.status}</p>
             </div>
             <div className="flex gap-2">
               {r.status === "approved" && r.invites && (

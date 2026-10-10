@@ -281,7 +281,7 @@ export const TEMPLATES: Template[] = [
     tags: ["mughal", "painting", "gold", "floral", "artwork", "heritage"],
     price: 2999,
     popular: true,
-    art: { src: "/art/mughal-floral.jpg", position: "50% 42%", zoom: 1.18, credit: "Vase with flower arrangement and scrollwork, Mughal India, Lucknow, c. 1750–1800. The Cleveland Museum of Art, Open Access (CC0)." },
+    art: { src: "/art/mughal-floral.webp", position: "50% 42%", zoom: 1.18, credit: "Vase with flower arrangement and scrollwork, Mughal India, Lucknow, c. 1750–1800. The Cleveland Museum of Art, Open Access (CC0)." },
     theme: { bg: "#F3E4BE", bg2: "#EAD39B", ink: "#4A1620", accent: "#A8321F", muted: "#6B4A3A", ornament: "none", headingFont: "serif" },
   },
   {
@@ -292,7 +292,7 @@ export const TEMPLATES: Template[] = [
     tagline: "A garden of embroidered flowers, ivory and rose.",
     tags: ["embroidery", "garden", "ivory", "rose", "artwork", "heritage"],
     price: 2499,
-    art: { src: "/art/mughal-medallion.jpg", position: "50% 46%", zoom: 1.5, credit: "Spread with floral medallion pattern, Mughal India (Deccan), embroidery. The Cleveland Museum of Art, Open Access (CC0)." },
+    art: { src: "/art/mughal-medallion.webp", position: "50% 46%", zoom: 1.5, credit: "Spread with floral medallion pattern, Mughal India (Deccan), embroidery. The Cleveland Museum of Art, Open Access (CC0)." },
     theme: { bg: "#FBF6EA", bg2: "#F1E6CF", ink: "#3C2A1E", accent: "#B0345A", muted: "#6E6A3A", ornament: "none", headingFont: "serif" },
   },
 ];

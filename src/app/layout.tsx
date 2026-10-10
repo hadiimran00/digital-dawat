@@ -1,12 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, DM_Sans, Noto_Nastaliq_Urdu } from "next/font/google";
+import { Cormorant_Garamond, DM_Sans, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu } from "next/font/google";
 import "./globals.css";
 import { SiteHeader, SiteFooter } from "@/components/Site";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const sans = DM_Sans({ variable: "--nf-sans", subsets: ["latin"] });
-const display = Cormorant_Garamond({ variable: "--nf-display", subsets: ["latin"], weight: ["500", "600", "700"] });
-const urdu = Noto_Nastaliq_Urdu({ variable: "--nf-urdu", subsets: ["arabic"], weight: ["400", "700"] });
+const display = Cormorant_Garamond({ variable: "--nf-display", subsets: ["latin"], weight: ["600", "700"] });
+// The Urdu font is large (about 230 KiB) and only needed for Arabic-script text, so it is not preloaded;
+// it still downloads on demand with font-display: swap.
+const urdu = Noto_Nastaliq_Urdu({ variable: "--nf-urdu", subsets: ["arabic"], weight: ["400", "700"], preload: false, display: "swap" });
+
+// Bismillah: a light Arabic font (about 50 KiB) so pages do not download the 230 KiB Nastaliq font just for it.
+const naskh = Noto_Naskh_Arabic({ variable: "--nf-naskh", subsets: ["arabic"], weight: ["400"], preload: false, display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -33,7 +38,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${sans.variable} ${display.variable} ${urdu.variable} h-full antialiased`}>
+    <html lang="en" className={`${sans.variable} ${display.variable} ${urdu.variable} ${naskh.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-3">
           Skip to content

@@ -76,7 +76,7 @@ export function InviteCard({ template, content }: { template: Template; content:
         style={{ padding: "12cqw", fontFamily: body, gap: "3cqw" }}
       >
         {content.bismillah && (
-          <p lang="ar" dir="rtl" style={{ fontSize: "5cqw", color: t.accent, fontFamily: "var(--nf-urdu), serif", lineHeight: 1.8, textShadow: glow }}>{BISMILLAH}</p>
+          <p lang="ar" dir="rtl" style={{ fontSize: "5cqw", color: t.accent, fontFamily: "var(--nf-naskh), serif", lineHeight: 1.9, textShadow: glow }}>{BISMILLAH}</p>
         )}
         <p className={template.concept === "tape" ? "font-mono" : ""} style={{ fontSize: "3.6cqw", letterSpacing: ur ? 0 : "0.25em", textTransform: ur ? "none" : "uppercase", color: t.accent, textShadow: glow }}>
           {content.headline}

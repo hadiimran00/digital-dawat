@@ -45,7 +45,7 @@ export default function Home() {
       <section className="bg-brand text-brand-ink">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-2 md:py-24">
           <div className="rise">
-            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-gold">Digital wedding invitations</p>
+            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.25em] text-gold-light">Digital wedding invitations</p>
             <h1 className="font-display text-5xl font-bold leading-[1.05] sm:text-6xl">
               Your whole wedding week in one WhatsApp link
             </h1>
@@ -53,7 +53,7 @@ export default function Home() {
               Mehndi, Nikkah, Baraat and Walima on one invitation. Guests tap to open it, see every event with its dress code, and reply with their guest count.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/templates" className="btn bg-gold text-brand">Browse {TEMPLATES.length} templates</Link>
+              <Link href="/templates" className="btn bg-gold-light text-brand">Browse {TEMPLATES.length} templates</Link>
               <a href="#how" className="btn border border-brand-ink/30">See how it works</a>
             </div>
           </div>
@@ -77,7 +77,7 @@ export default function Home() {
           <ol className="mt-8 grid gap-6 md:grid-cols-4">
             {STEPS.map(([title, text], i) => (
               <li key={title} className="rounded-2xl border border-line p-5">
-                <span className="font-display text-4xl text-gold">{i + 1}</span>
+                <span className="font-display text-4xl text-gold-deep">{i + 1}</span>
                 <p className="mt-2 font-semibold">{title}</p>
                 <p className="mt-1 text-sm text-foreground/70">{text}</p>
               </li>
@@ -91,7 +91,7 @@ export default function Home() {
         <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map(({ icon: Icon, title, text }) => (
             <li key={title} className="rounded-2xl border border-line bg-card p-6">
-              <Icon className="size-6 text-gold" aria-hidden />
+              <Icon className="size-6 text-gold-deep" aria-hidden />
               <h3 className="mt-3 font-semibold">{title}</h3>
               <p className="mt-1 text-sm text-foreground/70">{text}</p>
             </li>
@@ -120,7 +120,7 @@ export default function Home() {
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
           <h2 className="font-display text-4xl font-bold">See your names on a card</h2>
           <p className="mt-3 text-brand-ink/80">Choose a template, type your details, and preview your invitation before you pay.</p>
-          <Link href="/templates" className="btn mt-8 bg-gold text-brand">Choose your template</Link>
+          <Link href="/templates" className="btn mt-8 bg-gold-light text-brand">Choose your template</Link>
         </div>
       </section>
     </>

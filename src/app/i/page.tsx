@@ -3,7 +3,8 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { backendConfigured, getSupabase } from "@/lib/supabase";
-import { ContentSchema, type InviteContent } from "@/lib/content";
+import type { InviteContent } from "@/lib/content";
+import { ContentSchema } from "@/lib/contentSchema";
 import { getTemplate, type Template } from "@/lib/templates";
 import { InviteExperience } from "@/components/invite/InviteExperience";
 import { NotConfigured } from "@/lib/useUser";

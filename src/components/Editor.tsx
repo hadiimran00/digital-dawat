@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, Trash2, X } from "lucide-react";
 import {
-  ContentSchema, MAX_EVENTS, MAX_FAQ, defaultContent, newEvent, randomSlug, type InviteContent, type InviteEvent,
+  defaultContent, newEvent, randomSlug, type InviteContent, type InviteEvent,
 } from "@/lib/content";
+import { ContentSchema, MAX_EVENTS, MAX_FAQ } from "@/lib/contentSchema";
 import { TEMPLATES, formatPKR, getTemplate } from "@/lib/templates";
-import { backendConfigured, getSupabase } from "@/lib/supabase";
+import { backendConfigured } from "@/lib/config";
 import { InviteCard } from "@/components/invite/InviteCard";
 import { InviteExperience } from "@/components/invite/InviteExperience";
 import { VideoExport } from "@/components/VideoExport";
@@ -97,6 +98,7 @@ export function Editor() {
       return;
     }
     setErrors({});
+    const { getSupabase } = await import("@/lib/supabase");
     const sb = getSupabase();
     if (!sb) {
       setMsg("Ordering is not available yet: the site's backend has not been connected.");
@@ -138,7 +140,7 @@ export function Editor() {
       <form onSubmit={(e) => { e.preventDefault(); order(); }} className="order-2 space-y-6 lg:order-1" noValidate>
         <div>
           <h1 className="font-display text-4xl font-bold text-brand">Customise {template.name}</h1>
-          <p className="text-sm text-foreground/60">Your changes save automatically on this device.</p>
+          <p className="text-sm text-foreground/70">Your changes save automatically on this device.</p>
         </div>
 
         <fieldset className="grid gap-4 sm:grid-cols-2">
@@ -178,7 +180,7 @@ export function Editor() {
 
         <section className="space-y-4" aria-label="Events">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-2xl font-bold">Events <span className="text-base font-normal text-foreground/60">({content.events.length}/{MAX_EVENTS})</span></h2>
+            <h2 className="font-display text-2xl font-bold">Events <span className="text-base font-normal text-foreground/70">({content.events.length}/{MAX_EVENTS})</span></h2>
             <button type="button" className="btn btn-ghost" disabled={content.events.length >= MAX_EVENTS} onClick={() => set({ events: [...content.events, newEvent(content.language)] })}>
               <Plus className="size-4" aria-hidden /> Add event
             </button>
@@ -224,7 +226,7 @@ export function Editor() {
 
         <section className="space-y-4" aria-label="Questions">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-2xl font-bold">Good to know <span className="text-base font-normal text-foreground/60">(optional)</span></h2>
+            <h2 className="font-display text-2xl font-bold">Good to know <span className="text-base font-normal text-foreground/70">(optional)</span></h2>
             <button type="button" className="btn btn-ghost" disabled={content.faq.length >= MAX_FAQ} onClick={() => set({ faq: [...content.faq, { q: "", a: "" }] })}>
               <Plus className="size-4" aria-hidden /> Add question
             </button>
@@ -264,8 +266,8 @@ export function Editor() {
         </fieldset>
 
         <div className="rounded-2xl border border-line bg-card p-5">
-          <p className="font-semibold">{formatPKR(template.price)} <span className="font-normal text-foreground/60">· flat price, includes web invite, video and RSVP</span></p>
-          <p className="mt-1 text-sm text-foreground/60">You pay by SadaPay after reviewing, then upload your receipt. Your invite goes live once we confirm it.</p>
+          <p className="font-semibold">{formatPKR(template.price)} <span className="font-normal text-foreground/70">· flat price, includes web invite, video and RSVP</span></p>
+          <p className="mt-1 text-sm text-foreground/70">You pay by SadaPay after reviewing, then upload your receipt. Your invite goes live once we confirm it.</p>
           <div className="mt-4 flex flex-wrap gap-2">
             <button type="button" className="btn btn-ghost" onClick={() => setPreviewing(true)}>Preview full invitation</button>
             <button type="submit" className="btn btn-primary" disabled={busy}>{busy ? "Saving…" : "Continue to payment"}</button>

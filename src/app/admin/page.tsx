@@ -62,9 +62,9 @@ export default function Admin() {
     <div className="mx-auto max-w-5xl px-4 py-12">
       <h1 className="font-display text-4xl font-bold text-brand">Admin</h1>
       <dl className="mt-4 grid grid-cols-3 gap-3 text-center">
-        <div className="rounded-xl border border-line bg-card p-4"><dt className="text-sm text-foreground/60">Confirmed revenue</dt><dd className="text-xl font-bold">{formatPKR(revenue)}</dd></div>
-        <div className="rounded-xl border border-line bg-card p-4"><dt className="text-sm text-foreground/60">To review</dt><dd className="text-xl font-bold">{rows.filter((r) => r.status === "pending_review").length}</dd></div>
-        <div className="rounded-xl border border-line bg-card p-4"><dt className="text-sm text-foreground/60">Live invites</dt><dd className="text-xl font-bold">{rows.filter((r) => r.status === "approved").length}</dd></div>
+        <div className="rounded-xl border border-line bg-card p-4"><dt className="text-sm text-foreground/70">Confirmed revenue</dt><dd className="text-xl font-bold">{formatPKR(revenue)}</dd></div>
+        <div className="rounded-xl border border-line bg-card p-4"><dt className="text-sm text-foreground/70">To review</dt><dd className="text-xl font-bold">{rows.filter((r) => r.status === "pending_review").length}</dd></div>
+        <div className="rounded-xl border border-line bg-card p-4"><dt className="text-sm text-foreground/70">Live invites</dt><dd className="text-xl font-bold">{rows.filter((r) => r.status === "approved").length}</dd></div>
       </dl>
       <div className="mt-6 flex flex-wrap gap-2" role="group" aria-label="Filter orders">
         {["pending_review", "awaiting_payment", "approved", "rejected", "all"].map((f) => (
@@ -73,14 +73,14 @@ export default function Admin() {
       </div>
       {err && <p role="alert" className="mt-4 text-red-700">{err}</p>}
       <ul className="mt-4 space-y-3">
-        {shown.length === 0 && <li className="text-foreground/60">Nothing here.</li>}
+        {shown.length === 0 && <li className="text-foreground/70">Nothing here.</li>}
         {shown.map((r) => (
           <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-card p-4">
             <div>
               <p className="font-semibold">
                 {r.invites?.content.host1}{r.invites?.content.host2 && ` & ${r.invites.content.host2}`} · {getTemplate(r.invites?.template_id ?? "")?.name} · {formatPKR(r.amount_pkr)}
               </p>
-              <p className="text-sm text-foreground/60">
+              <p className="text-sm text-foreground/70">
                 {new Date(r.created_at).toLocaleString("en-GB")} · {r.status.replace("_", " ")}
                 {r.payment_method && ` · ${r.payment_method}`}{r.payment_reference && ` · ref ${r.payment_reference}`}
               </p>

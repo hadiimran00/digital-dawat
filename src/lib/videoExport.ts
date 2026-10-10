@@ -92,6 +92,7 @@ export async function createAnimator(template: Template, content: InviteContent,
   await Promise.all([
     document.fonts.load(`600 48px ${headFam}`, content.host1),
     document.fonts.load(`400 24px ${body}`, content.message),
+    content.bismillah ? document.fonts.load(`400 38px ${cssVar("--nf-naskh", "serif")}`, BISMILLAH) : Promise.resolve([]),
   ]).catch(() => {});
 
   const orn = t.ornament === "none" ? null : await loadOrnament(template);
@@ -186,7 +187,7 @@ export async function createAnimator(template: Template, content: InviteContent,
       if (content.bismillah) {
         const save = ctx.direction;
         ctx.direction = "rtl";
-        lines(BISMILLAH, `400 34px ${cssVar("--nf-urdu", "serif")}`, t.accent, 64);
+        lines(BISMILLAH, `400 38px ${cssVar("--nf-naskh", "serif")}`, t.accent, 64);
         ctx.direction = save;
       }
       lines(ur ? content.headline : content.headline.toUpperCase(), `500 ${ur ? 26 : 22}px ${body}`, t.accent, 40);

@@ -33,11 +33,11 @@ function Countdown({ events, ur }: { events: InviteEvent[]; ur: boolean }) {
         {[d, h, m].map((v, i) => (
           <div key={i} className="rounded-xl border border-line bg-card py-3">
             <p className="font-display text-3xl font-bold">{v}</p>
-            <p className="text-xs uppercase tracking-widest text-foreground/60">{labels[i]}</p>
+            <p className="text-xs uppercase tracking-widest text-foreground/70">{labels[i]}</p>
           </div>
         ))}
       </div>
-      <p className="mt-2 text-center text-sm text-foreground/60">{ur ? `${upcoming.title} تک` : `Until ${upcoming.title}`}</p>
+      <p className="mt-2 text-center text-sm text-foreground/70">{ur ? `${upcoming.title} تک` : `Until ${upcoming.title}`}</p>
     </section>
   );
 }
@@ -62,7 +62,6 @@ export function InviteExperience({
   const t = template.theme;
   const ur = content.language === "ur";
   const loc = ur ? "ur-PK" : "en-GB";
-  const [loaded, setLoaded] = useState(false);
   const [opened, setOpened] = useState(false);
   const [gone, setGone] = useState(false);
   const [guest, setGuest] = useState("");
@@ -73,8 +72,6 @@ export function InviteExperience({
   const ordered = useMemo(() => [...content.events].sort((a, b) => eventStart(a) - eventStart(b)), [content.events]);
 
   useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const id = setTimeout(() => setLoaded(true), reduce ? 0 : 900);
     // personalised greeting: .../i?s=slug&g=Sarah%20%26%20Family
     const g = new URLSearchParams(window.location.search).get("g");
     // eslint-disable-next-line react-hooks/set-state-in-effect -- read the URL after mount (static export)
@@ -82,7 +79,6 @@ export function InviteExperience({
     // reserved places for this guest: ...&n=2
     const n = Number(new URLSearchParams(window.location.search).get("n"));
     if (Number.isInteger(n) && n >= 1 && n <= 20) setSeats(n);
-    return () => clearTimeout(id);
   }, []);
   useEffect(() => {
     if (!opened) return;
@@ -109,7 +105,7 @@ export function InviteExperience({
                 {ur ? "ہمیں آپ کی میزبانی کا شرف ملے گا۔ ہم نے آپ کے لیے جگہ رکھی ہے۔" : "It would mean the world to have you with us. We have saved you a place."}
               </p>
               {demo && !guest && (
-                <p className="mt-2 text-xs text-foreground/50">Each guest can get a link that greets them by name.</p>
+                <p className="mt-2 text-xs text-foreground/70">Each guest can get a link that greets them by name.</p>
               )}
             </section>
           )}
@@ -128,7 +124,7 @@ export function InviteExperience({
             <h2 className="font-display text-3xl font-bold">{ur ? "تقاریب" : tape ? "Playlist" : ordered.length > 1 ? "Events" : "Event"}</h2>
             {ordered.map((e, i) => (
               <article key={i} className="rounded-2xl border border-line bg-card p-5">
-                <p className={`text-xs uppercase tracking-widest text-foreground/50 ${tape ? "font-mono" : ""}`}>
+                <p className={`text-xs uppercase tracking-widest text-foreground/70 ${tape ? "font-mono" : ""}`}>
                   {ordered.length > 1 && `${tape ? "REEL " : ""}${String(i + 1).padStart(2, "0")} / ${String(ordered.length).padStart(2, "0")}`}
                 </p>
                 <h3 className="font-display text-2xl font-bold">{e.title}</h3>
@@ -139,7 +135,7 @@ export function InviteExperience({
                   <p className="mt-2 text-sm font-medium text-brand">{ur ? `${seats} مہمانوں کے لیے مدعو` : `${seats} ${seats === 1 ? "guest" : "guests"} invited`}</p>
                 )}
                 {e.dressCode && (
-                  <p className="mt-2 flex items-center gap-2 text-sm"><Shirt className="size-4 shrink-0 text-gold" aria-hidden />{ur ? "ڈریس کوڈ: " : "Dress code: "}{e.dressCode}</p>
+                  <p className="mt-2 flex items-center gap-2 text-sm"><Shirt className="size-4 shrink-0 text-gold-deep" aria-hidden />{ur ? "ڈریس کوڈ: " : "Dress code: "}{e.dressCode}</p>
                 )}
                 <div className="mt-4 flex flex-wrap gap-2">
                   {e.mapUrl && (
@@ -151,7 +147,7 @@ export function InviteExperience({
                 </div>
               </article>
             ))}
-            {demo && !ordered.some((e) => e.mapUrl) && <p className="text-center text-sm text-foreground/50">Your map links appear here.</p>}
+            {demo && !ordered.some((e) => e.mapUrl) && <p className="text-center text-sm text-foreground/70">Your map links appear here.</p>}
           </section>
 
           {hasDress && ordered.length > 1 && (
@@ -197,9 +193,9 @@ export function InviteExperience({
             </div>
           )}
           {content.closing && (
-            <p className="py-6 text-center font-display text-2xl" style={{ fontFamily: font }}>{content.closing}<br /><span className="text-lg text-gold">{names}</span></p>
+            <p className="py-6 text-center font-display text-2xl" style={{ fontFamily: font }}>{content.closing}<br /><span className="text-lg text-gold-deep">{names}</span></p>
           )}
-          <p className="pb-4 text-center text-xs text-foreground/50">Made with Digital Dawat</p>
+          <p className="pb-4 text-center text-xs text-foreground/70">Made with Digital Dawat</p>
         </div>
       </div>
 
@@ -222,11 +218,9 @@ export function InviteExperience({
               <p aria-hidden className="absolute right-5 top-5 font-mono text-xs tracking-widest">❚❚ PAUSE SP</p>
             </>
           )}
-          {!loaded ? (
-            <p className="relative animate-pulse text-sm uppercase tracking-[0.3em]" style={{ color: t.accent }} role="status">{tape ? "● TRACKING…" : "Loading…"}</p>
-          ) : (
+          {(
             <div className="rise relative flex flex-col items-center gap-4 px-8" style={template.art ? { textShadow: `0 0 8px ${t.bg}, 0 0 18px ${t.bg}` } : undefined}>
-              {content.bismillah && <p lang="ar" dir="rtl" className="text-2xl" style={{ color: t.accent, fontFamily: "var(--nf-urdu), serif", lineHeight: 1.8 }}>{BISMILLAH}</p>}
+              {content.bismillah && <p lang="ar" dir="rtl" className="text-2xl" style={{ color: t.accent, fontFamily: "var(--nf-naskh), serif", lineHeight: 1.9 }}>{BISMILLAH}</p>}
               <p className="text-xs uppercase tracking-[0.3em]" style={{ color: t.accent }}>{content.headline}</p>
               <h2 className="text-5xl leading-tight" style={{ fontFamily: font, fontWeight: 600 }}>{names}</h2>
               <div className="h-px w-16" style={{ background: t.accent }} />

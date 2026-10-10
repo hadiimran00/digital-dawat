@@ -45,7 +45,7 @@ function Login() {
           </label>
           <button className="btn btn-primary w-full" disabled={busy}>{busy ? "Sending…" : "Email me a sign-in link"}</button>
           {error && <p role="alert" className="text-sm text-red-700">{error}</p>}
-          <p className="text-sm text-foreground/60">No password needed. We use your email only for your orders.</p>
+          <p className="text-sm text-foreground/70">No password needed. We use your email only for your orders.</p>
         </form>
       )}
     </div>

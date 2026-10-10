@@ -16,7 +16,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-line bg-background/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="font-display text-2xl font-bold tracking-tight text-brand">
-          Digital Dawat<span className="text-gold">.</span>
+          Digital Dawat<span className="text-gold-deep">.</span>
         </Link>
         <nav aria-label="Main" className="flex items-center gap-1 text-sm font-medium sm:gap-4">
           <Link href="/templates" className="px-3 py-2">Templates</Link>

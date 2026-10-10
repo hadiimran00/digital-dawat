@@ -45,7 +45,7 @@ function GuestLinks({ slug }: { slug: string }) {
       <ul className="mt-3 space-y-2">
         {list.map((g) => (
           <li key={g.name} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line p-3">
-            <span className="font-medium">{g.name}{g.seats && <span className="font-normal text-foreground/60"> · {g.seats} {g.seats === 1 ? "place" : "places"}</span>}</span>
+            <span className="font-medium">{g.name}{g.seats && <span className="font-normal text-foreground/70"> · {g.seats} {g.seats === 1 ? "place" : "places"}</span>}</span>
             <span className="flex gap-2">
               <button type="button" className="btn btn-ghost" onClick={() => copy(g)}>{copied === g.name ? "Copied" : "Copy link"}</button>
               <a className="btn btn-primary" target="_blank" rel="noopener noreferrer"
@@ -101,7 +101,7 @@ function Inner() {
         {rows.length === 0 && <li className="p-4">No replies yet.</li>}
         {rows.map((r) => (
           <li key={r.id} className="p-4">
-            <p className="font-semibold">{r.guest_name} <span className="font-normal text-foreground/60">· {r.attending ? `${r.guests} guest(s)` : "declined"}</span></p>
+            <p className="font-semibold">{r.guest_name} <span className="font-normal text-foreground/70">· {r.attending ? `${r.guests} guest(s)` : "declined"}</span></p>
             {r.note && <p className="text-sm text-foreground/70">{r.note}</p>}
           </li>
         ))}

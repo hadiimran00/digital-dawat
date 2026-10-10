@@ -48,7 +48,7 @@ export function VideoExport({ template, content }: { template: Template; content
             <label key={v.id} className={`press cursor-pointer rounded-xl border p-2 text-sm ${style === v.id ? "border-brand bg-white ring-1 ring-brand" : "border-line bg-card"}`}>
               <input type="radio" name="video-style" className="sr-only" checked={style === v.id} onChange={() => { setStyle(v.id); setUrl(null); }} />
               <span className="font-semibold">{v.label}</span>
-              <span className="block text-xs text-foreground/60">{v.hint}</span>
+              <span className="block text-xs text-foreground/70">{v.hint}</span>
             </label>
           ))}
         </div>
