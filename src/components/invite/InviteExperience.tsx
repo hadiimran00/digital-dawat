@@ -293,7 +293,7 @@ export function InviteExperience({
         {tape ? (
         <div className="mx-auto max-w-md px-5">
           <Screen tape scene={0} framed={false}>
-            <div className="overflow-hidden rounded-md"><InviteCard template={template} content={content} chrome={false} clear={!!backdrop} /></div>
+            <div className="mx-auto w-full overflow-hidden rounded-md" style={{ maxWidth: "calc((100cqh - 10.5rem - var(--frame-top, 0px) - var(--frame-bottom, 0px)) * 0.5625)" }}><InviteCard template={template} content={content} chrome={false} clear={!!backdrop} /></div>
           </Screen>
 
           {(content.family1 || content.family2 || content.members1.length > 0 || content.members2.length > 0) && (
@@ -582,7 +582,7 @@ export function InviteExperience({
           {["left-4 top-[calc(1rem+var(--frame-top,0px))] border-l-2 border-t-2", "right-4 top-[calc(1rem+var(--frame-top,0px))] border-r-2 border-t-2", "bottom-[calc(1rem+var(--frame-bottom,0px))] left-4 border-b-2 border-l-2", "bottom-[calc(1rem+var(--frame-bottom,0px))] right-4 border-b-2 border-r-2"].map((c) => (
             <span key={c} className={`absolute size-7 border-white/70 ${c}`} />
           ))}
-          <p className="absolute bottom-[calc(1.5rem+var(--frame-bottom,0px))] right-7 rounded bg-black/55 px-2 py-0.5 text-sm font-bold tracking-[0.2em]" style={{ color: t.accent }}>{stamp}</p>
+          <p className="absolute bottom-[calc(4.75rem+var(--frame-bottom,0px))] right-5 rounded bg-black/55 px-2 py-0.5 text-sm font-bold tracking-[0.2em]" style={{ color: t.accent }}>{stamp}</p>
           {!atEnd && (
             <button type="button" tabIndex={-1} onClick={() => scroller.current?.scrollBy({ top: scroller.current.clientHeight * 0.8, behavior: reducedMotion() ? "auto" : "smooth" })}
               className="pointer-events-auto absolute bottom-[calc(1.5rem+var(--frame-bottom,0px))] left-1/2 flex min-h-11 -translate-x-1/2 items-center gap-2 rounded-full border border-white/30 bg-black/60 px-5 text-xs font-bold tracking-[0.25em]">
