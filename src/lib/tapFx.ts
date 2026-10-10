@@ -62,8 +62,36 @@ function particles(kind: "petals" | "sparkles", x: number, y: number, colors: st
   Promise.all(anims).finally(() => root.remove());
 }
 
+const CHEERS = ["Wah!", "Mubarak!", "MashaAllah!", "Subhan Allah!"];
+const FLASH_STARS = ["#ffffff", "#fff1c4", "#9ff3ff", "#ffd27a", "#ffc6f2"];
+
+/** A short cheer that floats up from the tap point, in the tape's monospaced lettering. */
+function cheer(x: number, y: number) {
+  const el = document.createElement("span");
+  el.setAttribute("aria-hidden", "true");
+  el.textContent = CHEERS[Math.floor(Math.random() * CHEERS.length)];
+  el.style.cssText =
+    `position:fixed;left:${Math.min(Math.max(x, 70), window.innerWidth - 70)}px;top:${y}px;z-index:61;pointer-events:none;` +
+    "transform:translate(-50%,-50%);font:700 18px/1 ui-monospace,monospace;letter-spacing:.08em;color:#fff;" +
+    "text-shadow:0 0 8px #ff4f8b,0 0 18px #ff4f8b;white-space:nowrap";
+  document.body.appendChild(el);
+  const drift = reduced() ? 0 : -80;
+  el.animate(
+    [{ opacity: 0, transform: "translate(-50%,-50%) scale(.7)" }, { opacity: 1, transform: "translate(-50%,-70%) scale(1)", offset: 0.2 }, { opacity: 0, transform: `translate(-50%,calc(-50% + ${drift}px)) scale(1)` }],
+    { duration: 1100, easing: "cubic-bezier(0.23, 1, 0.32, 1)" },
+  ).finished.catch(() => {}).finally(() => el.remove());
+}
+
 export function burst(kind: TapFx, x: number, y: number, colors: string[] = ["#e8b95c", "#f4d98a"]) {
-  if (typeof document === "undefined" || reduced()) return;
-  if (kind === "flash") flash();
-  else particles(kind, x, y, colors);
+  if (typeof document === "undefined") return;
+  // a flash tap is a camera flash, stars from the finger and a cheer; with reduced motion only the cheer remains
+  if (kind === "flash") {
+    cheer(x, y);
+    if (reduced()) return;
+    flash();
+    particles("sparkles", x, y, FLASH_STARS);
+    return;
+  }
+  if (reduced()) return;
+  particles(kind, x, y, colors);
 }
