@@ -3,6 +3,9 @@ import type { Template } from "@/lib/templates";
 import { BISMILLAH, eventsDateText, eventsTitle, formatEventTime, type InviteContent } from "@/lib/content";
 import { Ornament, isTallOrnament } from "./Ornament";
 
+/** Warm see-through panel used by the video-tape concept. */
+export const TAPE_GLASS = "border-[#f3cf9a]/25 bg-[#24130a]/60 text-white backdrop-blur-[3px]";
+
 /** Brushed-gold fill for script names. */
 export const GOLD = "linear-gradient(180deg, #fff1c9 0%, #e8c06a 45%, #b98a35 100%)";
 

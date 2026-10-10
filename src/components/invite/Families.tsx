@@ -16,7 +16,7 @@ export function Families({ content, ur, glass }: { content: InviteContent; ur: b
   ].filter((s) => s.family || s.members.length > 0);
   if (sides.length === 0) return null;
   const cur = sides[Math.min(active, sides.length - 1)];
-  const panel = glass ? "border-white/15 bg-black/45 text-white backdrop-blur-md" : "border-line bg-card";
+  const panel = glass ? "border-white/15 bg-black/25 text-white" : "border-line bg-card";
 
   const onKey = (e: React.KeyboardEvent) => {
     if (sides.length < 2) return;

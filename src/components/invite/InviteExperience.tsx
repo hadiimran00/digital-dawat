@@ -7,7 +7,7 @@ import {
   BISMILLAH, buildIcs, eventsDateText, formatEventDate, formatEventTime, type InviteContent, type InviteEvent,
 } from "@/lib/content";
 import { burst, type TapFx } from "@/lib/tapFx";
-import { ArtHero, GOLD, InviteCard } from "./InviteCard";
+import { ArtHero, GOLD, InviteCard, TAPE_GLASS } from "./InviteCard";
 import { Families } from "./Families";
 import { Ornament, isTallOrnament } from "./Ornament";
 import { Rsvp } from "./Rsvp";
@@ -17,7 +17,7 @@ const eventStart = (e: InviteEvent) => new Date(`${e.date}T${e.time || "00:00"}:
 const reducedMotion = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /** Glass panels for the video-tape concept, ordinary cards otherwise. */
-const GLASS = "border-white/15 bg-black/45 text-white backdrop-blur-md";
+const GLASS = TAPE_GLASS;
 const PLAIN = "border-line bg-card";
 
 function Countdown({
@@ -119,14 +119,40 @@ function SceneBackdrop({ scene, t, photo }: { scene: number; t: Template["theme"
 }
 
 /** Small "● REC  SECTION" label above each panel in the tape concept; nothing otherwise. */
-function Tag({ tape, label }: { tape: boolean; label: string }) {
+function Tag({ tape, label, accent }: { tape: boolean; label: string; accent?: string }) {
   if (!tape) return null;
   return (
-    <p className="mb-2 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-white/75" aria-hidden>
-      <span><span className="text-red-400">●</span> REC</span><span>{label}</span>
+    <p className="mb-3 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] text-white/80" aria-hidden>
+      <span><span className="text-red-500">●</span> REC</span><span style={{ color: accent }}>{label}</span>
     </p>
   );
 }
+
+/** Tape concept: one full screen per section, content resting near the bottom so the photo shows above it. */
+function Screen({ tape, scene, id, framed = true, above, children }: { tape: boolean; scene: number; id?: string; framed?: boolean; above?: React.ReactNode; children: React.ReactNode }) {
+  if (!tape) return <>{children}</>;
+  return (
+    <div id={id} data-scene={scene} className="flex min-h-[100cqh] snap-start flex-col justify-end pb-[calc(5.5rem+var(--frame-bottom,0px))] pt-[calc(4.5rem+var(--frame-top,0px))]">
+      {above}
+      <div className="relative">
+        {framed && ["-left-2 -top-2 border-l-2 border-t-2", "-right-2 -top-2 border-r-2 border-t-2", "-bottom-2 -left-2 border-b-2 border-l-2", "-bottom-2 -right-2 border-b-2 border-r-2"].map((c) => (
+          <span key={c} aria-hidden className={`pointer-events-none absolute size-5 border-white/80 ${c}`} />
+        ))}
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/** Section title in the tape's lettering: white monospaced capitals with a faint VHS colour split. */
+function TapeTitle({ children, as: As = "h2" }: { children: React.ReactNode; as?: "h2" | "h3" }) {
+  return <As className="text-center font-mono text-2xl font-bold uppercase tracking-[0.16em]" style={{ textShadow: VHS }}>{children}</As>;
+}
+
+/** Gold script lettering for names and greetings. */
+const goldScript = { fontFamily: "var(--nf-script), cursive", fontWeight: 400, backgroundImage: GOLD, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" } as const;
+
+const SMALL_BTN = "press inline-flex min-h-10 items-center gap-1.5 rounded-sm px-3 font-mono text-[11px] font-bold uppercase tracking-[0.15em]";
 
 /** VHS colour split: a faint red and cyan ghost either side of tape lettering. */
 const VHS = "-1.5px 0 rgba(255,40,90,0.55), 1.5px 0 rgba(0,220,255,0.55)";
@@ -244,8 +270,154 @@ export function InviteExperience({
       <div
         ref={scroller}
         onScroll={onScroll}
-        className={`relative z-[1] h-full overflow-y-auto overscroll-contain ${opened ? "" : "overflow-hidden"} ${tape ? "text-white" : ""}`}
+        className={`relative z-[1] h-full overflow-y-auto overscroll-contain ${opened ? "" : "overflow-hidden"} ${tape ? "snap-y snap-proximity text-white [container-type:size]" : ""}`}
       >
+        {tape ? (
+        <div className="mx-auto max-w-md px-5">
+          <Screen tape scene={0} framed={false}>
+            <div className="overflow-hidden rounded-md"><InviteCard template={template} content={content} chrome={false} clear={!!template.backdrop} /></div>
+          </Screen>
+
+          {(content.family1 || content.family2 || content.members1.length > 0 || content.members2.length > 0) && (
+            <Screen tape scene={1}>
+              <div className={`rounded-md border p-4 ${panel}`}>
+                <Tag tape label={ur ? "خاندان" : "Families"} accent={t.accent} />
+                <Families content={content} ur={ur} glass />
+              </div>
+            </Screen>
+          )}
+
+          {(guest || demo) && (
+            <Screen tape scene={2}>
+              <section className={`rounded-md border p-5 text-center ${panel}`}>
+                <Tag tape label={ur ? "پیغام" : "Message"} accent={t.accent} />
+                <p className="pb-1 text-4xl leading-tight" style={ur ? { fontFamily: font } : goldScript}>
+                  {guest ? (ur ? `محترم ${guest}،` : `Dear ${guest},`) : ur ? "محترم مہمان،" : "Dear guest,"}
+                </p>
+                <p className="mt-3 text-[15px] leading-relaxed text-white/90">
+                  {ur
+                    ? "ہمیں آپ کی میزبانی کا شرف ملے گا۔ ہم نے آپ کے لیے جگہ رکھی ہے۔"
+                    : "Your presence is the blessing we are asking for. It would not be complete without the people who have loved us all our lives. We have saved you a place."}
+                </p>
+                {ordered.length > 1 && (
+                  <nav aria-label={ur ? "تقاریب" : "Jump to an event"} className="mt-4 flex flex-wrap justify-center gap-2">
+                    {ordered.map((e, i) => (
+                      <button key={i} type="button" onClick={() => goTo(i)} className={`${SMALL_BTN} border border-white/50 hover:bg-white/10`}>{e.title}</button>
+                    ))}
+                  </nav>
+                )}
+                {demo && !guest && <p className="mt-3 text-xs text-white/70">Each guest can get a link that greets them by name.</p>}
+              </section>
+            </Screen>
+          )}
+
+          <Screen tape scene={3}>
+            <div className={`rounded-md border p-4 ${panel}`}>
+              <Tag tape label={ur ? "الٹی گنتی" : "Countdown"} accent={t.accent} />
+              <Countdown events={ordered} ur={ur} tape scratchKind={scratchKind} accent={t.accent} panel="border-white/15 bg-black/30" muted="text-white/75" />
+            </div>
+          </Screen>
+
+          {ordered.map((e, i) => (
+            <Screen
+              key={i}
+              tape
+              scene={3}
+              id={`ev-${i}`}
+              above={
+                <p aria-hidden className="mx-auto mb-5 w-fit rounded-sm border border-white/40 bg-black/55 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-white/90">
+                  ✦ {ur ? fxCaption : "Tap anywhere for a photo flash"}
+                </p>
+              }
+            >
+              <article className={`rounded-md border p-5 text-center ${panel}`}>
+                <Tag tape label={`Tape ${pad(i + 1)} / ${pad(ordered.length)}`} accent={t.accent} />
+                {seats && (
+                  <p className="mx-auto -mt-1 mb-2 w-fit rounded-sm px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.15em]" style={{ background: t.accent, color: t.bg }}>
+                    {ur ? `${seats} مہمان مدعو` : `${seats} ${seats === 1 ? "guest" : "guests"} invited`}
+                  </p>
+                )}
+                <TapeTitle as="h3">{e.title}</TapeTitle>
+                <p className="mt-2 font-display text-lg font-semibold">{formatEventDate(e.date, loc)}{e.time && ` · ${formatEventTime(e.time)}`}</p>
+                {e.venue && <p className="mt-1 text-sm">{e.venue}</p>}
+                {e.address && <p className="text-xs text-white/75">{e.address}</p>}
+                {e.dressCode && <p className="mt-1 text-xs text-white/75">{ur ? "ڈریس کوڈ: " : "Dress code: "}{e.dressCode}</p>}
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  {e.mapUrl && (
+                    <a className={SMALL_BTN} style={{ background: t.accent, color: t.bg }} href={e.mapUrl} target="_blank" rel="noopener noreferrer">
+                      <MapPin className="size-3.5" aria-hidden />{ur ? "مقام" : "Open location"}
+                    </a>
+                  )}
+                  <button type="button" className={`${SMALL_BTN} border border-white/60`} onClick={() => downloadIcs(e, names)}>
+                    <CalendarPlus className="size-3.5" aria-hidden />{ur ? "کیلنڈر" : "Add to calendar"}
+                  </button>
+                </div>
+              </article>
+            </Screen>
+          ))}
+
+          {hasDress && ordered.length > 1 && (
+            <Screen tape scene={4}>
+              <section aria-label="Dress code" className={`rounded-md border p-5 text-center ${panel}`}>
+                <Tag tape label={ur ? "پروگرام" : "Programme"} accent={t.accent} />
+                <TapeTitle>{ur ? "ڈریس کوڈ" : "Dress code"}</TapeTitle>
+                <ul className="mt-4 space-y-3">
+                  {ordered.filter((e) => e.dressCode).map((e, i) => (
+                    <li key={i}>
+                      <p className="font-mono text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: t.accent }}>{e.title}</p>
+                      <p className="text-sm text-white/90">{e.dressCode}</p>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </Screen>
+          )}
+
+          {content.faq.length > 0 && (
+            <Screen tape scene={4}>
+              <section aria-label="Questions" className={`rounded-md border p-5 ${panel}`}>
+                <Tag tape label="Q & A" accent={t.accent} />
+                <TapeTitle>{ur ? "عام سوالات" : "A few questions"}</TapeTitle>
+                <div className="mt-4 divide-y divide-white/15 border-t border-white/15">
+                  {content.faq.map((f, i) => (
+                    <details key={i} className="group py-3">
+                      <summary className="flex min-h-8 cursor-pointer list-none items-center gap-3 text-sm font-medium">
+                        <span className="font-mono text-[11px] font-bold" style={{ color: t.accent }}>A{i + 1}</span>
+                        <span className="flex-1">{f.q}</span>
+                        <span aria-hidden className="grid size-6 shrink-0 place-items-center rounded-sm border border-white/50 font-mono text-xs transition-transform duration-200 ease-out group-open:rotate-45">+</span>
+                      </summary>
+                      <p className="mt-2 pl-8 text-sm text-white/85">{f.a}</p>
+                    </details>
+                  ))}
+                </div>
+                {wa && (
+                  <a className={`${SMALL_BTN} mt-4 w-full justify-center border border-white/50`} href={`https://wa.me/${wa}`} target="_blank" rel="noopener noreferrer">
+                    {ur ? "میزبان کو واٹس ایپ کریں" : "WhatsApp the hosts"}
+                  </a>
+                )}
+              </section>
+            </Screen>
+          )}
+
+          {content.rsvpEnabled && (
+            <Screen tape scene={5}>
+              <Rsvp inviteId={inviteId} demo={demo} guestName={guest} seats={seats} tape accent={t.accent} />
+            </Screen>
+          )}
+
+          <Screen tape scene={5}>
+            <div className={`rounded-md border p-5 text-center ${panel}`}>
+              <p className="mb-3 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em]" aria-hidden>
+                <span>■ Stop</span><span style={{ color: t.accent }}>End of tape</span>
+              </p>
+              <p className="pb-1 text-4xl leading-tight" style={ur ? { fontFamily: font } : goldScript}>{ur ? content.closing : "Thank you for watching, see you there"}</p>
+              <p className="mt-2 pb-1 text-3xl" style={ur ? { fontFamily: font } : goldScript}>{names}</p>
+              <button type="button" className={`${SMALL_BTN} mt-5 px-6 text-xs`} style={{ background: t.accent, color: t.bg, boxShadow: "0 4px 0 #A8531A" }} onClick={toTop}>◀◀ Rewind</button>
+            </div>
+          </Screen>
+          <p className="pb-[calc(5rem+var(--frame-bottom,0px))] text-center text-xs text-white/70">Made with Digital Dawat</p>
+        </div>
+        ) : (
         <div className="mx-auto max-w-md space-y-6 px-4 pb-[calc(1.5rem+var(--frame-bottom,0px))] pt-[calc(1.5rem+var(--frame-top,0px))]">
           <div {...sceneAttr(0)} className="overflow-hidden rounded-2xl shadow-xl"><InviteCard template={template} content={content} chrome={!tape} clear={tape && !!template.backdrop} /></div>
 
@@ -358,6 +530,7 @@ export function InviteExperience({
           )}
           <p className={`pb-16 text-center text-xs ${muted}`}>Made with Digital Dawat</p>
         </div>
+        )}
       </div>
 
       {/* tape: on-screen display (play state, timecode, viewfinder corners, date stamp, scroll hint) */}
