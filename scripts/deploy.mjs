@@ -11,10 +11,11 @@ import { join } from "node:path";
 
 const PROJECT = process.env.CF_PAGES_PROJECT ?? "digital-dawat";
 const WRANGLER = "wrangler@4.149.0";
-const run = (cmd, args, opts = {}) => spawnSync(cmd, args, { stdio: "inherit", shell: process.platform === "win32", ...opts });
+// Commands are fixed strings (no user input), run through the shell so npm/npx work on Windows too.
+const run = (cmd, opts = {}) => spawnSync(cmd, { stdio: "inherit", shell: true, ...opts });
 
 if (!process.argv.includes("--skip-build")) {
-  const b = run("npm", ["run", "build"]);
+  const b = run("npm run build");
   if (b.status !== 0) process.exit(b.status ?? 1);
 }
 if (!existsSync("out")) {
@@ -25,7 +26,7 @@ if (!existsSync("out")) {
 const dir = mkdtempSync(join(tmpdir(), "dawat-deploy-"));
 try {
   cpSync("out", dir, { recursive: true });
-  const d = run("npx", ["--yes", WRANGLER, "pages", "deploy", ".", "--project-name", PROJECT, "--branch", "main"], {
+  const d = run(`npx --yes ${WRANGLER} pages deploy . --project-name ${PROJECT} --branch main`, {
     cwd: dir,
     env: { ...process.env, WRANGLER_SEND_METRICS: "false" },
   });

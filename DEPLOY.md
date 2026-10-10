@@ -3,24 +3,27 @@
 The site is a static export (`out/`), so Cloudflare only serves files. Videos are rendered in the
 customer's browser; nothing runs on a server. Data lives in Supabase (already set up).
 
-## Before you start (one-time)
+## Live site
+**https://digital-dawat.pages.dev** (Cloudflare Pages project `digital-dawat`, first deployed 2026-10-10).
+
+## Before real customers (one-time checklist)
 - [ ] Read Cloudflare's current terms to confirm commercial use is allowed on the free plan
-      (I could not retrieve their agreement; third-party reviews say yes, unlike Vercel Hobby which forbids it).
+      (their agreement could not be retrieved; third-party reviews say yes, unlike Vercel Hobby which forbids it).
 - [ ] Optional: make the GitHub repo private (Settings -> General -> Danger zone -> Change visibility).
 
-## Option A: deploy from this computer (simplest, recommended first)
-1. Create a free account at https://dash.cloudflare.com/sign-up (use your own login; never share it).
-2. In a terminal:
-   ```
-   cd "D:\New folder (2)\dawat"
-   npx wrangler@4.149.0 login        # opens a browser; click Allow
-   npm run deploy                    # builds, then uploads ./out
-   ```
-   The first deploy asks to create the project `digital-dawat`. Your site appears at
-   `https://digital-dawat.pages.dev` (if the name is taken, change `--project-name` in package.json's
-   `deploy` script and the URLs below).
-3. Set the real address so the sitemap and robots.txt are correct, then redeploy:
-   put `NEXT_PUBLIC_SITE_URL=https://digital-dawat.pages.dev` in `.env.local`, run `npm run deploy` again.
+## Deploying again
+```
+cd "D:\New folder (2)\dawat"
+npm run deploy          # builds, then uploads ./out from a clean temp folder
+```
+First time on a new computer: `npx wrangler@4.149.0 login` (opens a browser; click Allow). The project already exists.
+
+**Do not run `wrangler` inside this folder.** It detects Next.js and tries to auto-install an adapter, which edits
+`package.json` and breaks `node_modules`. `scripts/deploy.mjs` copies `out/` to a temp folder and runs Wrangler there.
+
+The project was created with `wrangler pages project create digital-dawat --production-branch main --force`, run from
+a clean folder. The `--force` is needed because newer Wrangler otherwise routes Pages through Workers and requires a
+`workers.dev` name. Do not pass `--force` again.
 
 `wrangler login` stores a Cloudflare login on this computer. Run `npx wrangler@4.149.0 logout` when finished,
 or revoke it at dash.cloudflare.com -> My Profile -> API Tokens / OAuth.
@@ -31,7 +34,7 @@ Build command `npm run build`, output directory `out`, and add the same `NEXT_PU
 `.env.example` under Settings -> Environment variables (they are baked in at build time).
 Note: a Git-connected Pages project cannot later be switched to direct upload.
 
-## After the first deploy (required, or login will fail)
+## After deploying (required, or login will fail)
 1. Supabase -> Authentication -> URL Configuration:
    - Site URL: `https://digital-dawat.pages.dev`
    - Redirect URLs: add `https://digital-dawat.pages.dev/**` (keep `http://localhost:3000/**` for development).
