@@ -8,6 +8,7 @@ import { backendConfigured, getSupabase, paymentInfo } from "@/lib/supabase";
 import { NotConfigured, useUser } from "@/lib/useUser";
 import { formatPKR, getTemplate } from "@/lib/templates";
 import { SupportLink } from "@/components/SupportLink";
+import { supportWhatsapp } from "@/lib/config";
 
 interface Order {
   id: string;
@@ -81,7 +82,9 @@ function OrderInner() {
   const id = useSearchParams().get("id");
   const user = useUser();
   const [order, setOrder] = useState<Order | null>(null);
-  const methods = METHODS.filter((m) => paymentInfo[m.id]);
+  /** payment details from the settings table (the owner edits them in Supabase); the build's values until it exists */
+  const [pay, setPay] = useState<Record<Method, string>>({ bank: paymentInfo.bank, jazzcash: paymentInfo.jazzcash, easypaisa: paymentInfo.easypaisa });
+  const methods = METHODS.filter((m) => pay[m.id]);
   const [picked, setPicked] = useState<Method | null>(null);
   const method: Method = picked ?? methods[0]?.id ?? "bank";
   const [ref, setRef] = useState("");
@@ -101,6 +104,13 @@ function OrderInner() {
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- loads remote data once the user is known
   useEffect(() => { if (user) load(); }, [user, load]);
+  useEffect(() => {
+    getSupabase()?.from("settings").select("key,value").in("key", ["pay_bank", "pay_jazzcash", "pay_easypaisa"]).then(({ data, error }) => {
+      if (error || !data?.length) return; // table not set up yet: keep the build's values
+      const v = Object.fromEntries(data.map((r) => [r.key, String(r.value ?? "").trim()]));
+      setPay({ bank: v.pay_bank ?? "", jazzcash: v.pay_jazzcash ?? "", easypaisa: v.pay_easypaisa ?? "" });
+    });
+  }, []);
   useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
 
   if (!backendConfigured) return <NotConfigured />;
@@ -109,7 +119,7 @@ function OrderInner() {
   if (notFound) return <p className="p-8 text-center">We couldn&apos;t find this order in your account. <Link className="underline" href="/account">Go to My orders</Link></p>;
   if (!order) return <p className="p-8 text-center">Loading…</p>;
 
-  const details = paymentInfo[method];
+  const details = pay[method];
   const template = order.invites ? getTemplate(order.invites.template_id) : undefined;
 
   function pick(f: File | null) {
@@ -195,6 +205,11 @@ function OrderInner() {
                 </p>
               )}
             </div>
+            {supportWhatsapp && (
+              <p className="mt-4 rounded-xl bg-background p-3 text-sm text-foreground/80">
+                Paying from outside Pakistan? Message us and we&apos;ll arrange another way to pay. <SupportLink topic={`I'm outside Pakistan and want to pay for my ${template?.name ?? ""} invitation`} className="text-brand" />
+              </p>
+            )}
           </section>
 
           <section className="rounded-2xl border border-line bg-card p-5" aria-labelledby="pay-2">
