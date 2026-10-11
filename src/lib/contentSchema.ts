@@ -8,7 +8,7 @@ import { isOurPhoto } from "./photos";
 const Photo = z.string().trim().max(400).refine((v) => v === "" || isOurPhoto(v), "Please upload the photo again").default("");
 
 export const EventSchema = z.object({
-  title: z.string().trim().min(1, "Required").max(60),
+  title: z.string().trim().min(1, "Give this event a name, for example Mehndi").max(60),
   date: z.string().min(1, "Pick a date"),
   time: z.string().max(20),
   venue: z.string().trim().max(120),
@@ -23,13 +23,13 @@ export const EventSchema = z.object({
 });
 
 export const FaqSchema = z.object({
-  q: z.string().trim().min(1, "Required").max(120),
-  a: z.string().trim().min(1, "Required").max(400),
+  q: z.string().trim().min(1, "Type the question, or remove it").max(120),
+  a: z.string().trim().min(1, "Type the answer, or remove the question").max(400),
 });
 
 /** A family member guests can call. The phone is optional. */
 export const MemberSchema = z.object({
-  name: z.string().trim().min(1, "Required").max(60),
+  name: z.string().trim().min(1, "Type a name, or remove this person").max(60),
   phone: z
     .string()
     .trim()
@@ -45,7 +45,7 @@ export const ContentSchema = z.object({
   language: z.enum(["en", "ur"]),
   bismillah: z.boolean(),
   headline: z.string().trim().max(80),
-  host1: z.string().trim().min(1, "Required").max(40),
+  host1: z.string().trim().min(1, "Type the first name shown on the invitation").max(40),
   host2: z.string().trim().max(40),
   message: z.string().trim().max(400),
   family1: z.string().trim().max(120),

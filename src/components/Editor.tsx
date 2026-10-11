@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Plus, Trash2, X } from "lucide-react";
+import { Eye, Plus, Trash2, Undo2, X } from "lucide-react";
 import {
   defaultContent, newEvent, randomSlug, type InviteContent, type InviteEvent,
 } from "@/lib/content";
@@ -26,6 +26,26 @@ export function Editor() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState("");
   const [previewing, setPreviewing] = useState(false);
+  /** the last removed item, so a mis-tap on Remove can be undone */
+  const [removed, setRemoved] = useState<{ label: string; restore: () => void } | null>(null);
+  const closeBtn = useRef<HTMLButtonElement>(null);
+
+  // full preview: Escape closes it, focus starts on Close, and the page behind doesn't scroll
+  useEffect(() => {
+    if (!previewing) return;
+    closeBtn.current?.focus();
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setPreviewing(false); };
+    document.addEventListener("keydown", onKey);
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = overflow; };
+  }, [previewing]);
+
+  useEffect(() => {
+    if (!removed) return;
+    const id = setTimeout(() => setRemoved(null), 7000);
+    return () => clearTimeout(id);
+  }, [removed]);
 
   useEffect(() => {
     if (!template) return;
@@ -100,7 +120,14 @@ export function Editor() {
       const e: Record<string, string> = {};
       for (const i of parsed.error.issues) e[i.path.join(".")] = i.message;
       setErrors(e);
-      setMsg("Please fix the highlighted fields.");
+      const n = Object.keys(e).length;
+      setMsg(`${n === 1 ? "One field needs" : `${n} fields need`} fixing. We've taken you to the first one.`);
+      // take the customer to the first problem instead of leaving them at the bottom of a long form
+      setTimeout(() => {
+        const first = document.querySelector("#editor-form [role=alert]");
+        first?.scrollIntoView({ block: "center", behavior: "smooth" });
+        first?.parentElement?.querySelector<HTMLElement>("input:not([type=file]),textarea")?.focus({ preventScroll: true });
+      }, 50);
       return;
     }
     setErrors({});
@@ -140,11 +167,24 @@ export function Editor() {
   }
 
   const here = `/create?t=${template.id}`;
+  /** remove an item from a list, keeping a one-tap undo */
+  type ListKey = "events" | "faq" | "members1" | "members2";
+  const removeWithUndo = (label: string, key: ListKey, i: number) => {
+    const item = content[key][i];
+    const splice = (c: InviteContent, insert: boolean) => {
+      const list = [...c[key]] as unknown[];
+      if (insert) list.splice(i, 0, item); else list.splice(i, 1);
+      return { ...c, [key]: list } as InviteContent;
+    };
+    setContent((c) => c && splice(c, false));
+    // undo puts back just this item, keeping any edits made since
+    setRemoved({ label, restore: () => setContent((c) => c && splice(c, true)) });
+  };
   const err = (k: string) => (errors[k] ? <p role="alert" className="mt-1 text-sm text-red-700">{errors[k]}</p> : null);
 
   return (
-    <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-[1fr_340px]">
-      <form onSubmit={(e) => { e.preventDefault(); order(); }} className="order-2 space-y-6 lg:order-1" noValidate>
+    <div className="mx-auto grid max-w-6xl gap-8 px-4 pt-8 pb-28 lg:grid-cols-[1fr_340px] lg:pb-8">
+      <form id="editor-form" onSubmit={(e) => { e.preventDefault(); order(); }} className="order-2 space-y-6 lg:order-1" noValidate>
         <div>
           <h1 className="font-display text-4xl font-bold text-brand">Customise {template.name}</h1>
           <p className="text-sm text-foreground/70">Your changes save automatically on this device.</p>
@@ -216,16 +256,16 @@ export function Editor() {
                   <input className="field" value={content[labelKey]} maxLength={30} placeholder={side === 1 ? "Groom's side" : "Bride's side"} onChange={(e) => set({ [labelKey]: e.target.value } as Partial<InviteContent>)} />
                 </label>
                 {list.map((m, i) => (
-                  <div key={i} className="grid grid-cols-[1fr_1fr_auto] items-end gap-2">
+                  <div key={i} className="grid grid-cols-[1fr_auto] items-end gap-2 sm:grid-cols-[1fr_1fr_auto]">
                     <label className="block text-sm">Name
                       <input className="field" value={m.name} maxLength={60} onChange={(e) => setList(list.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))} />
                       {err(`${key}.${i}.name`)}
                     </label>
-                    <label className="block text-sm">Phone (optional)
+                    <label className="col-start-1 block text-sm sm:col-start-auto">Phone (optional)
                       <input className="field" inputMode="tel" value={m.phone} maxLength={20} placeholder="+92 300 0000000" onChange={(e) => setList(list.map((x, j) => (j === i ? { ...x, phone: e.target.value } : x)))} />
                       {err(`${key}.${i}.phone`)}
                     </label>
-                    <button type="button" className="press grid size-11 place-items-center rounded-full text-red-700" aria-label={`Remove ${m.name || "person"}`} onClick={() => setList(list.filter((_, j) => j !== i))}>
+                    <button type="button" className="press col-start-2 row-start-1 grid size-11 place-items-center rounded-full text-red-700 sm:col-start-auto sm:row-start-auto" aria-label={`Remove ${m.name || "person"}`} onClick={() => removeWithUndo(m.name || "person", key, i)}>
                       <Trash2 className="size-4" aria-hidden />
                     </button>
                   </div>
@@ -251,7 +291,7 @@ export function Editor() {
               <legend className="flex w-full items-center justify-between px-1 text-sm font-semibold">
                 <span>Event {i + 1}</span>
                 {content.events.length > 1 && (
-                  <button type="button" className="inline-flex min-h-11 items-center gap-1 text-red-700" onClick={() => set({ events: content.events.filter((_, j) => j !== i) })}>
+                  <button type="button" className="inline-flex min-h-11 items-center gap-1 text-red-700" onClick={() => removeWithUndo(ev.title || `Event ${i + 1}`, "events", i)}>
                     <Trash2 className="size-4" aria-hidden /> Remove
                   </button>
                 )}
@@ -302,7 +342,7 @@ export function Editor() {
             <fieldset key={i} className="space-y-3 rounded-2xl border border-line bg-card p-4">
               <legend className="flex w-full items-center justify-between px-1 text-sm font-semibold">
                 <span>Question {i + 1}</span>
-                <button type="button" className="inline-flex min-h-11 items-center gap-1 text-red-700" onClick={() => set({ faq: content.faq.filter((_, j) => j !== i) })}>
+                <button type="button" className="inline-flex min-h-11 items-center gap-1 text-red-700" onClick={() => removeWithUndo(f.q || `Question ${i + 1}`, "faq", i)}>
                   <Trash2 className="size-4" aria-hidden /> Remove
                 </button>
               </legend>
@@ -352,8 +392,27 @@ export function Editor() {
         <div className="mx-auto w-full max-w-[300px] overflow-hidden rounded-2xl border border-line shadow-xl">
           <InviteCard template={template} content={content} />
         </div>
-        <VideoExport template={template} content={content} />
+        <div className="hidden lg:block"><VideoExport template={template} content={content} /></div>
       </aside>
+      <div className="order-3 lg:hidden"><VideoExport template={template} content={content} /></div>
+
+      {/* phones: price, preview and continue always in reach */}
+      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-2 border-t border-line bg-background/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur lg:hidden">
+        <p className="mr-auto text-sm font-semibold">{formatPKR(template.price)}</p>
+        <button type="button" className="btn btn-ghost" onClick={() => setPreviewing(true)}><Eye className="size-4" aria-hidden /> Preview</button>
+        <button type="submit" form="editor-form" className="btn btn-primary" disabled={busy}>{busy ? "Saving…" : "Continue"}</button>
+      </div>
+
+      <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center px-4 lg:bottom-6">
+        {removed && (
+          <div className="pointer-events-auto flex items-center gap-3 rounded-full bg-foreground px-5 py-2 text-sm text-background shadow-xl">
+            <span className="max-w-[14rem] truncate">Removed {removed.label}</span>
+            <button type="button" className="inline-flex min-h-11 items-center gap-1 font-semibold text-gold-light" onClick={() => { removed.restore(); setRemoved(null); }}>
+              <Undo2 className="size-4" aria-hidden /> Undo
+            </button>
+          </div>
+        )}
+      </div>
 
       {previewing && (
         <div role="dialog" aria-modal="true" aria-label="Invitation preview" className="modal-overlay fixed inset-0 z-50 grid place-items-center bg-black/70 p-3">
@@ -361,7 +420,7 @@ export function Editor() {
             <PhoneFrame margin={32} plainClassName="h-[92dvh] w-[min(100vw-1.5rem,390px)] max-md:overflow-hidden max-md:rounded-[2rem] max-md:border-8 max-md:border-foreground/90">
               <InviteExperience template={template} content={content} demo />
             </PhoneFrame>
-            <button type="button" onClick={() => setPreviewing(false)} aria-label="Close preview"
+            <button ref={closeBtn} type="button" onClick={() => setPreviewing(false)} aria-label="Close preview"
               className="press absolute -right-3 -top-3 z-50 grid size-11 place-items-center rounded-full bg-black/70 text-white md:right-1 md:top-1">
               <X className="size-5" aria-hidden />
             </button>
