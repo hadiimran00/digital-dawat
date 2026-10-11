@@ -56,7 +56,22 @@ export function Rsvp({
     else setState("done");
   }
 
-  if (state === "done") return <p role="status" className="rounded-xl bg-green-50 p-5 text-center text-green-900">Thank you! Your reply has been sent.</p>;
+  if (state === "done") {
+    const chosen = events.length > 1 ? going.map((e) => e.title) : events.map((e) => e.title);
+    const list = chosen.length > 1 ? `${chosen.slice(0, -1).join(", ")} and ${chosen[chosen.length - 1]}` : chosen[0];
+    return (
+      <div role="status" className={`space-y-2 rounded-2xl border p-6 text-center ${box}`}>
+        <p className={titleClass ?? (tape ? "text-center font-mono text-2xl font-bold uppercase tracking-[0.16em]" : "font-display text-2xl font-bold")} style={titleStyle}>
+          Thank you{name.trim() ? `, ${name.trim()}` : ""}!
+        </p>
+        <p className="font-display text-lg">
+          {attending
+            ? `Your reply has been sent: you're coming${list ? ` to ${list}` : ""}, ${guests} ${guests === 1 ? "guest" : "guests"}. We can't wait to see you.`
+            : "Your reply has been sent. We'll miss you, and thank you for letting us know."}
+        </p>
+      </div>
+    );
+  }
   return (
     <form onSubmit={submit} className={`space-y-4 rounded-2xl border p-5 ${box}`}>
       <h2 className={titleClass ?? (tape ? "text-center font-mono text-2xl font-bold uppercase tracking-[0.16em]" : "font-display text-2xl font-bold")} style={titleStyle}>Will you attend?</h2>
