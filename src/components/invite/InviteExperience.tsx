@@ -351,8 +351,9 @@ const timecode = (s: number) => `${Math.floor(s / 3600)}:${pad(Math.floor(s / 60
  * and see-through panels.
  */
 export function InviteExperience({
-  template, content: fullContent, inviteId, demo = false, preview = false,
-}: { template: Template; content: InviteContent; inviteId?: string; demo?: boolean; preview?: boolean }) {
+  template, content: fullContent, inviteId, demo = false, preview = false, autoplay = false,
+}: { template: Template; content: InviteContent; inviteId?: string; demo?: boolean; preview?: boolean; autoplay?: boolean }) {
+  // autoplay = gallery hover preview: opens itself (silently) and steps through every screen, then replays
   // demo = a template showcase for buyers (sample data, explanatory notes, replies off)
   // preview = the owner or an admin viewing a real invitation before it is published: exactly what guests will see, replies off
   const t = template.theme;
@@ -435,6 +436,26 @@ export function InviteExperience({
     const id = setTimeout(() => setGone(true), gated ? 1500 : 560);
     return () => clearTimeout(id);
   }, [opened, gated]);
+
+  // autoplay: open after a beat (no music), then one screen at a time; at the end, close and start over
+  useEffect(() => {
+    if (!autoplay || opened) return;
+    const id = setTimeout(() => setOpened(true), 1100);
+    return () => clearTimeout(id);
+  }, [autoplay, opened]);
+  useEffect(() => {
+    const el = scroller.current;
+    if (!autoplay || !gone || !el) return;
+    const id = setInterval(() => {
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 8) {
+        el.scrollTo({ top: 0 });
+        setSeconds(0);
+        setGone(false);
+        setOpened(false);
+      } else el.scrollTo({ top: el.scrollTop + el.clientHeight, behavior: "smooth" });
+    }, 2200);
+    return () => clearInterval(id);
+  }, [autoplay, gone]);
 
   // tape: timecode runs once the guest presses play
   useEffect(() => {

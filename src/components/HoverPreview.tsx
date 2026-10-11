@@ -1,14 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { Music, Pause, Play } from "lucide-react";
 import type { Template } from "@/lib/templates";
 import { defaultContent } from "@/lib/content";
-import type { Animator } from "@/lib/videoExport";
 
 const FADE_MS = 220;
-const HOVER_INTENT_MS = 120;
-const HOLD_SECS = 1.2; // the finished card stays on screen before the loop restarts
+const HOVER_INTENT_MS = 150;
+/** the invitation is laid out at iPhone width, then scaled down to the card */
+const PHONE_W = 393;
+
+// loaded on first hover, so the gallery itself stays light
+const InviteExperience = dynamic(() => import("@/components/invite/InviteExperience").then((m) => m.InviteExperience), { ssr: false });
 
 /** Only one preview plays at a time, across the whole page. */
 let active: { owner: object; stop: () => void } | null = null;
@@ -17,86 +21,45 @@ const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)"
 const saveData = () => Boolean((navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData);
 
 /**
- * Plays the template's animation live on a canvas (no video file needed) over its thumbnail.
+ * Plays the real invitation over the card's thumbnail: it opens itself and steps through every screen, silently.
  * Mouse: starts after a short hover, cross-fades in and out. Touch screens: the card most in view plays on its own.
  * Keyboard and touch users also get a play button. Respects reduced motion and data saver.
  */
 export function HoverPreview({ template, children }: { template: Template; children: React.ReactNode }) {
   const [playing, setPlaying] = useState(false);
+  const [shown, setShown] = useState(false);
+  const [scale, setScale] = useState(0);
   const host = useRef<HTMLDivElement>(null);
-  const bar = useRef<HTMLDivElement>(null);
-  const loading = useRef<Promise<Animator> | null>(null);
-  const raf = useRef(0);
   const intent = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const token = useRef(0); // invalidates a start() that was stopped while still loading
+  const fade = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const me = useRef({}); // identifies this card as the page's active preview
 
   const stop = useCallback(() => {
     clearTimeout(intent.current);
-    token.current++;
-    const canvas = host.current?.querySelector("canvas");
-    if (canvas) {
-      canvas.style.opacity = "0"; // fade back to the thumbnail, then stop drawing
-      const mine = token.current;
-      setTimeout(() => {
-        if (token.current !== mine) return;
-        cancelAnimationFrame(raf.current);
-        canvas.remove();
-      }, FADE_MS);
-    } else cancelAnimationFrame(raf.current);
-    if (bar.current) bar.current.style.transform = "scaleX(0)";
+    setShown(false); // fade back to the thumbnail, then unmount
+    clearTimeout(fade.current);
+    fade.current = setTimeout(() => setPlaying(false), FADE_MS);
     if (active?.owner === me.current) active = null;
-    setPlaying(false);
   }, []);
 
-  const start = useCallback(async () => {
+  const start = useCallback(() => {
     if (reducedMotion()) return;
     if (active && active.owner !== me.current) active.stop();
     active = { owner: me.current, stop };
-    const mine = ++token.current;
+    clearTimeout(fade.current);
     setPlaying(true);
-    loading.current ??= import("@/lib/videoExport").then((m) =>
-      m.createAnimator(template, defaultContent(template.category), template.motion),
-    );
-    let a: Animator;
-    try {
-      a = await loading.current;
-    } catch {
-      loading.current = null;
-      if (token.current === mine) setPlaying(false);
-      return;
-    }
-    if (token.current !== mine) return; // stopped while loading
-    cancelAnimationFrame(raf.current);
-    const canvas = a.canvas;
-    canvas.className = "pointer-events-none absolute inset-0 h-full w-full";
-    canvas.style.transition = `opacity ${FADE_MS}ms cubic-bezier(0.23, 1, 0.32, 1)`;
-    canvas.style.opacity = "0";
-    if (canvas.parentElement !== host.current) host.current?.insertBefore(canvas, bar.current?.parentElement ?? null);
-    a.reset();
-    a.draw(0);
-    requestAnimationFrame(() => { canvas.style.opacity = "1"; });
-    const cycle = a.seconds + HOLD_SECS;
-    let t0 = performance.now();
-    let fadedForLoop = false;
-    const loop = (now: number) => {
-      let sec = (now - t0) / 1000;
-      if (sec >= cycle) {
-        a.reset();
-        t0 = now;
-        sec = 0;
-        fadedForLoop = false;
-        canvas.style.opacity = "1";
-      } else if (!fadedForLoop && sec >= cycle - FADE_MS / 1000) {
-        fadedForLoop = true;
-        canvas.style.opacity = "0.15"; // a soft dip instead of a hard cut back to the start
-      }
-      a.draw(Math.min(sec, a.seconds));
-      if (bar.current) bar.current.style.transform = `scaleX(${Math.min(1, sec / a.seconds)})`;
-      raf.current = requestAnimationFrame(loop);
-    };
-    raf.current = requestAnimationFrame(loop);
-  }, [template, stop]);
+    // give the invitation a moment to lay out before it fades in
+    fade.current = setTimeout(() => setShown(true), 60);
+  }, [stop]);
+
+  // keep the phone-width invitation scaled to the card's width
+  useEffect(() => {
+    const el = host.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => setScale(e.contentRect.width / PHONE_W));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   // Touch screens have no hover: play the card that is most in view, one at a time.
   useEffect(() => {
@@ -115,7 +78,7 @@ export function HoverPreview({ template, children }: { template: Template; child
 
   useEffect(() => () => {
     clearTimeout(intent.current);
-    cancelAnimationFrame(raf.current);
+    clearTimeout(fade.current);
     if (active?.owner === me.current) active = null;
   }, []);
 
@@ -131,14 +94,23 @@ export function HoverPreview({ template, children }: { template: Template; child
       onPointerLeave={(e) => { if (e.pointerType === "mouse") stop(); }}
     >
       {children}
+      {playing && scale > 0 && (
+        <div
+          aria-hidden
+          inert
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+          style={{ opacity: shown ? 1 : 0, transition: `opacity ${FADE_MS}ms cubic-bezier(0.23, 1, 0.32, 1)`, background: template.theme.bg }}
+        >
+          <div className="origin-top-left" style={{ width: PHONE_W, height: `${100 / scale}%`, transform: `scale(${scale})` }}>
+            <InviteExperience template={template} content={defaultContent(template.category)} demo autoplay />
+          </div>
+        </div>
+      )}
       {template.music && (
         <span className="pointer-events-none absolute left-2 top-2 z-10 inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-1 text-[11px] font-semibold text-white backdrop-blur">
           <Music className="size-3" aria-hidden /> Music
         </span>
       )}
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[3px] bg-black/20">
-        <div ref={bar} className="h-full origin-left bg-white/90" style={{ transform: "scaleX(0)" }} />
-      </div>
       <button
         type="button"
         onClick={() => (playing ? stop() : start())}
