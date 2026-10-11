@@ -559,18 +559,6 @@ export function InviteExperience({
             </Screen>
           )}
 
-          {(content.family1 || content.family2 || content.members1.length > 0 || content.members2.length > 0) && (
-            <Screen tape scene={1} framed={tape} align={look.align} photo={sc.families}>
-              <div className={`relative ${tape ? "p-4" : "px-4 pb-5 pt-12"} ${look.panel}`} style={look.panelStyle}>
-                {concept === "royal" && <Finial />}<PanelFrame look={look} />
-                {tape ? <Tag tape label={ur ? "خاندان" : "Families"} accent={t.accent} /> : <SceneTitle look={look} concept={concept!}>{ur ? "دعاؤں کے ساتھ" : "With the blessings of"}</SceneTitle>}
-                <div className={tape ? "" : "mt-4"}>
-                  {tape ? <Families content={content} ur={ur} glass={look.dark} /> : <FamilyColumns content={content} ur={ur} accent={t.accent} dark={look.dark} />}
-                </div>
-              </div>
-            </Screen>
-          )}
-
           {(guest || demo) && (
             <Screen tape scene={2} framed={tape} align={look.align} photo={sc.message}>
               <section className={`relative px-5 pb-5 ${tape ? "pt-5" : "pt-12"} text-center ${look.panel}`} style={look.panelStyle}>
@@ -740,6 +728,19 @@ export function InviteExperience({
             </Screen>
           )}
 
+          {/* family contacts sit near the end: guests look for them when they have a question */}
+          {(content.family1 || content.family2 || content.members1.length > 0 || content.members2.length > 0) && (
+            <Screen tape scene={5} framed={tape} align={look.align} photo={sc.families}>
+              <div className={`relative ${tape ? "p-4" : "px-4 pb-5 pt-12"} ${look.panel}`} style={look.panelStyle}>
+                {concept === "royal" && <Finial />}<PanelFrame look={look} />
+                {tape ? <Tag tape label={ur ? "خاندان" : "Families"} accent={t.accent} /> : <SceneTitle look={look} concept={concept!}>{ur ? "دعاؤں کے ساتھ" : "With the blessings of"}</SceneTitle>}
+                <div className={tape ? "" : "mt-4"}>
+                  {tape ? <Families content={content} ur={ur} glass={look.dark} /> : <FamilyColumns content={content} ur={ur} accent={t.accent} dark={look.dark} />}
+                </div>
+              </div>
+            </Screen>
+          )}
+
           <Screen tape scene={5} framed={tape} align={look.align} photo={sc.closing}>
             {tape ? (
               <div className={`p-5 text-center ${look.panel}`}>
@@ -772,10 +773,6 @@ export function InviteExperience({
               {/* eslint-disable-next-line @next/next/no-img-element -- static export, photo comes from our storage */}
               <img src={couple} alt={ur ? "تصویر" : `Photo of ${names}`} className="aspect-[4/5] w-full object-cover" />
             </figure>
-          )}
-
-          {(content.family1 || content.family2 || content.members1.length > 0 || content.members2.length > 0) && (
-            <div {...sceneAttr(1)}><Tag tape={tape} label={ur ? "خاندان" : "Families"} /><Families content={content} ur={ur} glass={tape} /></div>
           )}
 
           {(guest || demo) && (
@@ -870,6 +867,10 @@ export function InviteExperience({
           )}
 
           {content.rsvpEnabled && <div {...sceneAttr(5)}><Rsvp inviteId={inviteId} demo={demo || preview} showNote={demo} guestName={guest} seats={seats} guestId={guestId} events={rsvpEvents} /></div>}
+          {(content.family1 || content.family2 || content.members1.length > 0 || content.members2.length > 0) && (
+            <div {...sceneAttr(5)}><Tag tape={tape} label={ur ? "خاندان" : "Families"} /><Families content={content} ur={ur} glass={tape} /></div>
+          )}
+
 
           {tape && (
             <div {...sceneAttr(5)} className="rounded-2xl border border-white/15 bg-black p-5 text-center font-mono text-sm text-white">

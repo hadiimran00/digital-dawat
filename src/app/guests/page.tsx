@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Check, Copy, Download, Pencil, Search, Send, Trash2, Upload, UserPlus } from "lucide-react";
+import { Check, Copy, Download, Pencil, RotateCw, Search, Send, Trash2, Upload, UserPlus, X } from "lucide-react";
 import { backendConfigured, getSupabase } from "@/lib/supabase";
 import { NotConfigured, useUser } from "@/lib/useUser";
 import { ContentSchema } from "@/lib/contentSchema";
@@ -70,6 +70,7 @@ function GuestsInner() {
   const [importEvents, setImportEvents] = useState<number[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState("");
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const origin = typeof window === "undefined" ? "" : window.location.origin;
 
@@ -80,10 +81,13 @@ function GuestsInner() {
     const parsed = inv && ContentSchema.safeParse(inv.content);
     if (!inv || !parsed?.success) return setInvite(null);
     setInvite({ id: inv.id, content: parsed.data, published: inv.status === "published" });
-    const [{ data: g }, { data: r }] = await Promise.all([
+    const [{ data: g, error: ge }, { data: r, error: re }] = await Promise.all([
       sb.from("guests").select("*").eq("invite_id", inv.id).order("created_at", { ascending: true }),
       sb.from("rsvps").select("guest_id,attending,guests").eq("invite_id", inv.id),
     ]);
+    // a failed load must never look like an empty guest list
+    if (ge || re) return setLoadFailed(true);
+    setLoadFailed(false);
     setGuests((g as Guest[]) ?? []);
     setReplies((r as Reply[]) ?? []);
   }, [user, slug]);
@@ -102,6 +106,13 @@ function GuestsInner() {
       if (saved) setTemplate(saved);
     } catch {}
   }, [slug]);
+
+  // success messages fade after a few seconds; problems stay until dismissed or replaced
+  useEffect(() => {
+    if (!msg?.ok) return;
+    const id = setTimeout(() => setMsg(null), 4000);
+    return () => clearTimeout(id);
+  }, [msg]);
 
   const replyBy = useMemo(() => {
     const m = new Map<string, Reply>();
@@ -126,11 +137,11 @@ function GuestsInner() {
     opened: guests.filter((g) => g.opened_at).length,
     replied: guests.filter((g) => replyBy.has(g.id)).length,
     places: guests.reduce((n, g) => n + g.seats, 0),
+    coming: guests.reduce((n, g) => { const r = replyBy.get(g.id); return n + (r?.attending ? r.guests : 0); }, 0),
   };
+  const inFilter = (g: Guest, f: Filter) => { const s = status(g); return f === "all" || (f === "waiting" ? s !== "replied" : s === f); };
   const shown = guests.filter((g) => {
-    const s = status(g);
-    const okF = filter === "all" || (filter === "waiting" ? s !== "replied" : s === filter);
-    return okF && (!q || g.name.toLowerCase().includes(q.toLowerCase()) || (g.phone ?? "").includes(q.replace(/\D/g, "")));
+    return inFilter(g, filter) && (!q || g.name.toLowerCase().includes(q.toLowerCase()) || (g.phone ?? "").includes(q.replace(/\D/g, "")));
   });
   const next = guests.find((g) => !g.sent_at);
 
@@ -162,7 +173,7 @@ function GuestsInner() {
   async function saveGuest(e: React.FormEvent) {
     e.preventDefault();
     const name = fName.trim();
-    if (!name) return flash(false, "Please enter the guest's name.");
+    if (!name) { const el = document.getElementById("guest-name"); el?.scrollIntoView({ block: "center", behavior: "smooth" }); el?.focus({ preventScroll: true }); return flash(false, "Type the guest's name as it should appear, for example Sarah & Family."); }
     const phone = fPhone.trim() ? normalizePhone(fPhone) : null;
     if (fPhone.trim() && !phone) return flash(false, "That phone number doesn't look right. Use e.g. 0300 1234567 or +92 300 1234567.");
     if (!editing && guests.length >= MAX_GUESTS) return flash(false, `You can add up to ${MAX_GUESTS} guests.`);
@@ -246,13 +257,30 @@ function GuestsInner() {
         </p>
       )}
 
-      <dl className="mt-6 grid grid-cols-2 gap-3 text-center sm:grid-cols-5">
+      <dl className="mt-6 grid grid-cols-5 gap-2 text-center sm:gap-3">
         {[["Guests", counts.total], ["Places", counts.places], ["Sent", counts.sent], ["Opened", counts.opened], ["Replied", counts.replied]].map(([k, v]) => (
-          <div key={k} className="rounded-xl border border-line bg-card p-3"><dt className="text-xs text-foreground/70">{k}</dt><dd className="text-2xl font-bold">{v}</dd></div>
+          <div key={k} className="rounded-xl border border-line bg-card px-1 py-3"><dt className="text-xs text-foreground/70">{k}</dt><dd className="text-2xl font-bold tabular-nums">{v}</dd></div>
         ))}
       </dl>
+      {loadFailed && (
+        <p role="alert" className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+          Your guest list didn&apos;t load. Check your connection and try again.
+          <button type="button" className="btn btn-ghost" onClick={load}><RotateCw className="size-4" aria-hidden /> Try again</button>
+        </p>
+      )}
+      {counts.replied > 0 && (
+        <p className="mt-2 text-sm text-foreground/70"><strong className="text-foreground">{counts.coming}</strong> {counts.coming === 1 ? "person is" : "people are"} coming so far, of {counts.places} places. <Link className="underline" href={`/rsvps?s=${slug}`}>See totals for each event</Link></p>
+      )}
 
-      {msg && <p role={msg.ok ? "status" : "alert"} className={`mt-4 rounded-xl border p-3 text-sm ${msg.ok ? "border-green-300 bg-green-50 text-green-900" : "border-red-300 bg-red-50 text-red-800"}`}>{msg.text}</p>}
+      {/* messages appear where the host is looking, not at the top of a long page */}
+      <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4">
+        {msg && (
+          <p role={msg.ok ? "status" : "alert"} className={`pointer-events-auto flex max-w-lg items-start gap-3 rounded-2xl border px-4 py-3 text-sm shadow-xl ${msg.ok ? "border-green-300 bg-green-50 text-green-900" : "border-red-300 bg-red-50 text-red-800"}`}>
+            <span className="py-1">{msg.text}</span>
+            <button type="button" className="press -my-1 -mr-2 grid size-11 shrink-0 place-items-center rounded-full" onClick={() => setMsg(null)} aria-label="Dismiss message"><X className="size-4" aria-hidden /></button>
+          </p>
+        )}
+      </div>
 
       {/* ---------------- sending queue ---------------- */}
       {guests.length > 0 && (
@@ -292,7 +320,7 @@ function GuestsInner() {
         <h2 className="font-display text-2xl font-bold">{editing ? `Edit ${editing.name}` : "Add a guest"}</h2>
         <form id="guest-form" onSubmit={saveGuest} className="mt-3 grid gap-3 sm:grid-cols-[2fr_2fr_1fr]">
           <label className="block">Name (as it should appear)
-            <input className="field" value={fName} maxLength={80} placeholder="Sarah & Family" onChange={(e) => setFName(e.target.value)} />
+            <input id="guest-name" className="field" value={fName} maxLength={80} placeholder="Sarah & Family" onChange={(e) => setFName(e.target.value)} />
           </label>
           <label className="block">WhatsApp number (optional)
             <input className="field" inputMode="tel" value={fPhone} maxLength={20} placeholder="0300 1234567" onChange={(e) => setFPhone(e.target.value)} />
@@ -357,7 +385,9 @@ function GuestsInner() {
         <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Show">
           {FILTERS.map((f) => (
             <button key={f.id} type="button" aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}
-              className={`press min-h-11 rounded-full border px-4 text-sm font-medium ${filter === f.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-card"}`}>{f.label}</button>
+              className={`press min-h-11 rounded-full border px-4 text-sm font-medium ${filter === f.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-card"}`}>
+              {f.label} <span className="tabular-nums opacity-70">{guests.filter((g) => inFilter(g, f.id)).length}</span>
+            </button>
           ))}
         </div>
         <label className="relative mt-3 block">
@@ -376,8 +406,10 @@ function GuestsInner() {
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 {badge(g)}
-                <a className="btn btn-primary" href={whatsappLink(g.phone, messageFor(g))} target="_blank" rel="noopener noreferrer" onClick={() => sentLater(g)} aria-label={`Send ${g.name}'s invitation on WhatsApp`}>
-                  <Send className="size-4" aria-hidden /> WhatsApp
+                {/* only guests still waiting for their invitation get the filled button, so the list shows who's left */}
+                <a className={`btn ${g.sent_at ? "btn-ghost" : "btn-primary"}`} href={whatsappLink(g.phone, messageFor(g))} target="_blank" rel="noopener noreferrer" onClick={() => sentLater(g)}
+                  aria-label={`${g.sent_at ? "Resend" : "Send"} ${g.name}'s invitation on WhatsApp`}>
+                  {g.sent_at ? <RotateCw className="size-4" aria-hidden /> : <Send className="size-4" aria-hidden />} {g.sent_at ? "Resend" : "WhatsApp"}
                 </a>
                 <button type="button" className="btn btn-ghost" onClick={() => copy(g)} aria-label={`Copy ${g.name}'s message and link`}><Copy className="size-4" aria-hidden />{copied === g.id ? "Copied" : "Copy"}</button>
                 {g.sent_at && !replyBy.has(g.id) && <button type="button" className="btn btn-ghost" onClick={() => unmarkSent(g)}>Mark not sent</button>}
