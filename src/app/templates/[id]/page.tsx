@@ -110,10 +110,16 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
           <h2 className="mt-6 font-display text-2xl font-bold">Included</h2>
           <ul className="mt-2 space-y-2 text-sm">
             <li>✓ Tap-to-open invitation with countdown, venue, map and add-to-calendar</li>
+            {t.concept && <li>✓ A full-screen scene for every event, with an opening guests remember</li>}
+            {t.music && <li>✓ Background music guests can turn on or off</li>}
+            <li>✓ Your own photos on the cover and with the couple{t.concept ? ", plus one for each event" : ""}</li>
             <li>✓ English or Urdu layout, with an optional Bismillah</li>
-            <li>✓ RSVP with guest counts, exportable to a spreadsheet</li>
-            <li>✓ A personal link for each guest, with their name and reserved places</li>
-            <li>✓ One link to share on WhatsApp, and a vertical video to download</li>
+            <li>✓ A guest list where each guest gets their own link, greeted by name (&ldquo;Dear Sarah &amp; Family&rdquo;)</li>
+            <li>✓ Invite each guest to only their events, for example Walima only, with their reserved places</li>
+            <li>✓ A WhatsApp sending queue: tap once per guest, and see who was sent, opened and replied</li>
+            <li>✓ RSVPs for each event, with totals per event, exportable to a spreadsheet</li>
+            <li>✓ Guests can change their reply later from the same link</li>
+            <li>✓ A vertical video to download{t.music ? ", with your photos and music" : " with your photos"}</li>
           </ul>
           <Link href={cta} prefetch={false} className="btn btn-primary mt-8 hidden md:inline-flex">Customise this template</Link>
 

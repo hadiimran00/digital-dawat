@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { JsonLd } from "@/components/JsonLd";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
-import { Eye, Video, Link2, ListChecks, UserRound, Languages, ChevronDown } from "lucide-react";
+import { Eye, Video, Link2, ListChecks, UserRound, Languages, ChevronDown, Send, Image as ImageIcon } from "lucide-react";
 import { TemplateGallery } from "@/components/TemplateGallery";
 import { InviteCard } from "@/components/invite/InviteCard";
 import { SIGNATURE, TEMPLATES, formatPKR } from "@/lib/templates";
@@ -17,9 +17,11 @@ const TO = formatPKR(Math.max(...PRICES));
 const FEATURES = [
   { icon: Eye, title: "See it before you pay", text: "Edit names, events and venues with a live preview. The price is on every template page, and you pay after you have previewed your own invitation." },
   { icon: Link2, title: "One link for WhatsApp", text: "Guests open one link on any phone. They see each event with its date, venue, map and dress code, and can add it to their calendar." },
-  { icon: UserRound, title: "A link for each guest", text: "Greet Sarah & Family by name and reserve their places, so the RSVP form already knows how many are invited." },
-  { icon: ListChecks, title: "RSVPs in one list", text: "Guests reply on the invitation. You see who is coming and how many guests, and you can export the list to a spreadsheet." },
-  { icon: Video, title: "A video for your story", text: "Download a short vertical video in four styles, made on your own device, for Instagram or WhatsApp Status." },
+  { icon: UserRound, title: "A link for each guest", text: "Add your guest list or paste it from Excel. Each guest is greeted by name, sees only the events they are invited to, and has their places reserved." },
+  { icon: Send, title: "Send on WhatsApp, one tap each", text: "A sending queue opens each guest's chat with your message and their link ready. You see who was sent, who opened it and who replied." },
+  { icon: ListChecks, title: "RSVPs for every event", text: "Guests reply per event, and can change their answer later. You see totals for each event and can export the list to a spreadsheet." },
+  { icon: ImageIcon, title: "Your own photos", text: "Upload your cover and couple photos, or keep the template's. The signature designs add a photo for each event and background music." },
+  { icon: Video, title: "A video for your story", text: "Download a short vertical video with your photos, and music on the signature designs, for Instagram or WhatsApp Status." },
   { icon: Languages, title: "English and Urdu", text: "Switch the whole card to Urdu with a right-to-left layout, with an optional Bismillah at the top." },
 ];
 
@@ -34,6 +36,7 @@ const FAQ = [
   ["Do my guests need an app or an account?", "No. They open your link in their phone browser, tap to open the invitation, and reply on the same page."],
   ["Can I see the invitation before I pay?", "Yes. You edit and preview your own invitation first, and the price is shown on every template page."],
   ["How do I pay?", "By online bank transfer to the account shown at checkout. Upload a screenshot of the receipt and we publish your invitation after we confirm the payment."],
+  ["Some guests are only invited to the Walima. Can I do that?", "Yes. In your guest list, pick the events for each guest. Their personal link shows only those events, and they can only reply to those."],
   ["Can I use Urdu?", "Yes. Switch the card to Urdu and the layout turns right to left. You can also type your own wording in either language."],
   ["Why is there no video button on my phone?", "Video export needs a recent browser that can encode MP4. Your invitation link works on any phone either way."],
 ];
@@ -92,7 +95,7 @@ export default function Home() {
 
       <section className="mx-auto max-w-6xl px-4 py-16">
         <h2 className="font-display text-4xl font-bold text-brand">What every invitation includes</h2>
-        <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map(({ icon: Icon, title, text }) => (
             <li key={title} className="rounded-2xl border border-line bg-card p-6">
               <Icon className="size-6 text-gold-deep" aria-hidden />
