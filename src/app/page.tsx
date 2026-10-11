@@ -12,7 +12,6 @@ export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 const PRICES = TEMPLATES.map((t) => t.price);
 const FROM = formatPKR(Math.min(...PRICES));
-const TO = formatPKR(Math.max(...PRICES));
 
 const FEATURES = [
   { icon: Eye, title: "See it before you pay", text: "Edit names, events and venues with a live preview. The price is on every template page, and you pay after you have previewed your own invitation." },
@@ -26,14 +25,21 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  ["Pick a template", `${TEMPLATES.length} original designs for nikkah, mehndi, baraat, walima and more.`],
-  ["Add your details", "Names, events, venues and dress codes, with a live preview as you type."],
-  ["Pay by online bank transfer", "Send the amount and upload the receipt. We publish your invitation once we confirm it."],
-  ["Share your link", "Send it on WhatsApp, download your video, and watch the replies arrive."],
+  ["Pick a design", `${TEMPLATES.length} designs for nikkah, mehndi, baraat, walima and more. Every page shows the price.`],
+  ["Add your details", "Names, events, venues, dress codes and your photos. The preview updates as you type."],
+  ["Pay by bank transfer", "Send the amount and upload the receipt. We publish your invitation once we confirm it."],
+  ["Send it to your guests", "Add your guest list, then send each person their own link on WhatsApp with one tap."],
+];
+
+/** the problems of a Pakistani guest list, and what the invitation does about each */
+const GUEST_LIST = [
+  ["Some guests are only invited to the Walima", "Pick the events for each guest. Their link shows those events and nothing else, so nobody turns up to the wrong function."],
+  ["Every family asks how many can come", "Reserve places on each guest's link. The reply form lets them answer for that many people."],
+  ["Replies are scattered across a dozen chats", "Every answer lands on one page, with totals for each event and a list you can download for the caterer."],
 ];
 
 const FAQ = [
-  ["Do my guests need an app or an account?", "No. They open your link in their phone browser, tap to open the invitation, and reply on the same page."],
+  ["Will older relatives be able to open it?", "Yes. They tap the link in WhatsApp and it opens in their phone's browser. One more tap opens the invitation, and they reply on the same page. Guests never need an app or an account."],
   ["Can I see the invitation before I pay?", "Yes. You edit and preview your own invitation first, and the price is shown on every template page."],
   ["How do I pay?", "By online bank transfer to the account shown at checkout. Upload a screenshot of the receipt and we publish your invitation after we confirm the payment."],
   ["Some guests are only invited to the Walima. Can I do that?", "Yes. In your guest list, pick the events for each guest. Their personal link shows only those events, and they can only reply to those."],
@@ -53,12 +59,13 @@ export default function Home() {
               Your whole wedding week in one WhatsApp link
             </h1>
             <p className="mt-6 max-w-lg text-lg text-brand-ink/80">
-              Mehndi, Nikkah, Baraat and Walima on one invitation. Guests tap to open it, see every event with its dress code, and reply with their guest count.
+              Mehndi to Walima in one invitation that opens with music, maps and a countdown. Each guest gets a link with their name and only the events they&apos;re invited to, and you see who&apos;s coming.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/templates" className="btn bg-gold-light text-brand">Browse {TEMPLATES.length} templates</Link>
-              <a href="#how" className="btn border border-brand-ink/30">See how it works</a>
+              <Link href="/templates" className="btn bg-gold-light text-brand">See the invitations</Link>
+              <a href="#how" className="btn border border-brand-ink/30">How it works</a>
             </div>
+            <p className="mt-5 text-sm text-brand-ink/70">From {FROM}, one flat price. You preview your own invitation before you pay.</p>
           </div>
           <div className="mx-auto w-full max-w-xs rise" style={{ animationDelay: "0.12s" }}>
             <div className="-rotate-2 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10">
@@ -70,10 +77,10 @@ export default function Home() {
 
       <section className="mx-auto max-w-6xl px-4 py-16">
         <p className="text-sm font-semibold uppercase tracking-[0.25em] text-gold-deep">Signature collection</p>
-        <h2 className="font-display text-4xl font-bold text-brand">Our most cinematic invitations</h2>
-        <p className="mb-8 mt-2 text-foreground/70">
-          {SIGNATURE.map((t) => t.name).join(", ")}: full-screen scenes for every event, music, and an opening guests remember.
-          Prices run from {FROM} to {TO} per invitation. Hover a card to watch it move.
+        <h2 className="font-display text-4xl font-bold text-brand">Invitations that open like a film</h2>
+        <p className="mb-8 mt-2 max-w-3xl text-foreground/70">
+          Replay plays like a home video from your Mehndi. Shahi Darbar opens through carved palace doors, and Wisaal behind a silk curtain.
+          Each one has a scene for every event and its own song. Hover a card, or scroll on your phone, to watch it play.
         </p>
         <TemplateGallery limit={4} />
       </section>
@@ -91,6 +98,19 @@ export default function Home() {
             ))}
           </ol>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pt-16">
+        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-gold-deep">Guest list</p>
+        <h2 className="font-display text-4xl font-bold text-brand">Made for a Pakistani guest list</h2>
+        <ul className="mt-8 grid gap-6 md:grid-cols-3">
+          {GUEST_LIST.map(([problem, answer]) => (
+            <li key={problem} className="border-l-2 border-gold pl-5">
+              <p className="font-display text-2xl font-bold leading-snug text-brand">{problem}</p>
+              <p className="mt-2 text-sm text-foreground/70">{answer}</p>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-16">
@@ -125,9 +145,9 @@ export default function Home() {
 
       <section className="bg-brand text-brand-ink">
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
-          <h2 className="font-display text-4xl font-bold">See your names on a card</h2>
-          <p className="mt-3 text-brand-ink/80">Choose a template, type your details, and preview your invitation before you pay.</p>
-          <Link href="/templates" className="btn mt-8 bg-gold-light text-brand">Choose your template</Link>
+          <h2 className="font-display text-4xl font-bold">See your own names on the invitation</h2>
+          <p className="mt-3 text-brand-ink/80">Choose a design and type your names and events. You see the finished invitation before you pay anything.</p>
+          <Link href="/templates" className="btn mt-8 bg-gold-light text-brand">Choose your design</Link>
         </div>
       </section>
     </>

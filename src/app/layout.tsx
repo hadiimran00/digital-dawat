@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: "Digital Dawat | Wedding invitations for WhatsApp", template: "%s | Digital Dawat" },
   description:
-    "Make a nikkah, mehndi, baraat or walima invitation with a live preview, flat PKR prices, RSVPs with guest counts and one link for WhatsApp. English and Urdu.",
+    "Nikkah, mehndi, baraat and walima invitations in one WhatsApp link. Personal links for each guest, RSVPs per event, music and video. Flat PKR price, preview before you pay.",
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
