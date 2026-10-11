@@ -174,3 +174,5 @@ create policy "owner deletes own invite photo" on storage.objects for delete to 
   using (bucket_id = 'invite-photos' and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin()));
 
 -- Guest list and per-event RSVPs: see supabase/migrations/2026-10-11_guest_list.sql
+
+-- Security hardening (RSVP limits, content and guest-list size): see supabase/migrations/2026-10-11_security_hardening.sql

@@ -1,4 +1,7 @@
 import { z } from "zod";
+
+// No eval-based fast path: the site's Content-Security-Policy does not allow evaluating strings as code.
+z.config({ jitless: true });
 import { isOurPhoto } from "./photos";
 
 /** A customer photo: empty, or a URL in our own storage bucket. */
