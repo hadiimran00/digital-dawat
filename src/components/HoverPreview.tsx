@@ -98,7 +98,7 @@ export function HoverPreview({ template, children }: { template: Template; child
         <div
           aria-hidden
           inert
-          className="pointer-events-none absolute inset-0 overflow-hidden"
+          className="pointer-events-none absolute inset-0 z-[11] overflow-hidden"
           style={{ opacity: shown ? 1 : 0, transition: `opacity ${FADE_MS}ms cubic-bezier(0.23, 1, 0.32, 1)`, background: template.theme.bg }}
         >
           <div className="origin-top-left" style={{ width: PHONE_W, height: `${100 / scale}%`, transform: `scale(${scale})` }}>
@@ -106,6 +106,7 @@ export function HoverPreview({ template, children }: { template: Template; child
           </div>
         </div>
       )}
+      {/* the playing invitation (z-11) covers the Music and Signature badges; the play button stays above it */}
       {template.music && (
         <span className="pointer-events-none absolute left-2 top-2 z-10 inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-1 text-[11px] font-semibold text-white backdrop-blur">
           <Music className="size-3" aria-hidden /> Music
@@ -116,7 +117,7 @@ export function HoverPreview({ template, children }: { template: Template; child
         onClick={() => (playing ? stop() : start())}
         aria-label={playing ? `Stop ${template.name} preview` : `Play ${template.name} preview`}
         aria-pressed={playing}
-        className="absolute bottom-2 right-2 z-10 grid size-11 place-items-center press rounded-full bg-black/55 text-white backdrop-blur hover:bg-black/75"
+        className="absolute bottom-2 right-2 z-20 grid size-11 place-items-center press rounded-full bg-black/55 text-white backdrop-blur hover:bg-black/75"
       >
         {playing ? <Pause className="size-4" aria-hidden /> : <Play className="size-4" aria-hidden />}
       </button>
