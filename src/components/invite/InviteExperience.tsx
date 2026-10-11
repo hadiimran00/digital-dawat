@@ -143,10 +143,10 @@ function Tag({ tape, label, accent }: { tape: boolean; label: string; accent?: s
 }
 
 /** Tape concept: one full screen per section, content resting near the bottom so the photo shows above it. */
-function Screen({ tape, scene, id, photo, framed = true, above, align = "end", children }: { tape: boolean; scene: number; id?: string; photo?: string; framed?: boolean; above?: React.ReactNode; align?: "start" | "end"; children: React.ReactNode }) {
+function Screen({ tape, scene, id, section, photo, framed = true, above, align = "end", children }: { tape: boolean; scene: number; id?: string; section?: string; photo?: string; framed?: boolean; above?: React.ReactNode; align?: "start" | "end"; children: React.ReactNode }) {
   if (!tape) return <>{children}</>;
   return (
-    <div id={id} data-scene={scene} data-photo={photo || undefined} className={`flex min-h-[100cqh] snap-start flex-col ${align === "end" ? "justify-end" : "justify-start"} pb-[calc(5.5rem+var(--frame-bottom,0px))] pt-[calc(4.5rem+var(--frame-top,0px))]`}>
+    <div id={id} data-section={section} data-scene={scene} data-photo={photo || undefined} className={`flex min-h-[100cqh] snap-start flex-col ${align === "end" ? "justify-end" : "justify-start"} pb-[calc(5.5rem+var(--frame-bottom,0px))] pt-[calc(4.5rem+var(--frame-top,0px))]`}>
       {above}
       <div className="scene-reveal relative">
         {framed && ["-left-2 -top-2 border-l-2 border-t-2", "-right-2 -top-2 border-r-2 border-t-2", "-bottom-2 -left-2 border-b-2 border-l-2", "-bottom-2 -right-2 border-b-2 border-r-2"].map((c) => (
@@ -351,8 +351,9 @@ const timecode = (s: number) => `${Math.floor(s / 3600)}:${pad(Math.floor(s / 60
  * and see-through panels.
  */
 export function InviteExperience({
-  template, content: fullContent, inviteId, demo = false, preview = false, autoplay = false,
-}: { template: Template; content: InviteContent; inviteId?: string; demo?: boolean; preview?: boolean; autoplay?: boolean }) {
+  template, content: fullContent, inviteId, demo = false, preview = false, autoplay = false, startOpen = false, focus,
+}: { template: Template; content: InviteContent; inviteId?: string; demo?: boolean; preview?: boolean; autoplay?: boolean; startOpen?: boolean; focus?: string }) {
+  // startOpen + focus = the editor's live preview: already opened, scrolled to whatever the customer is editing
   // autoplay = gallery hover preview: opens itself (silently) and steps through every screen, then replays
   // demo = a template showcase for buyers (sample data, explanatory notes, replies off)
   // preview = the owner or an admin viewing a real invitation before it is published: exactly what guests will see, replies off
@@ -376,8 +377,8 @@ export function InviteExperience({
   const tape = concept === "tape";
   const look = LOOKS[concept ?? "tape"];
   const gated = concept === "royal" || concept === "ivory"; // doors or curtains instead of the sliding cover
-  const [opened, setOpened] = useState(false);
-  const [gone, setGone] = useState(false);
+  const [opened, setOpened] = useState(startOpen);
+  const [gone, setGone] = useState(startOpen);
   const [guest, setGuest] = useState("");
   const [seats, setSeats] = useState<number | null>(null);
   const [scene, setScene] = useState(0);
@@ -456,6 +457,17 @@ export function InviteExperience({
     }, 2200);
     return () => clearInterval(id);
   }, [autoplay, gone]);
+
+  useEffect(() => {
+    const root = scroller.current;
+    const el = focus && root?.querySelector<HTMLElement>(`[data-section="${focus}"]`);
+    if (!root || !el) return;
+    // offsetTop, not getBoundingClientRect: the editor shows this scaled down, and on-screen pixels would be scaled too
+    let top = 0;
+    for (let n: HTMLElement | null = el; n && n !== root; n = n.offsetParent as HTMLElement | null) top += n.offsetTop;
+    // an instant jump: a smooth scroll gets pulled back by the screens' scroll snapping before it arrives
+    root.scrollTo({ top: focus === "cover" ? 0 : top, behavior: "instant" });
+  }, [focus]);
 
   // tape: timecode runs once the guest presses play
   useEffect(() => {
@@ -536,11 +548,11 @@ export function InviteExperience({
         {scenic ? (
         <div className="mx-auto max-w-md px-5">
           {tape ? (
-            <Screen tape scene={0} framed={false}>
+            <Screen tape scene={0} section="cover" framed={false}>
               <div className="mx-auto w-full overflow-hidden rounded-md" style={{ maxWidth: "calc((100cqh - 10.5rem - var(--frame-top, 0px) - var(--frame-bottom, 0px)) * 0.5625)" }}><InviteCard template={template} content={content} chrome={false} clear={!!backdrop} /></div>
             </Screen>
           ) : (
-            <Screen tape scene={0} framed={false} align={look.align}>
+            <Screen tape scene={0} section="cover" framed={false} align={look.align}>
               <section className={`relative mt-4 px-6 pb-7 pt-12 text-center ${look.panel}`} style={look.panelStyle}>
                 {concept === "royal" && <Finial />}<PanelFrame look={look} />
                 {content.bismillah && <p lang="ar" dir="rtl" className="text-2xl" style={{ color: t.accent, fontFamily: "var(--nf-naskh), serif", lineHeight: 1.9 }}>{BISMILLAH}</p>}
@@ -560,7 +572,7 @@ export function InviteExperience({
           )}
 
           {(guest || demo) && (
-            <Screen tape scene={2} framed={tape} align={look.align} photo={sc.message}>
+            <Screen tape scene={2} section="message" framed={tape} align={look.align} photo={sc.message}>
               <section className={`relative px-5 pb-5 ${tape ? "pt-5" : "pt-12"} text-center ${look.panel}`} style={look.panelStyle}>
                 {concept === "royal" && <Finial />}<PanelFrame look={look} />
                 {tape && <Tag tape label={ur ? "پیغام" : "Message"} accent={t.accent} />}
@@ -584,7 +596,7 @@ export function InviteExperience({
             </Screen>
           )}
 
-          <Screen tape scene={3} framed={tape} align={look.align} photo={sc.countdown}>
+          <Screen tape scene={3} section="countdown" framed={tape} align={look.align} photo={sc.countdown}>
             <div className={`relative ${tape ? "p-4" : "px-4 pb-5 pt-12"} ${look.panel}`} style={look.panelStyle}>
               {concept === "royal" && <Finial />}<PanelFrame look={look} />
               {tape ? <Tag tape label={ur ? "الٹی گنتی" : "Countdown"} accent={t.accent} /> : <SceneTitle look={look} concept={concept!}>{ur ? "الٹی گنتی" : "Counting the days"}</SceneTitle>}
@@ -600,6 +612,7 @@ export function InviteExperience({
               tape
               scene={3}
               id={`ev-${i}`}
+              section={`event-${fullContent.events.indexOf(e)}`}
               photo={eventScene(e)}
               framed={tape}
               align={look.align}
@@ -649,7 +662,7 @@ export function InviteExperience({
           ))}
 
           {couple && (tape ? (
-            <Screen tape scene={4} framed={false} photo={couple}>
+            <Screen tape scene={4} section="couple" framed={false} photo={couple}>
               <h2 className="mb-4 text-center font-mono text-2xl font-bold uppercase tracking-[0.2em]" style={{ textShadow: VHS }}>{ur ? "دولہا دلہن" : "The couple"}</h2>
               <figure className="relative mx-auto w-[86%] rotate-[-1.5deg] border-[6px] border-[#efe3cc] bg-black shadow-2xl">
                 {/* eslint-disable-next-line @next/next/no-img-element -- static export, photo comes from our storage */}
@@ -661,7 +674,7 @@ export function InviteExperience({
               {!ur && <p className="mt-5 pb-1 text-center text-4xl" style={goldScript}>{names}</p>}
             </Screen>
           ) : (
-            <Screen tape scene={4} framed={false} align={look.align} photo={sc.couple}>
+            <Screen tape scene={4} section="couple" framed={false} align={look.align} photo={sc.couple}>
               <SceneTitle look={look} concept={concept!}>{ur ? "دولہا دلہن" : "The couple"}</SceneTitle>
               <figure className="mx-auto mt-4 w-[74%] overflow-hidden border-[3px] shadow-2xl" style={{ borderColor: t.accent, borderTopLeftRadius: "50% 28%", borderTopRightRadius: "50% 28%" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- static export, photo comes from our storage */}
@@ -673,7 +686,7 @@ export function InviteExperience({
           ))}
 
           {hasDress && ordered.length > 1 && (
-            <Screen tape scene={4} framed={tape} align={look.align} photo={sc.dress}>
+            <Screen tape scene={4} section="dress" framed={tape} align={look.align} photo={sc.dress}>
               <section aria-label="Dress code" className={`relative px-5 pb-5 ${tape ? "pt-5" : "pt-12"} text-center ${look.panel}`} style={look.panelStyle}>
                 {concept === "royal" && <Finial />}<PanelFrame look={look} />
                 {tape && <Tag tape label={ur ? "پروگرام" : "Programme"} accent={t.accent} />}
@@ -694,7 +707,7 @@ export function InviteExperience({
           )}
 
           {content.faq.length > 0 && (
-            <Screen tape scene={4} framed={tape} align={look.align} photo={sc.faq}>
+            <Screen tape scene={4} section="faq" framed={tape} align={look.align} photo={sc.faq}>
               <section aria-label="Questions" className={`relative px-5 pb-5 ${tape ? "pt-5" : "pt-12"} ${look.panel}`} style={look.panelStyle}>
                 {concept === "royal" && <Finial />}<PanelFrame look={look} />
                 {tape && <Tag tape label="Q & A" accent={t.accent} />}
@@ -723,14 +736,14 @@ export function InviteExperience({
           )}
 
           {content.rsvpEnabled && (
-            <Screen tape scene={5} framed={tape} align={look.align} photo={sc.rsvp}>
+            <Screen tape scene={5} section="rsvp" framed={tape} align={look.align} photo={sc.rsvp}>
               <Rsvp inviteId={inviteId} demo={demo || preview} showNote={demo} guestName={guest} seats={seats} guestId={guestId} events={rsvpEvents} tape={look.dark} accent={t.accent} titleClass={look.title} titleStyle={look.titleStyle} />
             </Screen>
           )}
 
           {/* family contacts sit near the end: guests look for them when they have a question */}
           {(content.family1 || content.family2 || content.members1.length > 0 || content.members2.length > 0) && (
-            <Screen tape scene={5} framed={tape} align={look.align} photo={sc.families}>
+            <Screen tape scene={5} section="families" framed={tape} align={look.align} photo={sc.families}>
               <div className={`relative ${tape ? "p-4" : "px-4 pb-5 pt-12"} ${look.panel}`} style={look.panelStyle}>
                 {concept === "royal" && <Finial />}<PanelFrame look={look} />
                 {tape ? <Tag tape label={ur ? "خاندان" : "Families"} accent={t.accent} /> : <SceneTitle look={look} concept={concept!}>{ur ? "دعاؤں کے ساتھ" : "With the blessings of"}</SceneTitle>}
@@ -741,7 +754,7 @@ export function InviteExperience({
             </Screen>
           )}
 
-          <Screen tape scene={5} framed={tape} align={look.align} photo={sc.closing}>
+          <Screen tape scene={5} section="closing" framed={tape} align={look.align} photo={sc.closing}>
             {tape ? (
               <div className={`p-5 text-center ${look.panel}`}>
                 <p className="mb-3 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em]" aria-hidden>
@@ -767,7 +780,7 @@ export function InviteExperience({
         </div>
         ) : (
         <div className="mx-auto max-w-md space-y-6 px-4 pb-[calc(1.5rem+var(--frame-bottom,0px))] pt-[calc(1.5rem+var(--frame-top,0px))]">
-          <div {...sceneAttr(0)} className="overflow-hidden rounded-2xl shadow-xl"><InviteCard template={template} content={content} chrome={!tape} clear={tape && !!backdrop} /></div>
+          <div {...sceneAttr(0)} data-section="cover" className="overflow-hidden rounded-2xl shadow-xl"><InviteCard template={template} content={content} chrome={!tape} clear={tape && !!backdrop} /></div>
           {couple && (
             <figure className="overflow-hidden rounded-2xl border border-line bg-card shadow-sm">
               {/* eslint-disable-next-line @next/next/no-img-element -- static export, photo comes from our storage */}
@@ -776,7 +789,7 @@ export function InviteExperience({
           )}
 
           {(guest || demo) && (
-            <section {...sceneAttr(2)} className={`rounded-2xl border p-5 text-center ${panel}`}>
+            <section {...sceneAttr(2)} data-section="message" className={`rounded-2xl border p-5 text-center ${panel}`}>
               <Tag tape={tape} label={ur ? "پیغام" : "Message"} />
               <p className="font-display text-2xl font-bold">
                 {guest ? (ur ? `محترم ${guest}،` : `Dear ${guest},`) : ur ? "محترم مہمان،" : "Dear guest,"}
@@ -806,7 +819,7 @@ export function InviteExperience({
           <section aria-label="Events" className="space-y-4">
             <h2 className="font-display text-3xl font-bold">{ur ? "تقاریب" : tape ? "Playlist" : ordered.length > 1 ? "Events" : "Event"}</h2>
             {ordered.map((e, i) => (
-              <article id={`ev-${i}`} key={i} {...sceneAttr(3)} className={`rounded-2xl border p-5 ${panel}`}>
+              <article id={`ev-${i}`} key={i} {...sceneAttr(3)} data-section={`event-${fullContent.events.indexOf(e)}`} className={`rounded-2xl border p-5 ${panel}`}>
                 <Tag tape={tape} label={`${tape ? "Tape " : ""}${pad(i + 1)} / ${pad(ordered.length)}`} />
                 {!tape && ordered.length > 1 && <p className={`text-xs uppercase tracking-widest ${muted}`}>{pad(i + 1)} / {pad(ordered.length)}</p>}
                 <h3 className="font-display text-2xl font-bold">{e.title}</h3>
@@ -834,7 +847,7 @@ export function InviteExperience({
           </section>
 
           {hasDress && ordered.length > 1 && (
-            <section {...sceneAttr(4)} aria-label="Dress code" className={`rounded-2xl border p-5 ${panel}`}>
+            <section {...sceneAttr(4)} data-section="dress" aria-label="Dress code" className={`rounded-2xl border p-5 ${panel}`}>
               <Tag tape={tape} label={ur ? "پروگرام" : "Programme"} />
               <h2 className="font-display text-2xl font-bold">{ur ? "ڈریس کوڈ" : "Dress code"}</h2>
               <ul className="mt-3 space-y-1 text-sm">
@@ -846,7 +859,7 @@ export function InviteExperience({
           )}
 
           {content.faq.length > 0 && (
-            <section {...sceneAttr(4)} aria-label="Questions" className="space-y-2">
+            <section {...sceneAttr(4)} data-section="faq" aria-label="Questions" className="space-y-2">
               <Tag tape={tape} label="Q & A" />
               <h2 className="font-display text-2xl font-bold">{ur ? "عام سوالات" : "Good to know"}</h2>
               {content.faq.map((f, i) => (
@@ -866,9 +879,9 @@ export function InviteExperience({
             </a>
           )}
 
-          {content.rsvpEnabled && <div {...sceneAttr(5)}><Rsvp inviteId={inviteId} demo={demo || preview} showNote={demo} guestName={guest} seats={seats} guestId={guestId} events={rsvpEvents} /></div>}
+          {content.rsvpEnabled && <div {...sceneAttr(5)} data-section="rsvp"><Rsvp inviteId={inviteId} demo={demo || preview} showNote={demo} guestName={guest} seats={seats} guestId={guestId} events={rsvpEvents} /></div>}
           {(content.family1 || content.family2 || content.members1.length > 0 || content.members2.length > 0) && (
-            <div {...sceneAttr(5)}><Tag tape={tape} label={ur ? "خاندان" : "Families"} /><Families content={content} ur={ur} glass={tape} /></div>
+            <div {...sceneAttr(5)} data-section="families"><Tag tape={tape} label={ur ? "خاندان" : "Families"} /><Families content={content} ur={ur} glass={tape} /></div>
           )}
 
 

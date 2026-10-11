@@ -19,7 +19,7 @@ const FROM = formatPKR(Math.min(...PRICES));
 const FEATURES = [
   { icon: Eye, title: "See it before you pay", text: "Edit names, events and venues with a live preview. The price is on every template page, and you pay after you have previewed your own invitation." },
   { icon: Link2, title: "One link for WhatsApp", text: "Guests open one link on any phone. They see each event with its date, venue, map and dress code, and can add it to their calendar." },
-  { icon: UserRound, title: "A link for each guest", text: "Add your guest list or paste it from Excel. Each guest is greeted by name, sees only the events they are invited to, and has their places reserved." },
+  { icon: UserRound, title: "A link for each guest", text: "Add your guest list or paste it from Excel. Each guest is greeted by name, sees only the events they are invited to, and knows how many guests are invited." },
   { icon: Send, title: "Send on WhatsApp, one tap each", text: "A sending queue opens each guest's chat with your message and their link ready. You see who was sent, who opened it and who replied." },
   { icon: ListChecks, title: "RSVPs for every event", text: "Guests reply per event, and can change their answer later. You see totals for each event and can export the list to a spreadsheet." },
   { icon: ImageIcon, title: "Your own photos", text: "Upload your cover and couple photos, or keep the template's. The signature designs add a photo for each event and background music." },
@@ -37,7 +37,7 @@ const STEPS = [
 /** the problems of a Pakistani guest list, and what the invitation does about each */
 const GUEST_LIST = [
   ["Some guests are only invited to the Walima", "Pick the events for each guest. Their link shows those events and nothing else, so nobody turns up to the wrong function."],
-  ["Every family asks how many can come", "Reserve places on each guest's link. The reply form lets them answer for that many people."],
+  ["Every family asks how many can come", "Set the number of guests on each link. The reply form lets them answer for up to that many people."],
   ["Replies are scattered across a dozen chats", "Every answer lands on one page, with totals for each event and a list you can download for the caterer."],
 ];
 

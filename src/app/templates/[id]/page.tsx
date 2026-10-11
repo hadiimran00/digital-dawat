@@ -62,7 +62,7 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
     ]],
     ["Your guests", [
       "A personal link for each guest, greeted by name",
-      "Invite each guest to only their events, with reserved places",
+      "Invite each guest to only their events, with their number of guests",
       "Send on WhatsApp with one tap per guest",
       "See who was sent, opened and replied",
     ]],

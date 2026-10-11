@@ -71,8 +71,8 @@ export interface ImportRow {
 
 /**
  * Parse guests pasted from Excel / Google Sheets (tab-separated) or a CSV file.
- * Columns, in any order when there is a header row: Name, Phone, Places (or Guests/Seats), Events.
- * Without a header the order is Name, Phone, Places, Events. Events may be "all" or names separated by commas/semicolons.
+ * Columns, in any order when there is a header row: Name, Phone, Guests (or Number of guests/Places/Seats), Events.
+ * Without a header the order is Name, Phone, Guests, Events. Events may be "all" or names separated by commas/semicolons.
  */
 export function parseGuests(text: string, content: InviteContent, defaultEvents: number[] | null): ImportRow[] {
   const lines = text.replace(/\r/g, "").split("\n").map((l) => l.trim()).filter(Boolean);
@@ -99,7 +99,8 @@ export function parseGuests(text: string, content: InviteContent, defaultEvents:
   const head = rows[0].map((c) => c.toLowerCase());
   if (head.some((c) => /^(name|guest|guest name)$/.test(c))) {
     const find = (re: RegExp, fallback: number) => { const i = head.findIndex((c) => re.test(c)); return i === -1 ? fallback : i; };
-    col = { name: find(/name|guest/, 0), phone: find(/phone|mobile|number|whatsapp|contact/, -1), seats: find(/place|seat|guests|count|people|persons/, -1), events: find(/event|function/, -1) };
+    // "Number of guests" must count as guests, not as a phone number or a name
+    col = { name: find(/^(name|names|guest|guest name|full name)$/, 0), phone: find(/phone|mobile|whatsapp|contact|cell|^number$/, -1), seats: find(/guests|place|seat|count|people|persons/, -1), events: find(/event|function/, -1) };
     rows = rows.slice(1);
   }
   const titles = content.events.map((e) => e.title.trim().toLowerCase());

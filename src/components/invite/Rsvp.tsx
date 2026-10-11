@@ -22,7 +22,7 @@ export function Rsvp({
   const [name, setName] = useState(guestName);
   const [attending, setAttending] = useState(true);
   const [chosen, setChosen] = useState<number | null>(null);
-  // until the guest edits it, default to the places reserved in their link
+  // until the guest edits it, default to the number of guests in their link
   const guests = Math.min(chosen ?? seats ?? 1, maxGuests);
   const setGuests = setChosen;
   const [note, setNote] = useState("");
@@ -112,7 +112,7 @@ export function Rsvp({
       {attending && (
         <label className="block">Number of guests (including you)
           <input type="number" min={1} max={maxGuests} disabled={demo} className="field" value={guests} onChange={(e) => setGuests(Math.min(maxGuests, Math.max(1, Number(e.target.value) || 1)))} />
-          {seats && <span className="text-sm text-foreground/70">{seats} {seats === 1 ? "place is" : "places are"} reserved for you.</span>}
+          {seats && <span className="text-sm text-foreground/70">This invitation is for {seats} {seats === 1 ? "guest" : "guests"}.</span>}
         </label>
       )}
       <label className="block">Message (optional)

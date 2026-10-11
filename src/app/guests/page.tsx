@@ -224,7 +224,7 @@ function GuestsInner() {
   }
   function downloadCsv() {
     const csv = toCsv([
-      ["Name", "Phone", "Places", "Events", "Link", "Sent", "Opened", "Reply"],
+      ["Name", "Phone", "Guests", "Events", "Link", "Sent", "Opened", "Reply"],
       ...guests.map((g) => {
         const r = replyBy.get(g.id);
         return [g.name, g.phone ?? "", g.seats, eventNames(content, g.events).join("; "), guestLink(origin, slug, g), g.sent_at ? "Yes" : "", g.opened_at ? "Yes" : "", r ? (r.attending ? `Yes (${r.guests})` : "No") : ""];
@@ -258,7 +258,7 @@ function GuestsInner() {
       )}
 
       <dl className="mt-6 grid grid-cols-5 gap-2 text-center sm:gap-3">
-        {[["Guests", counts.total], ["Places", counts.places], ["Sent", counts.sent], ["Opened", counts.opened], ["Replied", counts.replied]].map(([k, v]) => (
+        {[["Invites", counts.total], ["Guests", counts.places], ["Sent", counts.sent], ["Opened", counts.opened], ["Replied", counts.replied]].map(([k, v]) => (
           <div key={k} className="rounded-xl border border-line bg-card px-1 py-3"><dt className="text-xs text-foreground/70">{k}</dt><dd className="text-2xl font-bold tabular-nums">{v}</dd></div>
         ))}
       </dl>
@@ -269,7 +269,7 @@ function GuestsInner() {
         </p>
       )}
       {counts.replied > 0 && (
-        <p className="mt-2 text-sm text-foreground/70"><strong className="text-foreground">{counts.coming}</strong> {counts.coming === 1 ? "person is" : "people are"} coming so far, of {counts.places} places. <Link className="underline" href={`/rsvps?s=${slug}`}>See totals for each event</Link></p>
+        <p className="mt-2 text-sm text-foreground/70"><strong className="text-foreground">{counts.coming}</strong> of {counts.places} guests {counts.coming === 1 ? "is" : "are"} coming so far. <Link className="underline" href={`/rsvps?s=${slug}`}>See totals for each event</Link></p>
       )}
 
       {/* messages appear where the host is looking, not at the top of a long page */}
@@ -293,7 +293,7 @@ function GuestsInner() {
           {next ? (
             <div className="mt-4 rounded-xl border border-line p-4">
               <p className="text-sm text-foreground/70">Next guest</p>
-              <p className="text-xl font-semibold">{next.name} <span className="text-sm font-normal text-foreground/70">· {next.seats} {next.seats === 1 ? "place" : "places"} · {next.events ? eventNames(content, next.events).join(", ") : "All events"}</span></p>
+              <p className="text-xl font-semibold">{next.name} <span className="text-sm font-normal text-foreground/70">· {next.seats} {next.seats === 1 ? "guest" : "guests"} · {next.events ? eventNames(content, next.events).join(", ") : "All events"}</span></p>
               <p className="mt-1 text-sm text-foreground/70">{next.phone ? `+${next.phone}` : "No number saved: WhatsApp will ask you to pick the contact."}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <a className="btn btn-primary" href={whatsappLink(next.phone, messageFor(next))} target="_blank" rel="noopener noreferrer" onClick={() => sentLater(next)}>
@@ -325,7 +325,7 @@ function GuestsInner() {
           <label className="block">WhatsApp number (optional)
             <input className="field" inputMode="tel" value={fPhone} maxLength={20} placeholder="0300 1234567" onChange={(e) => setFPhone(e.target.value)} />
           </label>
-          <label className="block">Places
+          <label className="block">Number of guests
             <input className="field" type="number" min={1} max={20} value={fSeats} onChange={(e) => setFSeats(Math.min(20, Math.max(1, Number(e.target.value) || 1)))} />
           </label>
           <div className="sm:col-span-3">
@@ -343,12 +343,12 @@ function GuestsInner() {
       <details className="mt-6 rounded-2xl border border-line bg-card p-5">
         <summary className="cursor-pointer font-display text-2xl font-bold">Add many guests at once</summary>
         <p className="mt-2 text-sm text-foreground/70">
-          Copy the rows from Excel or Google Sheets and paste them below, or upload a CSV file. Columns: <strong>Name, Phone, Places, Events</strong>
+          Copy the rows from Excel or Google Sheets and paste them below, or upload a CSV file. Columns: <strong>Name, Phone, Guests, Events</strong>
           (a header row is fine). Events can be &quot;all&quot; or names like &quot;Baraat, Walima&quot;. Rows without events get the events you pick here.
         </p>
         <div className="mt-3"><EventPicker content={content} value={importEvents} onChange={setImportEvents} /></div>
         <textarea className="field mt-3 font-mono text-sm" rows={6} value={importText} onChange={(e) => setImportText(e.target.value)}
-          placeholder={"Name\tPhone\tPlaces\tEvents\nSarah & Family\t0300 1234567\t4\tall\nUncle Imran\t0321 7654321\t2\tWalima"} />
+          placeholder={"Name\tPhone\tGuests\tEvents\nSarah & Family\t0300 1234567\t4\tall\nUncle Imran\t0321 7654321\t2\tWalima"} />
         <label className="btn btn-ghost mt-2 cursor-pointer">
           <Upload className="size-4" aria-hidden /> Upload CSV
           <input type="file" accept=".csv,.txt,text/csv,text/plain" className="sr-only" onChange={(e) => onFile(e.target.files?.[0])} />
@@ -358,7 +358,7 @@ function GuestsInner() {
             <p className="text-sm font-semibold">{preview.filter((r) => !r.problem).length} ready to add{preview.some((r) => r.problem) && `, ${preview.filter((r) => r.problem).length} with problems (skipped)`}</p>
             <div className="mt-2 max-h-64 overflow-auto rounded-xl border border-line">
               <table className="w-full text-left text-sm">
-                <thead className="sticky top-0 bg-stone-50"><tr><th className="p-2">Name</th><th className="p-2">Phone</th><th className="p-2">Places</th><th className="p-2">Events</th></tr></thead>
+                <thead className="sticky top-0 bg-stone-50"><tr><th className="p-2">Name</th><th className="p-2">Phone</th><th className="p-2">Guests</th><th className="p-2">Events</th></tr></thead>
                 <tbody>
                   {preview.slice(0, 300).map((r: ImportRow, i) => (
                     <tr key={i} className={`border-t border-line ${r.problem ? "bg-red-50" : ""}`}>
@@ -401,7 +401,7 @@ function GuestsInner() {
           {shown.map((g) => (
             <li key={g.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
               <div className="min-w-0">
-                <p className="font-semibold">{g.name} <span className="font-normal text-foreground/70">· {g.seats} {g.seats === 1 ? "place" : "places"}</span></p>
+                <p className="font-semibold">{g.name} <span className="font-normal text-foreground/70">· {g.seats} {g.seats === 1 ? "guest" : "guests"}</span></p>
                 <p className="text-sm text-foreground/70">{g.phone ? `+${g.phone}` : "No number"} · {g.events ? eventNames(content, g.events).join(", ") : "All events"}</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">

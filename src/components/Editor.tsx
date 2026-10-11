@@ -9,7 +9,6 @@ import {
 import { ContentSchema, MAX_EVENTS, MAX_FAQ, MAX_MEMBERS } from "@/lib/contentSchema";
 import { TEMPLATES, formatPKR, getTemplate } from "@/lib/templates";
 import { backendConfigured } from "@/lib/config";
-import { InviteCard } from "@/components/invite/InviteCard";
 import { InviteExperience } from "@/components/invite/InviteExperience";
 import { VideoExport } from "@/components/VideoExport";
 import { PhoneFrame } from "@/components/PhoneFrame";
@@ -18,6 +17,33 @@ import { SupportLink } from "@/components/SupportLink";
 import { supportWhatsapp } from "@/lib/config";
 
 const draftKey = (id: string) => `dawat:draft:v2:${id}`;
+const PHONE_W = 393;
+
+/**
+ * The real invitation, already open, scaled into whatever box it's given. `focus` scrolls it to the section being
+ * edited, so a change made far down the form is visible straight away.
+ */
+function LivePreview({ template, content, focus, className }: { template: NonNullable<ReturnType<typeof getTemplate>>; content: InviteContent; focus?: string; className: string }) {
+  const box = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0);
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => setScale(e.contentRect.width / PHONE_W));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    // a visual mirror of the form (which is the accessible version); the full preview dialog is the interactive one
+    <div ref={box} aria-hidden inert className={`relative overflow-hidden ${className}`} style={{ background: template.theme.bg }}>
+      {scale > 0 && (
+        <div className="origin-top-left" style={{ width: PHONE_W, height: `${100 / scale}%`, transform: `scale(${scale})` }}>
+          <InviteExperience template={template} content={content} demo startOpen focus={focus} />
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function Editor() {
   const router = useRouter();
@@ -31,6 +57,8 @@ export function Editor() {
   /** the last removed item, so a mis-tap on Remove can be undone */
   const [removed, setRemoved] = useState<{ label: string; restore: () => void } | null>(null);
   const closeBtn = useRef<HTMLButtonElement>(null);
+  /** which part of the invitation the customer is editing, so the preview can show it */
+  const [focus, setFocus] = useState("cover");
 
   // full preview: Escape closes it, focus starts on Close, and the page behind doesn't scroll
   useEffect(() => {
@@ -186,13 +214,14 @@ export function Editor() {
 
   return (
     <div className="mx-auto grid max-w-6xl gap-8 px-4 pt-8 pb-28 lg:grid-cols-[1fr_340px] lg:pb-8">
-      <form id="editor-form" onSubmit={(e) => { e.preventDefault(); order(); }} className="order-2 space-y-6 lg:order-1" noValidate>
+      <form id="editor-form" onSubmit={(e) => { e.preventDefault(); order(); }} className="order-2 space-y-6 lg:order-1" noValidate
+        onFocus={(e) => { const s = (e.target as HTMLElement).closest<HTMLElement>("[data-preview]")?.dataset.preview; if (s) setFocus(s); }}>
         <div>
           <h1 className="font-display text-4xl font-bold text-brand">Customise {template.name}</h1>
           <p className="text-sm text-foreground/70">Your changes save automatically on this device.</p>
         </div>
 
-        <fieldset className="grid gap-4 sm:grid-cols-2">
+        <fieldset data-preview="cover" className="grid gap-4 sm:grid-cols-2">
           <legend className="sr-only">Names and message</legend>
           <div className="flex gap-2 sm:col-span-2" role="group" aria-label="Card language">
             {(["en", "ur"] as const).map((l) => (
@@ -233,17 +262,17 @@ export function Editor() {
             Photos are resized on your phone before upload. Anyone with the invitation link can see them. You need to sign in to upload.
           </p>
           <div className="space-y-4 rounded-2xl border border-line bg-card p-4">
-            <PhotoField label="Cover photo" next={here}
+            <div data-preview="cover"><PhotoField label="Cover photo" next={here}
               hint={template.concept ? "Shown behind the whole invitation." : "Shown at the top of the card."}
-              value={content.coverPhoto} fallback={template.backdrop?.src ?? template.art?.src} onChange={(url) => set({ coverPhoto: url })} />
+              value={content.coverPhoto} fallback={template.backdrop?.src ?? template.art?.src} onChange={(url) => set({ coverPhoto: url })} /></div>
             {err("coverPhoto")}
-            <PhotoField label="Couple photo" next={here} hint="A portrait of the two of you (or the host)."
-              value={content.couplePhoto} fallback={template.sample?.couple} onChange={(url) => set({ couplePhoto: url })} />
+            <div data-preview="couple"><PhotoField label="Couple photo" next={here} hint="A portrait of the two of you (or the host)."
+              value={content.couplePhoto} fallback={template.sample?.couple} onChange={(url) => set({ couplePhoto: url })} /></div>
             {err("couplePhoto")}
           </div>
         </section>
 
-        <section className="space-y-4" aria-label="Family contacts">
+        <section data-preview="families" className="space-y-4" aria-label="Family contacts">
           <h2 className="font-display text-2xl font-bold">Family contacts <span className="text-base font-normal text-foreground/70">(optional)</span></h2>
           <p className="text-sm text-foreground/70">Guests see each side on its own tab, with a Call button next to anyone who has a phone number.</p>
           {([1, 2] as const).map((side) => {
@@ -289,7 +318,7 @@ export function Editor() {
           </div>
           {err("events")}
           {content.events.map((ev, i) => (
-            <fieldset key={i} className="grid gap-4 rounded-2xl border border-line bg-card p-4 sm:grid-cols-2">
+            <fieldset key={i} data-preview={`event-${i}`} className="grid gap-4 rounded-2xl border border-line bg-card p-4 sm:grid-cols-2">
               <legend className="flex w-full items-center justify-between px-1 text-sm font-semibold">
                 <span>Event {i + 1}</span>
                 {content.events.length > 1 && (
@@ -333,7 +362,7 @@ export function Editor() {
           ))}
         </section>
 
-        <section className="space-y-4" aria-label="Questions">
+        <section data-preview="faq" className="space-y-4" aria-label="Questions">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-2xl font-bold">Good to know <span className="text-base font-normal text-foreground/70">(optional)</span></h2>
             <button type="button" className="btn btn-ghost" disabled={content.faq.length >= MAX_FAQ} onClick={() => set({ faq: [...content.faq, { q: "", a: "" }] })}>
@@ -360,7 +389,7 @@ export function Editor() {
           ))}
         </section>
 
-        <fieldset className="grid gap-4 sm:grid-cols-2">
+        <fieldset data-preview="closing" className="grid gap-4 sm:grid-cols-2">
           <legend className="sr-only">Closing and contact</legend>
           <label className="sm:col-span-2">Closing line
             <input className="field" value={content.closing} maxLength={120} onChange={(e) => set({ closing: e.target.value })} />
@@ -368,7 +397,7 @@ export function Editor() {
           <label>WhatsApp number for guests (optional)
             <input className="field" inputMode="tel" value={content.contactPhone} maxLength={20} onChange={(e) => set({ contactPhone: e.target.value })} placeholder="923001234567" />
           </label>
-          <label className="flex items-center gap-3 self-end">
+          <label data-preview="rsvp" className="flex items-center gap-3 self-end">
             <input type="checkbox" className="size-5" checked={content.rsvpEnabled} onChange={(e) => set({ rsvpEnabled: e.target.checked })} />
             Collect RSVPs
           </label>
@@ -392,12 +421,19 @@ export function Editor() {
       </form>
 
       <aside className="order-1 lg:sticky lg:top-20 lg:order-2 lg:self-start">
-        <div className="mx-auto w-full max-w-[300px] overflow-hidden rounded-2xl border border-line shadow-xl">
-          <InviteCard template={template} content={content} />
+        {/* desktop: the real invitation, following the part of the form being edited */}
+        <div className="hidden lg:block" data-live-preview>
+          <LivePreview template={template} content={content} focus={focus} className="mx-auto h-[min(680px,calc(100dvh-9rem))] w-full max-w-[320px] rounded-[2rem] border-[6px] border-foreground/90 shadow-xl" />
+          <p className="mt-3 text-center text-xs text-foreground/70">The preview follows what you edit.</p>
+          <button type="button" className="btn btn-ghost mx-auto mt-2 flex" onClick={() => setPreviewing(true)}>Open the full invitation</button>
         </div>
-        <div className="hidden lg:block"><VideoExport template={template} content={content} /></div>
+        {/* phones: a small live thumbnail, so the form starts near the top; tap it for the full preview */}
+        <button type="button" onClick={() => setPreviewing(true)} className="press flex w-full items-center gap-4 rounded-2xl border border-line bg-card p-3 text-left lg:hidden">
+          <LivePreview template={template} content={content} className="pointer-events-none h-36 w-[4.75rem] shrink-0 rounded-xl" />
+          <span className="text-sm"><span className="block font-semibold">Your invitation</span><span className="block text-foreground/70">It updates as you type. Tap to see all of it.</span></span>
+        </button>
       </aside>
-      <div className="order-3 lg:hidden"><VideoExport template={template} content={content} /></div>
+      <div className="order-3"><VideoExport template={template} content={content} /></div>
 
       {/* phones: price, preview and continue always in reach */}
       <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-2 border-t border-line bg-background/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur lg:hidden">
