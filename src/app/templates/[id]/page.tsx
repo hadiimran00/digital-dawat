@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { TEMPLATES, formatPKR, getTemplate, categoryLabel, type Template } from "@/lib/templates";
 import { defaultContent } from "@/lib/content";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
@@ -9,6 +9,7 @@ import { InviteExperience } from "@/components/invite/InviteExperience";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { JsonLd } from "@/components/JsonLd";
 import { SupportLink } from "@/components/SupportLink";
+import { MAX_GUESTS } from "@/lib/guests";
 import { supportWhatsapp } from "@/lib/config";
 
 export function generateStaticParams() {
@@ -51,6 +52,29 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
     ...TEMPLATES.filter((o) => o.id !== t.id && o.category !== t.category && o.theme.ornament === t.theme.ornament),
   ].slice(0, 3);
   const url = `${SITE_URL}/templates/${t.id}`;
+  const included: [string, string[]][] = [
+    ["The invitation", [
+      "Tap to open, with a countdown, venues, maps and add-to-calendar",
+      ...(t.concept ? ["A full-screen scene for every event"] : []),
+      ...(t.music ? ["Background music guests can turn on or off"] : []),
+      `Your own photos on the cover and with the couple${t.concept ? ", plus one per event" : ""}`,
+      "English or Urdu, with an optional Bismillah",
+    ]],
+    ["Your guests", [
+      "A personal link for each guest, greeted by name",
+      "Invite each guest to only their events, with reserved places",
+      "Send on WhatsApp with one tap per guest",
+      "See who was sent, opened and replied",
+    ]],
+    ["Replies", [
+      "RSVPs for each event, with totals",
+      "Guests can change their reply from the same link",
+      "Download the list for your caterer",
+    ]],
+    ["To share", [
+      `A vertical video${t.music ? " with your photos and music" : " with your photos"} for Status and Instagram`,
+    ]],
+  ];
 
   return (
     <div className="pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
@@ -97,43 +121,51 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
           <p className="text-sm font-semibold uppercase tracking-widest text-gold-deep">{categoryLabel(t.category)}</p>
           <h1 className="font-display text-5xl font-bold text-brand">{t.name}</h1>
           <p className="mt-3 text-lg text-foreground/70">{t.tagline}</p>
-          <p className="mt-6 text-3xl font-bold">{formatPKR(t.price)}</p>
-          <p className="text-sm text-foreground/70">One payment per invitation. Guests are not charged and there is no per-guest fee.</p>
+          {/* price, with what it covers and why it's safe to start, then the action right under it */}
+          <div className="mt-6 rounded-2xl border border-line bg-card p-5">
+            <p className="flex flex-wrap items-baseline gap-x-3"><span className="text-4xl font-bold tabular-nums">{formatPKR(t.price)}</span><span className="text-sm text-foreground/70">one price for your whole guest list</span></p>
+            <ul className="mt-3 space-y-1.5 text-sm">
+              <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-gold-deep" aria-hidden />Build and preview your own invitation for free. You pay only when you&apos;re happy with it.</li>
+              <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-gold-deep" aria-hidden />Up to {MAX_GUESTS.toLocaleString("en-PK")} guests, with no per-guest fee. For a 300-guest wedding that&apos;s about {formatPKR(Math.round(t.price / 300))} a guest.</li>
+              <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-gold-deep" aria-hidden />Pay by online transfer. Your invitation goes live once we confirm it.</li>
+            </ul>
+            <Link href={cta} prefetch={false} className="btn btn-primary mt-5 hidden w-full md:inline-flex">Customise {t.name}</Link>
+            <p className="mt-2 hidden text-center text-xs text-foreground/70 md:block">Free to try. You only sign in when you&apos;re ready to order.</p>
+          </div>
 
           <h2 className="mt-8 font-display text-2xl font-bold">About this design</h2>
           <p className="mt-2 text-sm text-foreground/80">
-            {t.name} is a {categoryLabel(t.category).toLowerCase()} invitation template. {t.tagline}{" "}
             {events.length > 1
-              ? `It starts with ${events.length} events already set up (${events.map((e) => e.title).join(", ")}). You can rename them, remove them or add more, up to six.`
-              : `It starts with one event, with fields for the date, time, venue, address, map link and dress code. You can add up to six events.`}{" "}
-            The video download uses the {MOTION_LABEL[t.motion]} style by default, and you can switch to three others.
+              ? `It comes with ${events.length} events set up: ${events.map((e) => e.title).join(", ")}. Rename them, remove them or add more, up to six.`
+              : `It comes with one event, with the date, time, venue, map link and dress code. You can add up to six.`}{" "}
+            The video download uses the {MOTION_LABEL[t.motion]} style, or you can pick one of three others.
           </p>
 
-          <h2 className="mt-6 font-display text-2xl font-bold">Included</h2>
-          <ul className="mt-2 space-y-2 text-sm">
-            <li>✓ Tap-to-open invitation with countdown, venue, map and add-to-calendar</li>
-            {t.concept && <li>✓ A full-screen scene for every event, with an opening guests remember</li>}
-            {t.music && <li>✓ Background music guests can turn on or off</li>}
-            <li>✓ Your own photos on the cover and with the couple{t.concept ? ", plus one for each event" : ""}</li>
-            <li>✓ English or Urdu layout, with an optional Bismillah</li>
-            <li>✓ A guest list where each guest gets their own link, greeted by name (&ldquo;Dear Sarah &amp; Family&rdquo;)</li>
-            <li>✓ Invite each guest to only their events, for example Walima only, with their reserved places</li>
-            <li>✓ A WhatsApp sending queue: tap once per guest, and see who was sent, opened and replied</li>
-            <li>✓ RSVPs for each event, with totals per event, exportable to a spreadsheet</li>
-            <li>✓ Guests can change their reply later from the same link</li>
-            <li>✓ A vertical video to download{t.music ? ", with your photos and music" : " with your photos"}</li>
-          </ul>
-          <Link href={cta} prefetch={false} className="btn btn-primary mt-8 hidden md:inline-flex">Customise this template</Link>
+          <h2 className="mt-8 font-display text-2xl font-bold">What you get</h2>
+          <div className="mt-3 grid gap-5 sm:grid-cols-2">
+            {included.map(([group, items]) => (
+              <div key={group}>
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-gold-deep">{group}</h3>
+                <ul className="mt-2 space-y-1.5 text-sm">
+                  {items.map((i) => <li key={i} className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />{i}</li>)}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <Link href={cta} prefetch={false} className="btn btn-primary mt-8 hidden md:inline-flex">Customise {t.name}</Link>
           {supportWhatsapp && <p className="mt-4 text-sm text-foreground/70">Questions about {t.name}? <SupportLink topic={`I have a question about the ${t.name} template`} className="text-brand" /></p>}
 
           {related.length > 0 && (
             <nav aria-label="Related templates" className="mt-10">
               <h2 className="font-display text-2xl font-bold">More designs you may like</h2>
-              <ul className="mt-3 space-y-2 text-sm">
+              <ul className="mt-3 grid grid-cols-3 gap-3">
                 {related.map((r) => (
                   <li key={r.id}>
-                    <Link className="underline decoration-gold underline-offset-4" href={`/templates/${r.id}`}>
-                      {r.name}: {categoryLabel(r.category)} invitation, {formatPKR(r.price)}
+                    <Link href={`/templates/${r.id}`} className="group block">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- static export */}
+                      <img src={`/thumbs/${r.id}.webp`} alt="" width={360} height={640} loading="lazy" className="w-full rounded-xl border border-line transition-[translate] duration-200 ease-out [@media(hover:hover)]:group-hover:-translate-y-0.5" style={{ background: r.theme.bg }} />
+                      <span className="mt-2 block text-sm font-semibold">{r.name}</span>
+                      <span className="block text-xs text-foreground/70">{categoryLabel(r.category)} · {formatPKR(r.price)}</span>
                     </Link>
                   </li>
                 ))}
