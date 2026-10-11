@@ -463,6 +463,9 @@ export function InviteExperience({
   const scenePhotos = [...new Set([...ordered.map(eventScene), tape ? couple : sc.couple ?? "", sc.families, sc.message, sc.countdown, sc.dress, sc.faq, sc.rsvp, sc.closing].filter(Boolean) as string[])];
 
   const font = ur ? "var(--nf-urdu), serif" : "var(--nf-display), Georgia, serif";
+  /** personal links greet the guest by name on the very first screen */
+  const hello = guest ? (ur ? `محترم ${guest}،` : `Dear ${guest},`) : "";
+  const invitedTo = ur ? "آپ کو شادی میں مدعو کیا جاتا ہے" : "you are warmly invited to the wedding of";
   const hasDress = ordered.some((e) => e.dressCode);
   const sceneAttr = (n: number) => (tape ? { "data-scene": n } : {});
   const stamp = new Date(`${ordered[0].date}T00:00:00`).toLocaleDateString("en-GB", { month: "short", day: "2-digit", year: "numeric" }).toUpperCase().replace(/(\w+) (\d+) (\d+)/, "$1 $2 $3");
@@ -888,11 +891,25 @@ export function InviteExperience({
           ))}
           <div className="gate-ui absolute inset-0 flex flex-col items-center justify-between px-6 pb-[calc(3.5rem+var(--frame-bottom,0px))] pt-[calc(4rem+var(--frame-top,0px))] text-center">
             {concept === "royal" ? (
-              <div className="rounded-2xl border border-[#e8c06a]/50 bg-[#2a120a]/80 px-6 py-3 shadow-2xl backdrop-blur-sm">
-                <p className="text-4xl" style={ur ? { fontFamily: font, color: t.accent } : look.names}>{names}</p>
+              <div className="flex flex-col items-center gap-2">
+                {hello && (
+                  <div className="rounded-2xl bg-[#2a120a]/75 px-5 py-2 shadow-xl backdrop-blur-sm">
+                    <p className="text-3xl leading-tight" style={ur ? { fontFamily: font, color: t.accent } : look.greet}>{hello}</p>
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.25em] text-[#f7e7c6]/85" style={{ fontFamily: CAPS }}>{invitedTo}</p>
+                  </div>
+                )}
+                <div className="rounded-2xl border border-[#e8c06a]/50 bg-[#2a120a]/80 px-6 py-3 shadow-2xl backdrop-blur-sm">
+                  <p className="text-4xl" style={ur ? { fontFamily: font, color: t.accent } : look.names}>{names}</p>
+                </div>
               </div>
             ) : (
               <div>
+                {hello && (
+                  <>
+                    <p className="text-4xl" style={ur ? { fontFamily: font, color: "#7a2a2e" } : { fontFamily: "var(--nf-script), cursive", color: "#7a2a2e", textShadow: "0 1px 10px rgba(255,250,240,.95)" }}>{hello}</p>
+                    <p className="mb-3 mt-1 text-[10px] uppercase tracking-[0.25em] text-[#7a2a2e]" style={{ fontFamily: CAPS, textShadow: "0 1px 8px rgba(255,250,240,.95)" }}>{invitedTo}</p>
+                  </>
+                )}
                 <p className="text-4xl" style={ur ? { fontFamily: font, color: "#7a2a2e" } : { ...look.names, color: "#7a2a2e", textShadow: "0 1px 10px rgba(255,250,240,.9)" }}>{content.host1}</p>
                 {content.host2 && <><p className="text-xl italic text-[#a8783a]" style={{ fontFamily: "var(--nf-display), Georgia, serif" }}>{ur ? "اور" : "and"}</p>
                 <p className="text-4xl" style={ur ? { fontFamily: font, color: "#7a2a2e" } : { ...look.names, color: "#7a2a2e", textShadow: "0 1px 10px rgba(255,250,240,.9)" }}>{content.host2}</p></>}
@@ -908,7 +925,7 @@ export function InviteExperience({
       {!gone && !gated && (
         <div
           data-open={opened}
-          className={`cover absolute inset-0 z-20 flex flex-col items-center text-center ${coverArt || tape ? "justify-end pb-28" : "justify-center"}`}
+          className={`cover absolute inset-0 z-20 flex flex-col items-center text-center ${coverArt || tape ? (hello ? "justify-end pb-20" : "justify-end pb-28") : "justify-center"}`}
           style={{
             background: tape && backdrop
               ? `linear-gradient(to top, rgba(12,8,5,0.92) 18%, rgba(12,8,5,0.35) 62%, rgba(12,8,5,0.15)), url(${backdrop}) 50% 12% / cover no-repeat`
@@ -926,14 +943,17 @@ export function InviteExperience({
               {["left-4 top-[calc(3rem+var(--frame-top,0px))] border-l-2 border-t-2", "right-4 top-[calc(3rem+var(--frame-top,0px))] border-r-2 border-t-2", "bottom-[calc(3rem+var(--frame-bottom,0px))] left-4 border-b-2 border-l-2", "bottom-[calc(3rem+var(--frame-bottom,0px))] right-4 border-b-2 border-r-2"].map((c) => (
                 <span key={c} aria-hidden className={`absolute size-7 border-white/60 ${c}`} />
               ))}
-              <p aria-hidden className="absolute left-7 top-[calc(4rem+var(--frame-top,0px))] font-mono text-xs tracking-widest" style={{ color: t.accent }}><span className="animate-pulse text-red-400">●</span> REC</p>
+              {!hello && <p aria-hidden className="absolute left-7 top-[calc(4rem+var(--frame-top,0px))] font-mono text-xs tracking-widest" style={{ color: t.accent }}><span className="animate-pulse text-red-400">●</span> REC</p>}
             </>
           )}
           <div className="rise relative flex flex-col items-center gap-4 px-8" style={coverArt ? { textShadow: `0 0 8px ${t.bg}, 0 0 18px ${t.bg}` } : undefined}>
+            {hello && (
+              <p className={`-mb-1 leading-tight ${tape ? "text-2xl" : "text-3xl"}`} style={ur ? { fontFamily: font, color: t.accent } : tape ? goldScript : { fontFamily: "var(--nf-script), cursive", color: t.accent }}>{hello}</p>
+            )}
             {content.bismillah && <p lang="ar" dir="rtl" className="text-2xl" style={{ color: t.accent, fontFamily: "var(--nf-naskh), serif", lineHeight: 1.9 }}>{BISMILLAH}</p>}
             <p className={`text-xs uppercase tracking-[0.3em] ${mono}`} style={{ color: t.accent, ...(tape ? { textShadow: VHS } : {}) }}>{tape && !ur ? "The wedding of" : content.headline}</p>
             {tape && !ur
-              ? <h2 className="pb-2 text-7xl leading-[1.05]" style={{ fontFamily: "var(--nf-script), cursive", fontWeight: 400, backgroundImage: GOLD, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{names}</h2>
+              ? <h2 className={`pb-2 leading-[1.05] ${hello ? "text-[3.4rem]" : "text-7xl"}`} style={{ fontFamily: "var(--nf-script), cursive", fontWeight: 400, backgroundImage: GOLD, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>{names}</h2>
               : <h2 className="text-5xl leading-tight" style={{ fontFamily: font, fontWeight: 600 }}>{names}</h2>}
             <div className="h-px w-16" style={{ background: t.accent }} />
             <p className={mono} style={{ color: tape ? t.accent : t.muted }}>{tape ? stamp : eventsDateText(content, loc)}</p>
