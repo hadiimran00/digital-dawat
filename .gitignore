@@ -44,3 +44,6 @@ next-env.d.ts
 # local tooling config (contains the Supabase project reference)
 /.mcp.json
 
+
+# unlicensed review assets: never commit or publish (scripts/deploy.mjs refuses too)
+/public/placeholder/

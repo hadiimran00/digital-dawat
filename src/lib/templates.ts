@@ -283,6 +283,12 @@ export const TEMPLATES: Template[] = [
     music: { src: "/audio/replay.mp3", title: "Replay" },
     sample: { couple: "/art/couple-hands.webp" },
     backdrop: { src: "/art/mehndi-stage.webp", credit: "Mehndi stage photograph supplied by the site owner, who holds the licence." },
+    // scene photos via Pinterest; the site owner holds the licence (see CREDITS.md)
+    scenes: {
+      families: "/art/rp-families.webp", message: "/art/rp-message.webp", countdown: "/art/rp-countdown.webp",
+      dress: "/art/rp-dress.webp", faq: "/art/rp-faq.webp", rsvp: "/art/rp-rsvp.webp", closing: "/art/rp-closing.webp",
+      events: { mehndi: "/art/rp-mehndi.webp", nikkah: "/art/rp-nikkah.webp", baraat: "/art/rp-baraat.webp", walima: "/art/rp-walima.webp" },
+    },
     name: "Replay",
     category: "wedding",
     tagline: "Your wedding week as a retro home-video tape.",

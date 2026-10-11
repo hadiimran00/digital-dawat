@@ -48,3 +48,22 @@ listed so it can be traced or replaced.
 | `public/art/dw-couple.webp` | Wisaal | https://i.pinimg.com/736x/2f/7c/6f/2f7c6ff82162e0ff32afe320c5fa5ebf.jpg |
 | `public/audio/darbar-song.m4a` ("Usne Jana Ki Tarif", Rahat Fateh Ali Khan) | Shahi Darbar | YouTube Short td0pBIa_MgY, supplied by the site owner |
 | `public/audio/wisaal-song.m4a` ("Do Pal") | Wisaal | YouTube Short hpt6yAFwMkQ, supplied by the site owner |
+
+## Replay scene photos
+
+Found on Pinterest on 2026-10-11. On 2026-10-11 the site owner stated that they hold the licence for all of them.
+Keep the licences on file.
+
+| File | Screen | Source |
+|---|---|---|
+| `public/art/rp-families.webp` | families | https://i.pinimg.com/736x/70/a9/37/70a937cdcbd9cf75d9000d6740878f79.jpg |
+| `public/art/rp-message.webp` | message | https://i.pinimg.com/736x/60/8f/d0/608fd0e5c2e9fe901528dc0228f0c83e.jpg |
+| `public/art/rp-countdown.webp` | countdown | https://i.pinimg.com/736x/2b/29/f1/2b29f168b615549ff1b967e4a40c82d1.jpg |
+| `public/art/rp-mehndi.webp` | mehndi | https://i.pinimg.com/736x/bc/ec/9b/bcec9bc9145ebee02153261b1a04145d.jpg |
+| `public/art/rp-nikkah.webp` | nikkah | https://i.pinimg.com/736x/58/34/4d/58344dbf894a3ec26f806e82340ec0cc.jpg |
+| `public/art/rp-baraat.webp` | baraat | https://i.pinimg.com/736x/2a/e1/8f/2ae18fff65a6d506979e0c857e9dd594.jpg |
+| `public/art/rp-walima.webp` | walima | https://i.pinimg.com/736x/03/73/42/03734213757ed411012b300959d5f195.jpg |
+| `public/art/rp-dress.webp` | dress | https://i.pinimg.com/736x/7e/01/63/7e016301a3d48ab1d92ffb49e18e2a17.jpg |
+| `public/art/rp-faq.webp` | faq | https://i.pinimg.com/736x/41/3a/06/413a06307bb1268380a1807922008151.jpg |
+| `public/art/rp-rsvp.webp` | rsvp | https://i.pinimg.com/736x/a5/e9/04/a5e90472039efcc2792a3e65d055916b.jpg |
+| `public/art/rp-closing.webp` | closing | https://i.pinimg.com/736x/85/23/96/852396c2260c274bd1aff36f24c4aedb.jpg |
