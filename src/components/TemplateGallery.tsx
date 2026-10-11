@@ -61,6 +61,11 @@ export function TemplateGallery({ limit, titleAs: Title = "h3" }: { limit?: numb
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={`/thumbs/${t.id}.webp`} width={360} height={640} loading="lazy" decoding="async" alt="" className="block h-auto w-full" style={{ background: t.theme.bg }} />
                   </Link>
+                  {t.signature && (
+                    <span className="pointer-events-none absolute right-2 top-2 z-10 rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-[#3a0c12] shadow" style={{ backgroundImage: "linear-gradient(180deg,#fff1c9,#e8c06a 55%,#b98a35)" }}>
+                      Signature
+                    </span>
+                  )}
                 </HoverPreview>
               </div>
               <Link href={`/templates/${t.id}`} className="block">

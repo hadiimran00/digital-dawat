@@ -53,6 +53,11 @@ export function InviteCard({ template, content, chrome = true, clear = false }: 
   const backdrop = content.coverPhoto || template.backdrop?.src;
   const glow = art ? `0 0 6px ${t.bg}, 0 0 14px ${t.bg}, 0 0 22px ${t.bg}` : undefined;
   const gold = template.concept === "tape" && !ur; // gold script lettering, like a home-video title card
+  // royal: gold-foil italic serif; ivory: gold-brown engraved capitals (the same lettering as the full invitation)
+  const foilNames: CSSProperties | null = ur ? null
+    : template.concept === "royal" ? { fontFamily: "var(--nf-display), Georgia, serif", fontStyle: "italic", fontWeight: 700, backgroundImage: GOLD, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }
+    : template.concept === "ivory" ? { fontFamily: "var(--nf-caps), var(--nf-display), serif", fontWeight: 500, letterSpacing: "0.08em", backgroundImage: "linear-gradient(180deg, #9a6b3c, #6b3d22)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }
+    : null;
   const names = content.host2 ? `${content.host1} & ${content.host2}` : content.host1;
   const style: CSSProperties = {
     background: clear
@@ -109,6 +114,7 @@ export function InviteCard({ template, content, chrome = true, clear = false }: 
             fontWeight: gold ? 400 : 600,
             fontStyle: t.headingFont === "script" && !ur && !gold ? "italic" : "normal",
             overflowWrap: "anywhere",
+            ...(foilNames ?? {}),
           }}
         >
           {names}

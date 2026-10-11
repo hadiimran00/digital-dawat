@@ -62,11 +62,12 @@ export function ScratchReveal({
     }
     ctx.fillStyle = kind === "static" ? "rgba(0,0,0,0.65)" : "rgba(60,40,0,0.6)";
     const fs = Math.max(11, Math.min(15, width / 22)) * dpr;
-    ctx.font = `700 ${fs}px ui-monospace, Menlo, monospace`;
+    const caps = getComputedStyle(document.documentElement).getPropertyValue("--nf-caps").trim();
+    ctx.font = kind === "static" ? `700 ${fs}px ui-monospace, Menlo, monospace` : `700 ${fs * 1.15}px ${caps || "Georgia"}, Georgia, serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(kind === "static" ? "NO SIGNAL" : "SCRATCH HERE", c.width / 2, c.height / 2 - fs * 0.7);
-    ctx.font = `500 ${fs * 0.8}px ui-monospace, Menlo, monospace`;
+    ctx.font = kind === "static" ? `500 ${fs * 0.8}px ui-monospace, Menlo, monospace` : `italic 500 ${fs * 0.95}px Georgia, serif`;
     ctx.fillStyle = kind === "static" ? accent : "rgba(60,40,0,0.8)";
     ctx.fillText(label, c.width / 2, c.height / 2 + fs * 0.9);
   }, [kind, label, accent]);

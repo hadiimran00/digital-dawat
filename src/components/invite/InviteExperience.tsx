@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CalendarPlus, ChevronDown, MapPin, Music, Shirt, VolumeX } from "lucide-react";
+import { CalendarDays, CalendarPlus, ChevronDown, MapPin, Music, Phone, Shirt, VolumeX } from "lucide-react";
 import type { Template } from "@/lib/templates";
 import {
   BISMILLAH, buildIcs, eventsDateText, formatEventDate, formatEventTime, type InviteContent, type InviteEvent,
@@ -66,6 +66,13 @@ function Countdown({
       <p className={`mt-2 text-center text-sm ${muted}`}>{ur ? `${upcoming.title} تک` : `Until ${upcoming.title}`}</p>
     </section>
   );
+}
+
+/** The customer's map link, or a Google Maps search for the venue and address when they did not give one. */
+function mapLink(e: InviteEvent) {
+  if (e.mapUrl) return e.mapUrl;
+  const q = [e.venue, e.address].filter(Boolean).join(", ");
+  return q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}` : "";
 }
 
 function downloadIcs(ev: InviteEvent, hosts: string) {
@@ -141,7 +148,7 @@ function Screen({ tape, scene, id, photo, framed = true, above, align = "end", c
   return (
     <div id={id} data-scene={scene} data-photo={photo || undefined} className={`flex min-h-[100cqh] snap-start flex-col ${align === "end" ? "justify-end" : "justify-start"} pb-[calc(5.5rem+var(--frame-bottom,0px))] pt-[calc(4.5rem+var(--frame-top,0px))]`}>
       {above}
-      <div className="relative">
+      <div className="scene-reveal relative">
         {framed && ["-left-2 -top-2 border-l-2 border-t-2", "-right-2 -top-2 border-r-2 border-t-2", "-bottom-2 -left-2 border-b-2 border-l-2", "-bottom-2 -right-2 border-b-2 border-r-2"].map((c) => (
           <span key={c} aria-hidden className={`pointer-events-none absolute size-5 border-white/80 ${c}`} />
         ))}
@@ -186,9 +193,20 @@ interface Look {
   align: "start" | "end";
   scrim: [string, string];
   pill: string;
+  /** body copy inside panels */
+  prose: string;
+  /** thin inner frame drawn just inside each panel (null = none) */
+  frame: string | null;
+  /** a line under the names on the opening screen */
+  tagline: string;
+  /** extra class on gold lettering (the moving shine) */
+  shine: string;
 }
 
 const CAPS = "var(--nf-caps), var(--nf-display), Georgia, serif";
+/** Gold with a bright band that slowly sweeps across (see .foil-shine). */
+const SHINE = "linear-gradient(110deg, #b98a35 0%, #e8c06a 28%, #fff6d8 42%, #e8c06a 56%, #b98a35 100%)";
+const IVORY_FOIL = "linear-gradient(110deg, #6b3d22 0%, #9a6b3c 30%, #d9b27a 44%, #9a6b3c 58%, #6b3d22 100%)";
 const LOOKS: Record<Concept, Look> = {
   tape: {
     dark: true,
@@ -203,36 +221,46 @@ const LOOKS: Record<Concept, Look> = {
     label: "font-mono text-[11px] font-bold uppercase tracking-[0.2em]",
     align: "end", scrim: ["rgba(12,8,5,0.52)", "rgba(12,8,5,0.68)"],
     pill: "rounded-full border border-white/30 bg-black/60 px-5 font-mono text-xs font-bold tracking-[0.25em] text-white",
+    prose: "text-[15px] leading-relaxed text-white/90", frame: null, tagline: "", shine: "",
   },
   royal: {
     dark: true,
-    panel: "rounded-b-[26px] border border-[#e8c06a]/40 bg-[#3a0c12]/75 text-[#f7e7c6] shadow-2xl backdrop-blur-[2px]",
+    panel: "rounded-b-[26px] border border-[#e8c06a]/55 bg-[#3a0c12]/[0.62] text-[#f7e7c6] shadow-[0_20px_60px_rgba(0,0,0,0.55)] backdrop-blur-md",
     panelStyle: { borderTopLeftRadius: "50% 64px", borderTopRightRadius: "50% 64px" },
     ink: "text-[#f7e7c6]", muted: "text-[#f7e7c6]/75", cell: "border-[#e8c06a]/30 bg-black/25",
-    title: "text-center text-lg font-bold uppercase tracking-[0.28em] text-[#e8c06a]", titleStyle: { fontFamily: CAPS },
-    names: foil("var(--nf-display), Georgia, serif", 700, true), greet: foil("var(--nf-display), Georgia, serif", 700, true),
+    title: "text-center text-lg font-bold uppercase tracking-[0.28em] text-[#e8c06a] [text-wrap:balance]", titleStyle: { fontFamily: CAPS },
+    names: { ...foil("var(--nf-display), Georgia, serif", 700, true), backgroundImage: SHINE, backgroundSize: "250% 100%" },
+    greet: { ...foil("var(--nf-display), Georgia, serif", 700, true), backgroundImage: SHINE, backgroundSize: "250% 100%" },
     solid: "press inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[#3a0c12]",
     solidStyle: () => ({ backgroundImage: GOLD, fontFamily: CAPS }),
     ghost: "press inline-flex min-h-10 items-center gap-1.5 rounded-full border border-[#e8c06a]/60 px-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[#f7e7c6] [font-family:var(--nf-caps)]",
-    chip: "press inline-flex min-h-10 items-center rounded-full border border-[#e8c06a]/50 px-4 text-[11px] font-bold uppercase tracking-[0.18em] [font-family:var(--nf-caps)] hover:bg-white/10",
+    chip: "press inline-flex min-h-11 items-center rounded-full border border-[#e8c06a]/50 px-4 text-[11px] font-bold uppercase tracking-[0.18em] [font-family:var(--nf-caps)] hover:bg-white/10",
     label: "text-[11px] font-bold uppercase tracking-[0.25em] text-[#e8c06a] [font-family:var(--nf-caps)]",
     align: "start", scrim: ["rgba(20,5,6,0.15)", "rgba(20,5,6,0.45)"],
     pill: "rounded-full border border-[#e8c06a]/50 bg-[#2a0a0e]/70 px-5 text-[11px] font-bold tracking-[0.3em] text-[#f7e7c6] [font-family:var(--nf-caps)]",
+    prose: "font-display text-[17px] italic leading-relaxed text-[#f7e7c6]/90",
+    frame: "rgba(232,192,106,0.45)",
+    tagline: "A royal celebration of two families",
+    shine: "foil-shine",
   },
   ivory: {
     dark: false,
-    panel: "rounded-[22px] border border-white/80 bg-[#fbf6ee]/88 text-[#4a1c20] shadow-xl backdrop-blur-md",
+    panel: "rounded-[22px] border border-[#e6d3b0] bg-[#fbf6ee]/[0.86] text-[#4a1c20] shadow-[0_18px_50px_rgba(40,20,10,0.35)] backdrop-blur-md",
     ink: "text-[#4a1c20]", muted: "text-[#4a1c20]/75", cell: "border-[#a8783a]/30 bg-white/60",
-    title: "text-center text-lg font-bold uppercase tracking-[0.28em] text-[#4a1c20]", titleStyle: { fontFamily: CAPS },
-    names: { fontFamily: CAPS, fontWeight: 500, letterSpacing: "0.12em", color: "#7a2a2e" },
+    title: "text-center text-lg font-bold uppercase tracking-[0.28em] text-[#4a1c20] [text-wrap:balance]", titleStyle: { fontFamily: CAPS },
+    names: { fontFamily: CAPS, fontWeight: 500, letterSpacing: "0.12em", backgroundImage: IVORY_FOIL, backgroundSize: "250% 100%", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" },
     greet: { fontFamily: "var(--nf-script), cursive", color: "#9a6b3c" },
     solid: "press inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[#3a1a10]",
     solidStyle: () => ({ backgroundImage: GOLD, fontFamily: CAPS }),
     ghost: "press inline-flex min-h-10 items-center gap-1.5 rounded-full border border-[#4a1c20]/30 bg-white/70 px-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[#4a1c20] [font-family:var(--nf-caps)]",
-    chip: "press inline-flex min-h-10 items-center rounded-full border border-[#a8783a]/50 bg-white/60 px-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[#4a1c20] [font-family:var(--nf-caps)]",
+    chip: "press inline-flex min-h-11 items-center rounded-full border border-[#a8783a]/50 bg-white/60 px-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[#4a1c20] [font-family:var(--nf-caps)]",
     label: "text-[11px] font-bold uppercase tracking-[0.25em] text-[#a8783a] [font-family:var(--nf-caps)]",
     align: "start", scrim: ["rgba(30,15,10,0.0)", "rgba(30,15,10,0.35)"],
     pill: "rounded-full border border-white/60 bg-[#fbf6ee]/80 px-5 text-[11px] font-bold tracking-[0.3em] text-[#4a1c20] [font-family:var(--nf-caps)]",
+    prose: "font-display text-[17px] italic leading-relaxed text-[#4a1c20]/90",
+    frame: "rgba(168,120,58,0.35)",
+    tagline: "A new chapter in our dastaan",
+    shine: "foil-shine",
   },
 };
 
@@ -242,6 +270,60 @@ function SceneTitle({ look, concept, children, as: As = "h2" }: { look: Look; co
     <As className={look.title} style={look.titleStyle}>
       {concept === "royal" ? <><span aria-hidden className="mr-2 text-xs">✦</span>{children}<span aria-hidden className="ml-2 text-xs">✦</span></> : children}
     </As>
+  );
+}
+
+/** The thin inner frame just inside a royal / ivory panel (it follows the panel's arched corners). */
+function PanelFrame({ look }: { look: Look }) {
+  if (!look.frame) return null;
+  return <span aria-hidden className="pointer-events-none absolute inset-[7px] border" style={{ borderColor: look.frame, borderRadius: "inherit" }} />;
+}
+
+/** Gold rule with a small star in the middle: — ✦ — */
+function Divider({ color }: { color: string }) {
+  return (
+    <div aria-hidden className="mx-auto my-3 flex w-40 items-center gap-2" style={{ color }}>
+      <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, transparent, ${color})` }} />
+      <span className="text-xs">✦</span>
+      <span className="h-px flex-1" style={{ background: `linear-gradient(270deg, transparent, ${color})` }} />
+    </div>
+  );
+}
+
+/** Both families side by side, each person a pill guests can tap to call (royal / ivory looks). */
+function FamilyColumns({ content, ur, accent, dark }: { content: InviteContent; ur: boolean; accent: string; dark: boolean }) {
+  const sides = [
+    { label: content.side1Label || (ur ? "پہلا گھرانہ" : "Family"), family: content.family1, members: content.members1 },
+    { label: content.side2Label || (ur ? "دوسرا گھرانہ" : "Family"), family: content.family2, members: content.members2 },
+  ].filter((x) => x.family || x.members.length > 0);
+  if (sides.length === 0) return null;
+  const tel = (p: string) => `tel:${p.replace(/[^\d+]/g, "")}`;
+  return (
+    <div className={`grid gap-3 ${sides.length > 1 ? "grid-cols-2" : ""}`}>
+      {sides.map((x, i) => (
+        <div key={i} className="text-center">
+          <p className="text-[10px] font-bold uppercase tracking-[0.22em]" style={{ fontFamily: CAPS, color: accent }}>♡ {x.label}</p>
+          {x.family && <p className="mt-1 font-display text-[15px] font-bold leading-snug">{x.family}</p>}
+          <ul className="mt-2 space-y-1.5">
+            {x.members.map((m, j) => {
+              const pill = `block rounded-xl border px-2 py-1.5 text-[13px] leading-tight ${dark ? "border-[#e8c06a]/35 bg-black/20" : "border-[#a8783a]/35 bg-white/70"}`;
+              return (
+                <li key={j}>
+                  {m.phone ? (
+                    <a href={tel(m.phone)} className={`press ${pill}`} aria-label={`${ur ? "کال کریں" : "Call"} ${m.name}`}>
+                      <span className="font-display font-semibold">{m.name}</span>
+                      <span className="mt-0.5 flex items-center justify-center gap-1 text-[11px] opacity-80"><Phone className="size-3" aria-hidden />{m.phone}</span>
+                    </a>
+                  ) : (
+                    <span className={pill}><span className="font-display font-semibold">{m.name}</span></span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -332,6 +414,7 @@ export function InviteExperience({
     const root = scroller.current;
     const io = new IntersectionObserver(
       (entries) => {
+        for (const e of entries) if (e.isIntersecting) (e.target as HTMLElement).dataset.in = "1"; // one-time entrance (see .scene-reveal)
         const best = entries.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
         if (best) {
           const el = best.target as HTMLElement;
@@ -400,17 +483,18 @@ export function InviteExperience({
           ) : (
             <Screen tape scene={0} framed={false} align={look.align}>
               <section className={`relative mt-4 px-6 pb-7 pt-12 text-center ${look.panel}`} style={look.panelStyle}>
-                {concept === "royal" && <Finial />}
+                {concept === "royal" && <Finial />}<PanelFrame look={look} />
                 {content.bismillah && <p lang="ar" dir="rtl" className="text-2xl" style={{ color: t.accent, fontFamily: "var(--nf-naskh), serif", lineHeight: 1.9 }}>{BISMILLAH}</p>}
-                <p className="mt-1 text-[11px] uppercase leading-relaxed tracking-[0.22em]" style={{ fontFamily: CAPS, color: t.accent }}>
+                <p className="mx-auto mt-1 max-w-[16rem] text-xs uppercase leading-6 tracking-[0.2em] [text-wrap:balance]" style={{ fontFamily: CAPS, color: t.accent }}>
                   {ur ? content.headline : "Together with their families, we joyfully invite you to the wedding of"}
                 </p>
-                <h2 className="mt-3 text-5xl leading-[1.05]" style={ur ? { fontFamily: font } : look.names}>
+                <h2 className={`mt-3 text-5xl leading-[1.05] ${ur ? "" : look.shine}`} style={ur ? { fontFamily: font } : look.names}>
                   {content.host1}
                   {content.host2 && <><span className="my-1 block text-2xl" style={ur ? undefined : { ...look.greet, fontFamily: "var(--nf-display), Georgia, serif", fontStyle: "italic" }}>{ur ? "اور" : "and"}</span>{content.host2}</>}
                 </h2>
-                <div className="mx-auto mt-4 h-px w-24" style={{ background: t.accent }} />
-                <p className={`mt-4 text-sm ${look.muted}`}>{content.message}</p>
+                <Divider color={t.accent} />
+                {!ur && look.tagline && <p className="text-[11px] uppercase tracking-[0.3em] [text-wrap:balance]" style={{ fontFamily: CAPS, color: t.accent }}>{look.tagline}</p>}
+                <p className={`mt-3 ${look.prose}`}>{content.message}</p>
                 <p className="mt-3 text-[11px] uppercase tracking-[0.25em]" style={{ fontFamily: CAPS }}>{eventsDateText(content, loc)}</p>
               </section>
             </Screen>
@@ -419,9 +503,11 @@ export function InviteExperience({
           {(content.family1 || content.family2 || content.members1.length > 0 || content.members2.length > 0) && (
             <Screen tape scene={1} framed={tape} align={look.align} photo={sc.families}>
               <div className={`relative ${tape ? "p-4" : "px-4 pb-5 pt-12"} ${look.panel}`} style={look.panelStyle}>
-                {concept === "royal" && <Finial />}
+                {concept === "royal" && <Finial />}<PanelFrame look={look} />
                 {tape ? <Tag tape label={ur ? "خاندان" : "Families"} accent={t.accent} /> : <SceneTitle look={look} concept={concept!}>{ur ? "دعاؤں کے ساتھ" : "With the blessings of"}</SceneTitle>}
-                <div className={tape ? "" : "mt-4"}><Families content={content} ur={ur} glass={look.dark} accent={look.dark ? undefined : t.accent} /></div>
+                <div className={tape ? "" : "mt-4"}>
+                  {tape ? <Families content={content} ur={ur} glass={look.dark} /> : <FamilyColumns content={content} ur={ur} accent={t.accent} dark={look.dark} />}
+                </div>
               </div>
             </Screen>
           )}
@@ -429,12 +515,12 @@ export function InviteExperience({
           {(guest || demo) && (
             <Screen tape scene={2} framed={tape} align={look.align} photo={sc.message}>
               <section className={`relative px-5 pb-5 ${tape ? "pt-5" : "pt-12"} text-center ${look.panel}`} style={look.panelStyle}>
-                {concept === "royal" && <Finial />}
+                {concept === "royal" && <Finial />}<PanelFrame look={look} />
                 {tape && <Tag tape label={ur ? "پیغام" : "Message"} accent={t.accent} />}
-                <p className="pb-1 text-4xl leading-tight" style={ur ? { fontFamily: font } : look.greet}>
+                <p className={`pb-1 text-4xl leading-tight ${ur ? "" : look.shine}`} style={ur ? { fontFamily: font } : look.greet}>
                   {guest ? (ur ? `محترم ${guest}،` : `Dear ${guest},`) : ur ? "محترم مہمان،" : "Dear guest,"}
                 </p>
-                <p className={`mt-3 text-[15px] leading-relaxed ${look.dark ? "text-white/90" : "text-[#4a1c20]/90"}`}>
+                <p className={`mt-3 ${look.prose}`}>
                   {ur
                     ? "ہمیں آپ کی میزبانی کا شرف ملے گا۔ ہم نے آپ کے لیے جگہ رکھی ہے۔"
                     : "Your presence is the blessing we are asking for. It would not be complete without the people who have loved us all our lives. We have saved you a place."}
@@ -453,7 +539,7 @@ export function InviteExperience({
 
           <Screen tape scene={3} framed={tape} align={look.align} photo={sc.countdown}>
             <div className={`relative ${tape ? "p-4" : "px-4 pb-5 pt-12"} ${look.panel}`} style={look.panelStyle}>
-              {concept === "royal" && <Finial />}
+              {concept === "royal" && <Finial />}<PanelFrame look={look} />
               {tape ? <Tag tape label={ur ? "الٹی گنتی" : "Countdown"} accent={t.accent} /> : <SceneTitle look={look} concept={concept!}>{ur ? "الٹی گنتی" : "Counting the days"}</SceneTitle>}
               <div className={tape ? "" : "mt-4"}>
                 <Countdown events={ordered} ur={ur} tape={tape} scratchKind={scratchKind} accent={t.accent} panel={look.cell} muted={look.muted} />
@@ -477,7 +563,7 @@ export function InviteExperience({
               ) : undefined}
             >
               <article className={`relative px-5 pb-5 ${tape ? "pt-5" : "pt-12"} text-center ${look.panel}`} style={look.panelStyle}>
-                {concept === "royal" && <Finial />}
+                {concept === "royal" && <Finial />}<PanelFrame look={look} />
                 {tape ? (
                   <Tag tape label={`Tape ${pad(i + 1)} / ${pad(ordered.length)}`} accent={t.accent} />
                 ) : (
@@ -491,14 +577,18 @@ export function InviteExperience({
                     {ur ? `${seats} مہمان مدعو` : `${seats} ${seats === 1 ? "guest" : "guests"} invited`}
                   </p>
                 )}
-                {tape ? <TapeTitle as="h3">{e.title}</TapeTitle> : <h3 className="text-5xl leading-tight" style={ur ? { fontFamily: font } : look.names}>{e.title}</h3>}
-                <p className="mt-2 font-display text-lg font-semibold">{formatEventDate(e.date, loc)}{e.time && ` · ${formatEventTime(e.time)}`}</p>
-                {e.venue && <p className="mt-1 text-sm">{e.venue}</p>}
+                {tape ? <TapeTitle as="h3">{e.title}</TapeTitle> : <h3 className={`text-5xl leading-tight ${ur ? "" : look.shine}`} style={ur ? { fontFamily: font } : look.names}>{e.title}</h3>}
+                {!tape && <Divider color={t.accent} />}
+                <p className="mt-2 flex items-center justify-center gap-1.5 font-display text-lg font-semibold">
+                  {!tape && <CalendarDays className="size-4 shrink-0" style={{ color: t.accent }} aria-hidden />}
+                  {formatEventDate(e.date, loc)}{e.time && ` · ${formatEventTime(e.time)}`}
+                </p>
+                {e.venue && <p className="mt-1 flex items-center justify-center gap-1.5 text-sm">{!tape && <MapPin className="size-3.5 shrink-0" style={{ color: t.accent }} aria-hidden />}{e.venue}</p>}
                 {e.address && <p className={`text-xs ${look.muted}`}>{e.address}</p>}
                 {e.dressCode && <p className={`mt-1 text-xs ${look.muted}`}>{ur ? "ڈریس کوڈ: " : "Dress code: "}{e.dressCode}</p>}
                 <div className="mt-4 flex flex-wrap justify-center gap-2">
-                  {e.mapUrl && (
-                    <a className={look.solid} style={look.solidStyle(t.accent, t.bg)} href={e.mapUrl} target="_blank" rel="noopener noreferrer">
+                  {mapLink(e) && (
+                    <a className={look.solid} style={look.solidStyle(t.accent, t.bg)} href={mapLink(e)} target="_blank" rel="noopener noreferrer">
                       <MapPin className="size-3.5" aria-hidden />{ur ? "مقام" : "Open location"}
                     </a>
                   )}
@@ -506,7 +596,7 @@ export function InviteExperience({
                     <CalendarPlus className="size-3.5" aria-hidden />{ur ? "کیلنڈر" : "Add to calendar"}
                   </button>
                 </div>
-                {!tape && <p className={`mt-3 text-[10px] uppercase tracking-[0.2em] ${look.muted}`} style={{ fontFamily: CAPS }}>{fxCaption}</p>}
+                {!tape && i === 0 && <p className={`mt-3 text-[10px] uppercase tracking-[0.2em] ${look.muted}`} style={{ fontFamily: CAPS }}>✦ {fxCaption}</p>}
               </article>
             </Screen>
           ))}
@@ -538,7 +628,7 @@ export function InviteExperience({
           {hasDress && ordered.length > 1 && (
             <Screen tape scene={4} framed={tape} align={look.align} photo={sc.dress}>
               <section aria-label="Dress code" className={`relative px-5 pb-5 ${tape ? "pt-5" : "pt-12"} text-center ${look.panel}`} style={look.panelStyle}>
-                {concept === "royal" && <Finial />}
+                {concept === "royal" && <Finial />}<PanelFrame look={look} />
                 {tape && <Tag tape label={ur ? "پروگرام" : "Programme"} accent={t.accent} />}
                 {tape ? <TapeTitle>{ur ? "ڈریس کوڈ" : "Dress code"}</TapeTitle> : <SceneTitle look={look} concept={concept!}>{ur ? "ڈریس کوڈ" : "Dress code"}</SceneTitle>}
                 <ul className={`mt-4 space-y-3 ${tape ? "" : "text-start"}`}>
@@ -547,7 +637,7 @@ export function InviteExperience({
                       {!tape && <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-full" style={{ backgroundImage: GOLD }}><Shirt className="size-4 text-[#3a0c12]" /></span>}
                       <span>
                         <span className={`block ${look.label}`} style={tape ? { color: t.accent } : undefined}>{e.title}</span>
-                        <span className={`block text-sm ${look.dark ? "text-white/90" : "text-[#4a1c20]/90"}`}>{e.dressCode}</span>
+                        <span className={`block font-display text-[15px] ${look.dark ? "text-white/90" : "text-[#4a1c20]/90"}`}>{e.dressCode}</span>
                       </span>
                     </li>
                   ))}
@@ -559,7 +649,7 @@ export function InviteExperience({
           {content.faq.length > 0 && (
             <Screen tape scene={4} framed={tape} align={look.align} photo={sc.faq}>
               <section aria-label="Questions" className={`relative px-5 pb-5 ${tape ? "pt-5" : "pt-12"} ${look.panel}`} style={look.panelStyle}>
-                {concept === "royal" && <Finial />}
+                {concept === "royal" && <Finial />}<PanelFrame look={look} />
                 {tape && <Tag tape label="Q & A" accent={t.accent} />}
                 {tape ? <TapeTitle>{ur ? "عام سوالات" : "A few questions"}</TapeTitle> : <SceneTitle look={look} concept={concept!}>{ur ? "عام سوالات" : "A few questions"}</SceneTitle>}
                 <div className={`mt-4 divide-y border-t ${look.dark ? "divide-white/15 border-white/15" : "divide-[#4a1c20]/15 border-[#4a1c20]/15"}`}>
@@ -572,7 +662,7 @@ export function InviteExperience({
                         <span className="flex-1">{f.q}</span>
                         <span aria-hidden className={`grid size-6 shrink-0 place-items-center border text-xs transition-transform duration-200 ease-out group-open:rotate-45 ${tape ? "rounded-sm border-white/50 font-mono" : "rounded-full border-current/40"}`}>+</span>
                       </summary>
-                      <p className={`mt-2 pl-10 text-sm ${look.dark ? "text-white/85" : "text-[#4a1c20]/85"}`}>{f.a}</p>
+                      <p className={`mt-2 pl-10 font-display text-[15px] ${look.dark ? "text-white/85" : "text-[#4a1c20]/85"}`}>{f.a}</p>
                     </details>
                   ))}
                 </div>
@@ -587,7 +677,7 @@ export function InviteExperience({
 
           {content.rsvpEnabled && (
             <Screen tape scene={5} framed={tape} align={look.align} photo={sc.rsvp}>
-              <Rsvp inviteId={inviteId} demo={demo} guestName={guest} seats={seats} tape={look.dark} accent={t.accent} />
+              <Rsvp inviteId={inviteId} demo={demo} guestName={guest} seats={seats} tape={look.dark} accent={t.accent} titleClass={look.title} titleStyle={look.titleStyle} />
             </Screen>
           )}
 
@@ -603,9 +693,9 @@ export function InviteExperience({
               </div>
             ) : (
               <div className={`relative px-5 pb-6 pt-12 text-center ${look.panel}`} style={look.panelStyle}>
-                {concept === "royal" && <Finial />}
+                {concept === "royal" && <Finial />}<PanelFrame look={look} />
                 <p className="text-lg italic" style={{ fontFamily: "var(--nf-display), Georgia, serif" }}>{content.closing || "We cannot wait to see you there."}</p>
-                <p className="mt-3 text-5xl leading-[1.05]" style={ur ? { fontFamily: font } : look.names}>
+                <p className={`mt-3 text-5xl leading-[1.05] ${ur ? "" : look.shine}`} style={ur ? { fontFamily: font } : look.names}>
                   {content.host1}
                   {content.host2 && <><span className="my-1 block text-2xl" style={ur ? undefined : { ...look.greet, fontFamily: "var(--nf-display), Georgia, serif", fontStyle: "italic" }}>{ur ? "اور" : "and"}</span>{content.host2}</>}
                 </p>
@@ -674,8 +764,8 @@ export function InviteExperience({
                   <p className="mt-2 flex items-center gap-2 text-sm"><Shirt className={`size-4 shrink-0 ${tape ? "text-amber-300" : "text-gold-deep"}`} aria-hidden />{ur ? "ڈریس کوڈ: " : "Dress code: "}{e.dressCode}</p>
                 )}
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {e.mapUrl && (
-                    <a className={`btn btn-ghost ${tape ? "!border-white/30 !bg-transparent !text-white" : ""}`} href={e.mapUrl} target="_blank" rel="noopener noreferrer"><MapPin className="size-4" aria-hidden />{ur ? "مقام دیکھیں" : "Open location"}</a>
+                  {mapLink(e) && (
+                    <a className={`btn btn-ghost ${tape ? "!border-white/30 !bg-transparent !text-white" : ""}`} href={mapLink(e)} target="_blank" rel="noopener noreferrer"><MapPin className="size-4" aria-hidden />{ur ? "مقام دیکھیں" : "Open location"}</a>
                   )}
                   <button type="button" className={`btn btn-ghost ${tape ? "!border-white/30 !bg-transparent !text-white" : ""}`} onClick={() => downloadIcs(e, names)}>
                     <CalendarPlus className="size-4" aria-hidden />{ur ? "کیلنڈر میں شامل کریں" : "Add to calendar"}
@@ -759,8 +849,11 @@ export function InviteExperience({
 
       {scenic && !tape && opened && !atEnd && (
         <button type="button" tabIndex={-1} aria-hidden onClick={() => scroller.current?.scrollBy({ top: scroller.current.clientHeight * 0.8, behavior: reducedMotion() ? "auto" : "smooth" })}
-          className={`press absolute bottom-[calc(1.25rem+var(--frame-bottom,0px))] left-1/2 z-10 flex min-h-11 -translate-x-1/2 items-center gap-2 ${look.pill}`}>
-          SCROLL DOWN <ChevronDown className="size-4" />
+          className="press absolute bottom-[calc(0.75rem+var(--frame-bottom,0px))] left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1">
+          <span className={`scroll-nudge grid size-11 place-items-center rounded-full border-2 ${look.dark ? "border-[#e8c06a]/80 bg-[#2a0a0e]/60 text-[#e8c06a]" : "border-[#a8783a]/70 bg-[#fbf6ee]/80 text-[#7a2a2e]"}`}>
+            <ChevronDown className="size-5" />
+          </span>
+          <span className={`text-[9px] font-bold tracking-[0.3em] ${look.dark ? "text-[#f7e7c6]" : "text-white [text-shadow:0_1px_4px_rgba(0,0,0,.7)]"}`} style={{ fontFamily: CAPS }}>SCROLL DOWN</span>
         </button>
       )}
 

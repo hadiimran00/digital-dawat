@@ -36,6 +36,8 @@ export interface Template {
   /** Flat price in PKR, shown upfront. */
   price: number;
   popular?: boolean;
+  /** Our signature invitations: listed first, with a badge. Lower number = earlier. */
+  signature?: number;
   /** Default animation for this template's video and hover preview. */
   motion: VideoStyle;
   /**
@@ -275,6 +277,7 @@ export const TEMPLATES: Template[] = [
   },
   {
     id: "replay-wedding",
+    signature: 1,
     motion: "rise",
     concept: "tape",
     music: { src: "/audio/replay.mp3", title: "Replay" },
@@ -314,6 +317,7 @@ export const TEMPLATES: Template[] = [
   // ---- Scene templates (royal / ivory) built from Ceremonia references. Images and songs: see CREDITS.md. ----
   {
     id: "darbar-wedding",
+    signature: 2,
     motion: "sparkle",
     concept: "royal",
     name: "Shahi Darbar",
@@ -334,6 +338,7 @@ export const TEMPLATES: Template[] = [
   },
   {
     id: "wisaal-wedding",
+    signature: 3,
     motion: "rise",
     concept: "ivory",
     name: "Wisaal",
@@ -361,9 +366,13 @@ export function formatPKR(n: number) {
   return `Rs ${n.toLocaleString("en-PK")}`;
 }
 
+/** Signature invitations first (in their set order), then everything else in catalogue order. */
+export const ORDERED = [...TEMPLATES].sort((a, b) => (a.signature ?? 99) - (b.signature ?? 99));
+export const SIGNATURE = ORDERED.filter((t) => t.signature);
+
 export function searchTemplates(q: string, category: CategoryId | "all") {
   const s = q.trim().toLowerCase();
-  return TEMPLATES.filter((t) => {
+  return ORDERED.filter((t) => {
     if (category !== "all" && t.category !== category) return false;
     if (!s) return true;
     return [t.name, t.tagline, categoryLabel(t.category), ...t.tags].join(" ").toLowerCase().includes(s);

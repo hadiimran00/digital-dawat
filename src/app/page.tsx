@@ -5,7 +5,7 @@ import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { Eye, Video, Link2, ListChecks, UserRound, Languages, ChevronDown } from "lucide-react";
 import { TemplateGallery } from "@/components/TemplateGallery";
 import { InviteCard } from "@/components/invite/InviteCard";
-import { TEMPLATES, formatPKR } from "@/lib/templates";
+import { SIGNATURE, TEMPLATES, formatPKR } from "@/lib/templates";
 import { defaultContent } from "@/lib/content";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
@@ -59,15 +59,19 @@ export default function Home() {
           </div>
           <div className="mx-auto w-full max-w-xs rise" style={{ animationDelay: "0.12s" }}>
             <div className="-rotate-2 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10">
-              <InviteCard template={TEMPLATES[0]} content={defaultContent(TEMPLATES[0].category)} />
+              <InviteCard template={SIGNATURE[1]} content={defaultContent(SIGNATURE[1].category)} />
             </div>
           </div>
         </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-4 py-16">
-        <h2 className="font-display text-4xl font-bold text-brand">Start from a design you like</h2>
-        <p className="mb-8 mt-2 text-foreground/70">Prices run from {FROM} to {TO} per invitation. Hover a card to watch it move.</p>
+        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-gold-deep">Signature collection</p>
+        <h2 className="font-display text-4xl font-bold text-brand">Our most cinematic invitations</h2>
+        <p className="mb-8 mt-2 text-foreground/70">
+          {SIGNATURE.map((t) => t.name).join(", ")}: full-screen scenes for every event, music, and an opening guests remember.
+          Prices run from {FROM} to {TO} per invitation. Hover a card to watch it move.
+        </p>
         <TemplateGallery limit={4} />
       </section>
 

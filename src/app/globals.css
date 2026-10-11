@@ -184,6 +184,40 @@ summary,
   opacity: 0;
 }
 
+/* A bright band sweeps slowly across gold lettering, then rests. */
+@keyframes foil-shine {
+  0%, 55% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0% 0;
+  }
+}
+.foil-shine {
+  animation: foil-shine 6s ease-in-out infinite;
+}
+/* The scroll cue gently bobs to invite a swipe. */
+@keyframes nudge {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+.scroll-nudge {
+  animation: nudge 1.8s ease-in-out infinite;
+}
+
+/* Each scene's panel rises in once, the first time its screen comes into view (ease-out, short). */
+.scene-reveal {
+  transition: opacity 560ms var(--ease-out), transform 560ms var(--ease-out);
+}
+[data-scene]:not([data-in]) > .scene-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
 /* Scene photos drift very slowly, like a held camera. */
 @keyframes drift {
   from {
@@ -275,6 +309,16 @@ summary,
   }
   .scene-drift > div {
     animation: none;
+  }
+  .foil-shine,
+  .scroll-nudge {
+    animation: none;
+  }
+  .scene-reveal {
+    transition: opacity 300ms ease-out;
+  }
+  [data-scene]:not([data-in]) > .scene-reveal {
+    transform: none;
   }
   .cover[data-open="true"] {
     transform: none;
