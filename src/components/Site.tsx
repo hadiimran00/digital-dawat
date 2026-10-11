@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SupportLink } from "@/components/SupportLink";
 import { usePathname } from "next/navigation";
 
 /** Guest-facing invitation pages and template demos are full-screen: no site header or footer. */
@@ -38,6 +39,7 @@ export function SiteFooter() {
         <nav aria-label="Footer" className="flex gap-4">
           <Link href="/templates">Templates</Link>
           <Link href="/policies">Pricing &amp; refunds</Link>
+          <SupportLink className="!font-normal !no-underline">Help on WhatsApp</SupportLink>
         </nav>
       </div>
     </footer>

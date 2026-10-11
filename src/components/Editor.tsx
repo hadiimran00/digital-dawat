@@ -14,6 +14,8 @@ import { InviteExperience } from "@/components/invite/InviteExperience";
 import { VideoExport } from "@/components/VideoExport";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { PhotoField } from "@/components/PhotoField";
+import { SupportLink } from "@/components/SupportLink";
+import { supportWhatsapp } from "@/lib/config";
 
 const draftKey = (id: string) => `dawat:draft:v2:${id}`;
 
@@ -375,6 +377,7 @@ export function Editor() {
         <div className="rounded-2xl border border-line bg-card p-5">
           <p className="font-semibold">{formatPKR(template.price)} <span className="font-normal text-foreground/70">· flat price, includes web invite, video and RSVP</span></p>
           <p className="mt-1 text-sm text-foreground/70">You pay by online bank transfer after reviewing, then upload your receipt. Your invite goes live once we confirm it.</p>
+          {supportWhatsapp && <p className="mt-2 text-sm text-foreground/70">Need help? <SupportLink topic={`I have a question about the ${template.name} invitation`} className="text-brand" /></p>}
           <div className="mt-4 flex flex-wrap gap-2">
             <button type="button" className="btn btn-ghost" onClick={() => setPreviewing(true)}>Preview full invitation</button>
             <button type="submit" className="btn btn-primary" disabled={busy}>{busy ? "Saving…" : "Continue to payment"}</button>

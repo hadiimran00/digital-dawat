@@ -8,6 +8,8 @@ import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { InviteExperience } from "@/components/invite/InviteExperience";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { JsonLd } from "@/components/JsonLd";
+import { SupportLink } from "@/components/SupportLink";
+import { supportWhatsapp } from "@/lib/config";
 
 export function generateStaticParams() {
   return TEMPLATES.map((t) => ({ id: t.id }));
@@ -122,6 +124,7 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
             <li>✓ A vertical video to download{t.music ? ", with your photos and music" : " with your photos"}</li>
           </ul>
           <Link href={cta} prefetch={false} className="btn btn-primary mt-8 hidden md:inline-flex">Customise this template</Link>
+          {supportWhatsapp && <p className="mt-4 text-sm text-foreground/70">Questions about {t.name}? <SupportLink topic={`I have a question about the ${t.name} template`} className="text-brand" /></p>}
 
           {related.length > 0 && (
             <nav aria-label="Related templates" className="mt-10">

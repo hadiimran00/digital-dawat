@@ -12,3 +12,8 @@ export const paymentInfo = {
   easypaisa: process.env.NEXT_PUBLIC_PAY_EASYPAISA ?? "",
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP ?? "",
 };
+
+/** Customer support on WhatsApp (the owner's number, digits only, e.g. 923001234567). Empty = links are hidden. */
+export const supportWhatsapp = paymentInfo.whatsapp.replace(/\D/g, "");
+export const supportLink = (topic = "I have a question about Digital Dawat") =>
+  `https://wa.me/${supportWhatsapp}?text=${encodeURIComponent(`Assalam o Alaikum, ${topic}.`)}`;

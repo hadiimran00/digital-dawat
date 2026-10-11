@@ -6,6 +6,8 @@ import { Eye, Video, Link2, ListChecks, UserRound, Languages, ChevronDown, Send,
 import { TemplateGallery } from "@/components/TemplateGallery";
 import { InviteCard } from "@/components/invite/InviteCard";
 import { HeroDemo } from "@/components/HeroDemo";
+import { SupportLink } from "@/components/SupportLink";
+import { supportWhatsapp } from "@/lib/config";
 import { SIGNATURE, TEMPLATES, formatPKR } from "@/lib/templates";
 import { defaultContent } from "@/lib/content";
 
@@ -151,6 +153,7 @@ export default function Home() {
               </details>
             ))}
           </div>
+          {supportWhatsapp && <p className="mt-6 text-sm text-foreground/80">Still have a question? <SupportLink className="text-brand" /></p>}
         </div>
       </section>
 
