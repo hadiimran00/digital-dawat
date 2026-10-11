@@ -376,11 +376,24 @@ export function formatPKR(n: number) {
 export const ORDERED = [...TEMPLATES].sort((a, b) => (a.signature ?? 99) - (b.signature ?? 99));
 export const SIGNATURE = ORDERED.filter((t) => t.signature);
 
+/** How people actually type it: Roman Urdu spellings and everyday words, mapped to the words templates use. */
+const ALIASES: Record<string, string> = {
+  shadi: "wedding", shaadi: "wedding", marriage: "wedding", biyah: "wedding",
+  valima: "walima", nikah: "nikkah", nikaah: "nikkah", barat: "baraat", baarat: "baraat",
+  mehendi: "mehndi", mehandi: "mehndi", henna: "mehndi", mayun: "mehndi", mayoun: "mehndi",
+  dholak: "dholki", mangni: "engagement", mangi: "engagement", salgira: "birthday", salgirah: "birthday",
+};
+/** Every template has these, so they shouldn't narrow the results. */
+const EVERY_TEMPLATE = new Set(["urdu", "english", "bismillah", "rsvp", "invitation", "invitations", "invite", "card", "cards", "digital", "whatsapp", "template", "templates", "video", "design", "designs", "online"]);
+
 export function searchTemplates(q: string, category: CategoryId | "all") {
-  const s = q.trim().toLowerCase();
+  const words = q.trim().toLowerCase().split(/[\s,]+/).filter((w) => w && !EVERY_TEMPLATE.has(w)).map((w) => ALIASES[w] ?? w);
   return ORDERED.filter((t) => {
     if (category !== "all" && t.category !== category) return false;
-    if (!s) return true;
-    return [t.name, t.tagline, categoryLabel(t.category), ...t.tags].join(" ").toLowerCase().includes(s);
+    if (!words.length) return true;
+    const cat = CATEGORIES.find((c) => c.id === t.category);
+    const hay = [t.name, t.tagline, cat?.label, cat?.urdu, t.signature ? "signature" : "", t.music ? "music song" : "", t.concept ? "photo photos cinematic" : "", ...t.tags]
+      .join(" ").toLowerCase();
+    return words.every((w) => hay.includes(w));
   });
 }

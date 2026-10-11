@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import { CATEGORIES, TEMPLATES, formatPKR, searchTemplates, categoryLabel, type CategoryId } from "@/lib/templates";
@@ -12,6 +12,26 @@ export function TemplateGallery({ limit, titleAs: Title = "h3" }: { limit?: numb
   const [cat, setCat] = useState<CategoryId | "all">("all");
   const results = useMemo(() => searchTemplates(q, cat), [q, cat]);
   const shown = limit ? results.slice(0, limit) : results;
+
+  // the full gallery keeps its search and filter in the link (?c=nikkah&q=gold), so it can be shared and Back works
+  useEffect(() => {
+    if (limit) return;
+    const u = new URLSearchParams(window.location.search);
+    const c = u.get("c");
+    /* eslint-disable react-hooks/set-state-in-effect -- read the link once after mount (static export) */
+    if (c && CATEGORIES.some((x) => x.id === c)) setCat(c as CategoryId);
+    if (u.get("q")) setQ(u.get("q")!.slice(0, 60));
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [limit]);
+  useEffect(() => {
+    if (limit) return;
+    const u = new URLSearchParams();
+    if (cat !== "all") u.set("c", cat);
+    if (q.trim()) u.set("q", q.trim());
+    const next = `${window.location.pathname}${u.size ? `?${u}` : ""}`;
+    if (next !== `${window.location.pathname}${window.location.search}`) window.history.replaceState(null, "", next);
+  }, [q, cat, limit]);
+  const clear = () => { setQ(""); setCat("all"); };
 
   return (
     <div>
@@ -28,14 +48,15 @@ export function TemplateGallery({ limit, titleAs: Title = "h3" }: { limit?: numb
               className="field pl-10"
             />
           </label>
-          <div role="group" aria-label="Filter by category" className="flex flex-wrap gap-2">
+          {/* phones: one row you swipe sideways, so the designs start near the top */}
+          <div role="group" aria-label="Filter by category" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
             {[{ id: "all" as const, label: "All" }, ...CATEGORIES].map((c) => (
               <button
                 key={c.id}
                 type="button"
                 aria-pressed={cat === c.id}
                 onClick={() => setCat(c.id)}
-                className={`press min-h-11 rounded-full border px-4 text-sm font-medium ${
+                className={`press min-h-11 shrink-0 rounded-full border px-4 text-sm font-medium ${
                   cat === c.id ? "border-brand bg-brand text-brand-ink" : "border-line bg-card hover:border-gold"
                 }`}
               >
@@ -46,10 +67,23 @@ export function TemplateGallery({ limit, titleAs: Title = "h3" }: { limit?: numb
         </div>
       )}
 
-      {shown.length === 0 ? (
-        <p className="rounded-xl border border-line bg-card p-8 text-center text-foreground/70">
-          No templates match “{q}”. Try a colour or an event name.
+      {!limit && (
+        <p aria-live="polite" className="mb-4 text-sm text-foreground/70">
+          {shown.length === TEMPLATES.length ? `${shown.length} designs` : `${shown.length} of ${TEMPLATES.length} designs`}
+          {(q || cat !== "all") && shown.length > 0 && <button type="button" onClick={clear} className="ml-3 min-h-11 font-semibold text-brand underline underline-offset-4">Show all</button>}
         </p>
+      )}
+      {shown.length === 0 ? (
+        <div className="rounded-2xl border border-line bg-card p-8 text-center">
+          <p className="font-semibold">No designs match{q ? ` “${q}”` : ""}{cat !== "all" ? ` in ${CATEGORIES.find((c) => c.id === cat)?.label}` : ""}.</p>
+          <p className="mt-1 text-sm text-foreground/70">Try an event or a colour:</p>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {["Walima", "Nikkah", "Mehndi", "Gold", "Emerald"].map((w) => (
+              <button key={w} type="button" onClick={() => { setCat("all"); setQ(w); }} className="press min-h-11 rounded-full border border-line px-4 text-sm font-medium hover:border-gold">{w}</button>
+            ))}
+            <button type="button" onClick={clear} className="btn btn-primary">Show all designs</button>
+          </div>
+        </div>
       ) : (
         <ul className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
           {shown.map((t) => (
