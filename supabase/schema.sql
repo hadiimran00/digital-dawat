@@ -172,3 +172,5 @@ create policy "owner reads own invite photos" on storage.objects for select to a
   using (bucket_id = 'invite-photos' and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin()));
 create policy "owner deletes own invite photo" on storage.objects for delete to authenticated
   using (bucket_id = 'invite-photos' and ((storage.foldername(name))[1] = auth.uid()::text or public.is_admin()));
+
+-- Guest list and per-event RSVPs: see supabase/migrations/2026-10-11_guest_list.sql

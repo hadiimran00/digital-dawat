@@ -49,6 +49,9 @@ export default function Account() {
               <p className="text-sm text-foreground/70">{new Date(r.created_at).toLocaleDateString("en-GB")} · {LABEL[r.status] ?? r.status}</p>
             </div>
             <div className="flex gap-2">
+              {r.invites && (
+                <Link className="btn btn-primary" href={`/guests?s=${r.invites.slug}`}>Guests</Link>
+              )}
               {r.status === "approved" && r.invites && (
                 <>
                   <Link className="btn btn-ghost" href={`/i?s=${r.invites.slug}`}>Open</Link>

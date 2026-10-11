@@ -351,11 +351,23 @@ const timecode = (s: number) => `${Math.floor(s / 3600)}:${pad(Math.floor(s / 60
  * and see-through panels.
  */
 export function InviteExperience({
-  template, content, inviteId, demo = false, preview = false,
+  template, content: fullContent, inviteId, demo = false, preview = false,
 }: { template: Template; content: InviteContent; inviteId?: string; demo?: boolean; preview?: boolean }) {
   // demo = a template showcase for buyers (sample data, explanatory notes, replies off)
   // preview = the owner or an admin viewing a real invitation before it is published: exactly what guests will see, replies off
   const t = template.theme;
+  // A guest's private link (…&c=code) may invite them to only some events: everything below sees just those.
+  const [allowed, setAllowed] = useState<number[] | null>(null);
+  const [guestId, setGuestId] = useState<string | null>(null);
+  const content = useMemo(
+    () => (allowed ? { ...fullContent, events: fullContent.events.filter((_, i) => allowed.includes(i)) } : fullContent),
+    [fullContent, allowed],
+  );
+  /** the events this guest can answer for, with their position in the full list (stored with the RSVP) */
+  const rsvpEvents = useMemo(
+    () => fullContent.events.map((e, i) => ({ i, title: e.title })).filter((x) => !allowed || allowed.includes(x.i)),
+    [fullContent, allowed],
+  );
   const ur = content.language === "ur";
   const loc = ur ? "ur-PK" : "en-GB";
   const concept = template.concept;
@@ -396,6 +408,27 @@ export function InviteExperience({
     if (g) setGuest(g.slice(0, 60));
     const n = Number(q.get("n"));
     if (Number.isInteger(n) && n >= 1 && n <= 20) setSeats(n);
+    // guest-list link: …&c=code gives the guest's name, places and events (only that guest's row is readable)
+    const code = q.get("c");
+    const slug = q.get("s");
+    if (demo || !code || !slug || !/^[a-z0-9]{8,16}$/.test(code)) return;
+    let live = true;
+    (async () => {
+      const { getSupabase } = await import("@/lib/supabase");
+      const sb = getSupabase();
+      if (!sb) return;
+      const { data } = await sb.rpc("guest_by_code", { p_slug: slug, p_code: code });
+      const row = Array.isArray(data) ? data[0] : null;
+      if (!live || !row) return;
+      setGuest(String(row.name).slice(0, 80));
+      setSeats(row.seats);
+      setGuestId(row.id);
+      const valid = (row.events as number[] | null)?.filter((i) => i >= 0 && i < fullContent.events.length);
+      setAllowed(valid && valid.length ? valid : null);
+      if (!preview) sb.rpc("mark_guest_opened", { p_slug: slug, p_code: code }).then(() => {}, () => {});
+    })();
+    return () => { live = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- read once on arrival
   }, []);
   useEffect(() => {
     if (!opened) return;
@@ -682,7 +715,7 @@ export function InviteExperience({
 
           {content.rsvpEnabled && (
             <Screen tape scene={5} framed={tape} align={look.align} photo={sc.rsvp}>
-              <Rsvp inviteId={inviteId} demo={demo || preview} showNote={demo} guestName={guest} seats={seats} tape={look.dark} accent={t.accent} titleClass={look.title} titleStyle={look.titleStyle} />
+              <Rsvp inviteId={inviteId} demo={demo || preview} showNote={demo} guestName={guest} seats={seats} guestId={guestId} events={rsvpEvents} tape={look.dark} accent={t.accent} titleClass={look.title} titleStyle={look.titleStyle} />
             </Screen>
           )}
 
@@ -815,7 +848,7 @@ export function InviteExperience({
             </a>
           )}
 
-          {content.rsvpEnabled && <div {...sceneAttr(5)}><Rsvp inviteId={inviteId} demo={demo || preview} showNote={demo} guestName={guest} seats={seats} /></div>}
+          {content.rsvpEnabled && <div {...sceneAttr(5)}><Rsvp inviteId={inviteId} demo={demo || preview} showNote={demo} guestName={guest} seats={seats} guestId={guestId} events={rsvpEvents} /></div>}
 
           {tape && (
             <div {...sceneAttr(5)} className="rounded-2xl border border-white/15 bg-black p-5 text-center font-mono text-sm text-white">
