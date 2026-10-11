@@ -19,6 +19,7 @@ export default function Admin() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [filter, setFilter] = useState("pending_review");
   const [err, setErr] = useState("");
+  const [done, setDone] = useState<{ text: string; link?: string } | null>(null);
 
   const load = useCallback(async () => {
     const sb = getSupabase();
@@ -35,6 +36,13 @@ export default function Admin() {
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- loads remote data once the user is known
   useEffect(() => { load(); }, [load]);
+  // Never act on a stale list: reload whenever the admin comes back to this tab.
+  useEffect(() => {
+    const onFocus = () => { if (document.visibilityState === "visible") load(); };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => { window.removeEventListener("focus", onFocus); document.removeEventListener("visibilitychange", onFocus); };
+  }, [load]);
 
   async function viewReceipt(path: string) {
     const sb = getSupabase();
@@ -43,12 +51,18 @@ export default function Admin() {
     else window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   }
 
-  async function review(id: string, approve: boolean) {
+  async function review(r: Row, approve: boolean) {
     const note = approve ? null : window.prompt("Reason for rejecting (shown to the customer):") ?? "";
     if (!approve && note === "") return;
-    const { error } = await getSupabase()!.rpc("review_order", { order_id: id, approve, note });
-    if (error) setErr(error.message);
-    else load();
+    setErr("");
+    setDone(null);
+    const { error } = await getSupabase()!.rpc("review_order", { order_id: r.id, approve, note });
+    const who = r.invites ? `${r.invites.content.host1}${r.invites.content.host2 ? ` & ${r.invites.content.host2}` : ""}` : "Order";
+    if (error) setErr(`${who}: ${error.message.includes("not pending") ? "this order was already reviewed or changed. The list has been refreshed." : error.message}`);
+    else setDone(approve
+      ? { text: `${who}: approved and published. Guests can open it now.`, link: r.invites ? `/i?s=${r.invites.slug}` : undefined }
+      : { text: `${who}: rejected. The customer will see your reason and can upload a new receipt.` });
+    load();
   }
 
   if (!backendConfigured) return <NotConfigured />;
@@ -73,7 +87,16 @@ export default function Admin() {
           <button key={f} aria-pressed={filter === f} onClick={() => setFilter(f)} className={`btn ${filter === f ? "btn-primary" : "btn-ghost"}`}>{f.replace("_", " ")}</button>
         ))}
       </div>
-      {err && <p role="alert" className="mt-4 text-red-700">{err}</p>}
+      <div className="mt-4 flex items-center justify-between gap-3">
+        <p className="text-sm text-foreground/70">Shows the latest orders; it refreshes when you return to this tab.</p>
+        <button className="btn btn-ghost" onClick={() => { setDone(null); setErr(""); load(); }}>Refresh</button>
+      </div>
+      {done && (
+        <p role="status" className="mt-4 rounded-xl border border-green-300 bg-green-50 p-4 text-green-900">
+          {done.text} {done.link && <a className="font-semibold underline" href={done.link} target="_blank" rel="noopener noreferrer">Open the invitation</a>}
+        </p>
+      )}
+      {err && <p role="alert" className="mt-4 rounded-xl border border-red-300 bg-red-50 p-4 text-red-800">{err}</p>}
       <ul className="mt-4 space-y-3">
         {shown.length === 0 && <li className="text-foreground/70">Nothing here.</li>}
         {shown.map((r) => (
@@ -92,8 +115,8 @@ export default function Admin() {
               {r.invites && <a className="btn btn-ghost" href={`/i?s=${r.invites.slug}`} target="_blank" rel="noopener noreferrer">Preview</a>}
               {r.status === "pending_review" && (
                 <>
-                  <button className="btn btn-primary" onClick={() => review(r.id, true)}>Approve &amp; publish</button>
-                  <button className="btn btn-ghost" onClick={() => review(r.id, false)}>Reject</button>
+                  <button className="btn btn-primary" onClick={() => review(r, true)}>Approve &amp; publish</button>
+                  <button className="btn btn-ghost" onClick={() => review(r, false)}>Reject</button>
                 </>
               )}
             </div>
