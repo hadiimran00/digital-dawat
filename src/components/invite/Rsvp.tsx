@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { TAPE_GLASS } from "./InviteCard";
 
 /** Guest reply form. In demo mode it is fully visible but disabled, so buyers can see what guests get. */
-export function Rsvp({ inviteId, demo = false, guestName = "", seats = null, tape = false, accent, titleClass, titleStyle }: { inviteId?: string; demo?: boolean; guestName?: string; seats?: number | null; tape?: boolean; accent?: string; titleClass?: string; titleStyle?: React.CSSProperties }) {
+export function Rsvp({ inviteId, demo = false, showNote = demo, guestName = "", seats = null, tape = false, accent, titleClass, titleStyle }: { inviteId?: string; demo?: boolean; showNote?: boolean; guestName?: string; seats?: number | null; tape?: boolean; accent?: string; titleClass?: string; titleStyle?: React.CSSProperties }) {
   // tape concept: warm see-through panel, dark fields, monospaced title
   const box = tape ? `${TAPE_GLASS} !rounded-md [&_.field]:!border-white/30 [&_.field]:!bg-black/35 [&_.field]:!text-white` : "border-line bg-card text-foreground";
   const on = accent ? { background: accent, color: tape ? "#1a0e06" : "#fff", borderColor: accent } : undefined;
@@ -45,7 +45,7 @@ export function Rsvp({ inviteId, demo = false, guestName = "", seats = null, tap
   return (
     <form onSubmit={submit} className={`space-y-4 rounded-2xl border p-5 ${box}`}>
       <h2 className={titleClass ?? (tape ? "text-center font-mono text-2xl font-bold uppercase tracking-[0.16em]" : "font-display text-2xl font-bold")} style={titleStyle}>Will you attend?</h2>
-      {demo && <p className={`rounded-lg p-2 text-sm ${tape ? "border border-white/20 bg-black/30 text-white/85" : "bg-amber-50 text-amber-900"}`}>Demo: guests reply here, and you see every response in your dashboard.</p>}
+      {showNote && <p className={`rounded-lg p-2 text-sm ${tape ? "border border-white/20 bg-black/30 text-white/85" : "bg-amber-50 text-amber-900"}`}>Demo: guests reply here, and you see every response in your dashboard.</p>}
       <label className="block">Your full name
         <input className="field" value={name} maxLength={80} disabled={demo} onChange={(e) => setName(e.target.value)} />
       </label>

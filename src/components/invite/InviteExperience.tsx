@@ -351,8 +351,10 @@ const timecode = (s: number) => `${Math.floor(s / 3600)}:${pad(Math.floor(s / 60
  * and see-through panels.
  */
 export function InviteExperience({
-  template, content, inviteId, demo = false,
-}: { template: Template; content: InviteContent; inviteId?: string; demo?: boolean }) {
+  template, content, inviteId, demo = false, preview = false,
+}: { template: Template; content: InviteContent; inviteId?: string; demo?: boolean; preview?: boolean }) {
+  // demo = a template showcase for buyers (sample data, explanatory notes, replies off)
+  // preview = the owner or an admin viewing a real invitation before it is published: exactly what guests will see, replies off
   const t = template.theme;
   const ur = content.language === "ur";
   const loc = ur ? "ur-PK" : "en-GB";
@@ -677,7 +679,7 @@ export function InviteExperience({
 
           {content.rsvpEnabled && (
             <Screen tape scene={5} framed={tape} align={look.align} photo={sc.rsvp}>
-              <Rsvp inviteId={inviteId} demo={demo} guestName={guest} seats={seats} tape={look.dark} accent={t.accent} titleClass={look.title} titleStyle={look.titleStyle} />
+              <Rsvp inviteId={inviteId} demo={demo || preview} showNote={demo} guestName={guest} seats={seats} tape={look.dark} accent={t.accent} titleClass={look.title} titleStyle={look.titleStyle} />
             </Screen>
           )}
 
@@ -810,7 +812,7 @@ export function InviteExperience({
             </a>
           )}
 
-          {content.rsvpEnabled && <div {...sceneAttr(5)}><Rsvp inviteId={inviteId} demo={demo} guestName={guest} seats={seats} /></div>}
+          {content.rsvpEnabled && <div {...sceneAttr(5)}><Rsvp inviteId={inviteId} demo={demo || preview} showNote={demo} guestName={guest} seats={seats} /></div>}
 
           {tape && (
             <div {...sceneAttr(5)} className="rounded-2xl border border-white/15 bg-black p-5 text-center font-mono text-sm text-white">
@@ -849,7 +851,7 @@ export function InviteExperience({
 
       {scenic && !tape && opened && !atEnd && (
         <button type="button" tabIndex={-1} aria-hidden onClick={() => scroller.current?.scrollBy({ top: scroller.current.clientHeight * 0.8, behavior: reducedMotion() ? "auto" : "smooth" })}
-          className="press absolute bottom-[calc(0.75rem+var(--frame-bottom,0px))] left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1">
+          className="press absolute bottom-[calc(0.75rem+var(--frame-bottom,0px))] left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1 outline-none">
           <span className={`scroll-nudge grid size-11 place-items-center rounded-full border-2 ${look.dark ? "border-[#e8c06a]/80 bg-[#2a0a0e]/60 text-[#e8c06a]" : "border-[#a8783a]/70 bg-[#fbf6ee]/80 text-[#7a2a2e]"}`}>
             <ChevronDown className="size-5" />
           </span>

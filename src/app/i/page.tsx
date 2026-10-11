@@ -40,7 +40,7 @@ function Invite() {
           Preview: this invitation is not published yet. Guests cannot open it and replies are disabled.
         </p>
       )}
-      <InviteExperience template={data.template} content={data.content} inviteId={data.id} demo={!data.published} />
+      <InviteExperience template={data.template} content={data.content} inviteId={data.id} preview={!data.published} />
     </div>
   );
 }
