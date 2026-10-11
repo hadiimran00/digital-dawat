@@ -33,14 +33,22 @@ function Invite() {
   if (data === undefined) return <p className="p-8 text-center">Loading invitation…</p>;
   if (data === null) return <p className="p-8 text-center">This invitation could not be found, or hasn’t been published yet.</p>;
 
+  // the invitation is designed for a phone: on wide screens it sits in a phone-width column over a blurred backdrop,
+  // instead of stretching portrait photos across a landscape window
+  const backdrop = data.content.coverPhoto || data.template.backdrop?.src || data.template.art?.src;
   return (
-    <div className="relative h-[100dvh] w-full">
+    <div className="relative h-[100dvh] w-full overflow-hidden" style={{ background: data.template.theme.bg }}>
+      {backdrop && (
+        <div aria-hidden className="absolute -inset-10 hidden scale-110 md:block" style={{ background: `url(${backdrop}) center / cover no-repeat`, filter: "blur(32px) brightness(0.45)" }} />
+      )}
       {!data.published && (
         <p role="status" className="absolute inset-x-0 top-0 z-[70] bg-amber-400 px-3 py-1.5 text-center text-xs font-semibold text-amber-950">
           Preview: this invitation is not published yet. Guests cannot open it and replies are disabled.
         </p>
       )}
-      <InviteExperience template={data.template} content={data.content} inviteId={data.id} preview={!data.published} />
+      <div className="relative mx-auto h-full w-full md:max-w-[440px] md:shadow-[0_0_80px_rgba(0,0,0,0.6)]">
+        <InviteExperience template={data.template} content={data.content} inviteId={data.id} preview={!data.published} />
+      </div>
     </div>
   );
 }
