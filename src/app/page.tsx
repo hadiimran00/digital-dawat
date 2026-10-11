@@ -5,6 +5,7 @@ import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { Eye, Video, Link2, ListChecks, UserRound, Languages, ChevronDown, Send, Image as ImageIcon } from "lucide-react";
 import { TemplateGallery } from "@/components/TemplateGallery";
 import { InviteCard } from "@/components/invite/InviteCard";
+import { HeroDemo } from "@/components/HeroDemo";
 import { SIGNATURE, TEMPLATES, formatPKR } from "@/lib/templates";
 import { defaultContent } from "@/lib/content";
 
@@ -69,8 +70,14 @@ export default function Home() {
           </div>
           <div className="mx-auto w-full max-w-xs rise" style={{ animationDelay: "0.12s" }}>
             <div className="-rotate-2 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10">
-              <InviteCard template={SIGNATURE[1]} content={defaultContent(SIGNATURE[1].category)} />
+              <HeroDemo template={SIGNATURE[1]}>
+                <InviteCard template={SIGNATURE[1]} content={defaultContent(SIGNATURE[1].category)} />
+              </HeroDemo>
             </div>
+            <p className="mt-5 text-center text-sm text-brand-ink/80">
+              {SIGNATURE[1].name}, playing live.{" "}
+              <Link href={`/templates/${SIGNATURE[1].id}`} className="font-semibold text-gold-light underline underline-offset-4">Try it yourself</Link>
+            </p>
           </div>
         </div>
       </section>
@@ -124,6 +131,10 @@ export default function Home() {
             </li>
           ))}
         </ul>
+        <div className="mt-10 flex flex-wrap items-center gap-4">
+          <Link href="/templates" className="btn btn-primary">See the invitations</Link>
+          <p className="text-sm text-foreground/70">Every design includes all of this, from {FROM}.</p>
+        </div>
       </section>
 
       <section className="border-t border-line bg-white" aria-label="Questions">
