@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { backendConfigured, getSupabase } from "@/lib/supabase";
 import { NotConfigured, useUser } from "@/lib/useUser";
 import { formatPKR, getTemplate } from "@/lib/templates";
@@ -21,7 +22,40 @@ const LABEL: Record<string, string> = {
   rejected: "Payment not confirmed",
 };
 
+/** Set or change the password used to sign in (the first sign-in is by emailed code). */
+function PasswordSection({ hasPassword }: { hasPassword: boolean }) {
+  const [pw, setPw] = useState("");
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    if (pw.length < 8) return setMsg({ ok: false, text: "Use at least 8 characters." });
+    setBusy(true);
+    const { error } = await getSupabase()!.auth.updateUser({ password: pw, data: { has_password: true } });
+    setBusy(false);
+    if (error) return setMsg({ ok: false, text: error.message });
+    setPw("");
+    setMsg({ ok: true, text: "Password saved. Use it with your email next time you sign in." });
+  }
+  return (
+    <form onSubmit={save} className="rounded-2xl border border-line bg-card p-5">
+      <h2 className="font-semibold">{hasPassword ? "Change your password" : "Set a password"}</h2>
+      <p className="mt-1 text-sm text-foreground/70">
+        {hasPassword ? "You sign in with your email and password." : "Sign in faster next time, without waiting for an email code."} For your security you&apos;re signed out after 7 days away, or 30 days after signing in.
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <label className="min-w-0 flex-1"><span className="sr-only">New password</span>
+          <input type="password" autoComplete="new-password" minLength={8} placeholder="New password (8+ characters)" className="field" value={pw} onChange={(e) => setPw(e.target.value)} />
+        </label>
+        <button className="btn btn-primary" disabled={busy}>{busy ? "Saving…" : "Save"}</button>
+      </div>
+      {msg && <p role={msg.ok ? "status" : "alert"} className={`mt-2 text-sm ${msg.ok ? "text-green-800" : "text-red-700"}`}>{msg.text}</p>}
+    </form>
+  );
+}
+
 export default function Account() {
+  const router = useRouter();
   const user = useUser();
   const [rows, setRows] = useState<Row[] | null>(null);
 
@@ -38,7 +72,12 @@ export default function Account() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="font-display text-4xl font-bold text-brand">My orders</h1>
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <h1 className="font-display text-4xl font-bold text-brand">My orders</h1>
+        <button type="button" className="min-h-11 text-sm underline underline-offset-4"
+          onClick={async () => { await getSupabase()?.auth.signOut({ scope: "local" }); router.replace("/"); }}>Sign out</button>
+      </div>
+      <p className="mt-1 text-sm text-foreground/70">Signed in as {user.email}</p>
       <div className="mt-6 space-y-3">
         {rows === null && <p>Loading…</p>}
         {rows?.length === 0 && <p>No orders yet. <Link className="underline" href="/templates">Browse templates</Link>.</p>}
@@ -63,6 +102,7 @@ export default function Account() {
           </div>
         ))}
       </div>
+      <div className="mt-10"><PasswordSection hasPassword={Boolean(user.user_metadata?.has_password)} /></div>
     </div>
   );
 }

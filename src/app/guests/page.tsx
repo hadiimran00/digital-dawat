@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Check, Copy, Download, Pencil, RotateCw, Search, Send, Trash2, Upload, UserPlus, X } from "lucide-react";
@@ -90,7 +90,7 @@ function GuestsInner() {
     setLoadFailed(false);
     setGuests((g as Guest[]) ?? []);
     setReplies((r as Reply[]) ?? []);
-  }, [user, slug]);
+  }, [user?.id, slug]); // eslint-disable-line react-hooks/exhaustive-deps -- reload per account, not on every profile update
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- loads remote data once the user is known
   useEffect(() => { load(); }, [load]);
@@ -99,13 +99,43 @@ function GuestsInner() {
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
   }, [load]);
+  // the host's own WhatsApp message is saved to their account, so it's there on any phone or computer
+  const userId = user?.id;
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(`dawat:message:${slug}`);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- restore the host's saved message
-      if (saved) setTemplate(saved);
-    } catch {}
-  }, [slug]);
+    if (!userId) return;
+    let local = "";
+    try { local = localStorage.getItem(`dawat:message:${slug}`) ?? ""; } catch {}
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- show this device's copy at once
+    if (local) setTemplate(local);
+    // then the account's copy, fetched fresh: the session stored on this device can hold out-of-date account details
+    let live = true;
+    getSupabase()?.auth.getUser().then(({ data }) => {
+      const fromAccount = (data.user?.user_metadata?.wa_messages as Record<string, string> | undefined)?.[slug];
+      // never replace text the host has typed in the meantime
+      if (live && fromAccount && !edited.current) setTemplate(fromAccount);
+    });
+    return () => { live = false; };
+  }, [userId, slug]);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const edited = useRef(false);
+  function changeMessage(text: string) {
+    edited.current = true;
+    setTemplate(text);
+    try { localStorage.setItem(`dawat:message:${slug}`, text); } catch {}
+    clearTimeout(saveTimer.current);
+    if (!invite) return; // only save for an invitation that loaded from this account
+    saveTimer.current = setTimeout(async () => {
+      const sb = getSupabase();
+      if (!sb) return;
+      const { data } = await sb.auth.getUser();
+      const current = { ...((data.user?.user_metadata?.wa_messages as Record<string, string> | undefined) ?? {}) };
+      delete current[slug];
+      // keep the 20 most recent invitations' messages (they travel inside the sign-in token, so they must stay small)
+      const kept = Object.fromEntries(Object.entries(current).slice(-19));
+      const { error } = await sb.auth.updateUser({ data: { wa_messages: { ...kept, [slug]: text.slice(0, 600) } } });
+      if (error) setMsg({ ok: false, text: "Your message is saved on this device, but didn't save to your account. Check your connection." });
+    }, 800);
+  }
 
   // success messages fade after a few seconds; problems stay until dismissed or replaced
   useEffect(() => {
@@ -273,7 +303,7 @@ function GuestsInner() {
       )}
 
       {/* messages appear where the host is looking, not at the top of a long page */}
-      <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4">
+      <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center px-4 md:bottom-6">
         {msg && (
           <p role={msg.ok ? "status" : "alert"} className={`pointer-events-auto flex max-w-lg items-start gap-3 rounded-2xl border px-4 py-3 text-sm shadow-xl ${msg.ok ? "border-green-300 bg-green-50 text-green-900" : "border-red-300 bg-red-50 text-red-800"}`}>
             <span className="py-1">{msg.text}</span>
@@ -285,7 +315,7 @@ function GuestsInner() {
       {/* ---------------- sending queue ---------------- */}
       {guests.length > 0 && (
         <section className="mt-6 rounded-2xl border border-line bg-card p-5" aria-label="Send invitations">
-          <h2 className="font-display text-2xl font-bold">Send invitations</h2>
+          <h2 className="font-display text-2xl font-bold">{counts.sent > 0 && counts.sent < counts.total ? "Continue sending" : "Send invitations"}</h2>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-stone-100" aria-hidden>
             <div className="h-full bg-brand transition-[width] duration-300 ease-out" style={{ width: `${(counts.sent / counts.total) * 100}%` }} />
           </div>
@@ -309,7 +339,7 @@ function GuestsInner() {
           <details className="mt-4">
             <summary className="cursor-pointer text-sm font-semibold">Edit the WhatsApp message</summary>
             <textarea className="field mt-2" rows={3} value={template} maxLength={600}
-              onChange={(e) => { setTemplate(e.target.value); try { localStorage.setItem(`dawat:message:${slug}`, e.target.value); } catch {} }} />
+              onChange={(e) => changeMessage(e.target.value)} />
             <p className="mt-1 text-xs text-foreground/70">{"{name}"} = guest&apos;s name, {"{hosts}"} = your names, {"{events}"} = their events, {"{link}"} = their personal link (always added).</p>
           </details>
         </section>

@@ -146,7 +146,12 @@ function Tag({ tape, label, accent }: { tape: boolean; label: string; accent?: s
 function Screen({ tape, scene, id, section, photo, framed = true, above, align = "end", children }: { tape: boolean; scene: number; id?: string; section?: string; photo?: string; framed?: boolean; above?: React.ReactNode; align?: "start" | "end"; children: React.ReactNode }) {
   if (!tape) return <>{children}</>;
   return (
-    <div id={id} data-section={section} data-scene={scene} data-photo={photo || undefined} className={`flex min-h-[100cqh] snap-start flex-col ${align === "end" ? "justify-end" : "justify-start"} pb-[calc(5.5rem+var(--frame-bottom,0px))] pt-[calc(4.5rem+var(--frame-top,0px))]`}>
+    // the opening is a full screen; every other section is as tall as its card plus breathing room, and stops in the
+    // middle of the screen. (Full-screen sections left half a screen of empty photo between every pair of cards.)
+    <div id={id} data-section={section} data-scene={scene} data-photo={photo || undefined}
+      className={scene === 0
+        ? `flex min-h-[100cqh] snap-start flex-col ${align === "end" ? "justify-end" : "justify-start"} pb-[calc(5.5rem+var(--frame-bottom,0px))] pt-[calc(4.5rem+var(--frame-top,0px))]`
+        : "flex snap-center flex-col py-[12cqh] first:pt-[calc(4.5rem+var(--frame-top,0px))] last:pb-[calc(6rem+var(--frame-bottom,0px))]"}>
       {above}
       <div className="scene-reveal relative">
         {framed && ["-left-2 -top-2 border-l-2 border-t-2", "-right-2 -top-2 border-r-2 border-t-2", "-bottom-2 -left-2 border-b-2 border-l-2", "-bottom-2 -right-2 border-b-2 border-r-2"].map((c) => (

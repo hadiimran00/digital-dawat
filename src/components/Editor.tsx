@@ -442,7 +442,7 @@ export function Editor() {
         <button type="submit" form="editor-form" className="btn btn-primary" disabled={busy}>{busy ? "Saving…" : "Continue"}</button>
       </div>
 
-      <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center px-4 lg:bottom-6">
+      <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-40 z-50 flex justify-center px-4 lg:bottom-6">
         {removed && (
           <div className="pointer-events-auto flex items-center gap-3 rounded-full bg-foreground px-5 py-2 text-sm text-background shadow-xl">
             <span className="max-w-[14rem] truncate">Removed {removed.label}</span>

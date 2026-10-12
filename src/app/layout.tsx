@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Cinzel, Cormorant_Garamond, DM_Sans, Great_Vibes, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu } from "next/font/google";
 import "./globals.css";
 import { SiteHeader, SiteFooter } from "@/components/Site";
+import { WhatsAppWidget } from "@/components/WhatsAppWidget";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const script = Great_Vibes({ variable: "--nf-script", subsets: ["latin"], weight: "400", preload: false, display: "swap" });
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {children}
         </main>
         <SiteFooter />
+        <WhatsAppWidget />
       </body>
     </html>
   );
