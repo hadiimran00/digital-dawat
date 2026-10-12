@@ -18,15 +18,16 @@ const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayout
  * and the home indicator.
  */
 export function PhoneFrame({
-  children, margin = 48, plainClassName = "h-full w-full", className = "",
-}: { children: ReactNode; margin?: number; plainClassName?: string; className?: string }) {
+  children, margin = 48, plainClassName = "h-full w-full", className = "", maxWidth,
+}: { children: ReactNode; margin?: number; plainClassName?: string; className?: string; maxWidth?: number }) {
   const [scale, setScale] = useState(1);
   useIsoLayoutEffect(() => {
-    const fit = () => setScale(Math.max(0.35, Math.min(1, (window.innerHeight - margin) / H)));
+    // fit the window height, and the column width when one is given (e.g. the editor's sidebar)
+    const fit = () => setScale(Math.max(0.35, Math.min(1, (window.innerHeight - margin) / H, maxWidth ? maxWidth / W : 1)));
     fit();
     window.addEventListener("resize", fit);
     return () => window.removeEventListener("resize", fit);
-  }, [margin]);
+  }, [margin, maxWidth]);
 
   return (
     <div
@@ -48,7 +49,8 @@ export function PhoneFrame({
           {/* status bar, Dynamic Island and home indicator (decoration only, hidden on real phones) */}
           <div aria-hidden className="pointer-events-none absolute inset-0 z-50 hidden md:block">
             <div className="absolute left-1/2 top-[11px] h-[34px] w-[122px] -translate-x-1/2 rounded-full bg-black" />
-            <p className="absolute left-[34px] top-[16px] text-[16px] font-semibold leading-none text-white mix-blend-difference">9:41</p>
+            {/* drawn as a graphic, not text: it's decoration, and its blend mode (dark on light screens) confuses contrast checkers */}
+            <svg className="absolute left-[34px] top-[14px] text-white mix-blend-difference" width="40" height="20" viewBox="0 0 40 20"><text x="0" y="15" fill="currentColor" style={{ font: "600 16px var(--nf-sans), system-ui" }}>9:41</text></svg>
             <div className="absolute right-[30px] top-[17px] flex items-center gap-[6px] text-white mix-blend-difference">
               <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1" /><rect x="5" y="5.5" width="3" height="6.5" rx="1" /><rect x="10" y="3" width="3" height="9" rx="1" /><rect x="15" y="0" width="3" height="12" rx="1" /></svg>
               <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.4c2.3 0 4.4.9 6 2.4l1-1.1C13.1 1.8 10.7.8 8 .8S2.9 1.8 1 3.7l1 1.1c1.6-1.5 3.700-2.400 6-2.400zm0 3.400c1.400 0 2.700.5 3.700 1.400l1-1.100C11.400 4.900 9.800 4.200 8 4.200s-3.400.7-4.700 1.900l1 1.100C5.300 6.300 6.600 5.800 8 5.800zM8 9.200c.7 0 1.300.3 1.800.7L8 11.800 6.200 9.900c.5-.4 1.100-.7 1.800-.7z" /></svg>

@@ -197,6 +197,7 @@ export function Editor() {
   }
 
   const here = `/create?t=${template.id}`;
+  const photoless = template.concept === "aurora" || template.concept === "monogram";
   /** remove an item from a list, keeping a one-tap undo */
   type ListKey = "events" | "faq" | "members1" | "members2";
   const removeWithUndo = (label: string, key: ListKey, i: number) => {
@@ -262,9 +263,10 @@ export function Editor() {
             Photos are resized on your phone before upload. Anyone with the invitation link can see them. You need to sign in to upload.
           </p>
           <div className="space-y-4 rounded-2xl border border-line bg-card p-4">
-            <div data-preview="cover"><PhotoField label="Cover photo" next={here}
-              hint={template.concept ? "Shown behind the whole invitation." : "Shown at the top of the card."}
-              value={content.coverPhoto} fallback={template.backdrop?.src ?? template.art?.src} onChange={(url) => set({ coverPhoto: url })} /></div>
+            {/* Roshni (light) and Mohr (monogram) are designed without a cover photo */}
+            {!photoless && <div data-preview="cover"><PhotoField label="Cover photo" next={here}
+              hint={template.concept === "editorial" ? "Shown at the top of the opening page." : template.concept ? "Shown behind the whole invitation." : "Shown at the top of the card."}
+              value={content.coverPhoto} fallback={template.backdrop?.src ?? template.art?.src} onChange={(url) => set({ coverPhoto: url })} /></div>}
             {err("coverPhoto")}
             <div data-preview="couple"><PhotoField label="Couple photo" next={here} hint="A portrait of the two of you (or the host)."
               value={content.couplePhoto} fallback={template.sample?.couple} onChange={(url) => set({ couplePhoto: url })} /></div>
@@ -351,9 +353,9 @@ export function Editor() {
                 <input className="field" inputMode="url" value={ev.mapUrl} onChange={(e) => setEvent(i, { mapUrl: e.target.value })} placeholder="https://maps.app.goo.gl/…" />
                 {err(`events.${i}.mapUrl`)}
               </label>
-              {template.concept && (
+              {template.concept && !photoless && (
                 <div className="sm:col-span-2">
-                  <PhotoField label="Event photo (optional)" next={here} hint="Shown behind this event's screen."
+                  <PhotoField label="Event photo (optional)" next={here} hint={template.concept === "editorial" ? "Shown above this event, like a magazine photo." : "Shown behind this event's screen."}
                     value={ev.photo} onChange={(url) => setEvent(i, { photo: url })} />
                   {err(`events.${i}.photo`)}
                 </div>
@@ -423,7 +425,12 @@ export function Editor() {
       <aside className="order-1 lg:sticky lg:top-20 lg:order-2 lg:self-start">
         {/* desktop: the real invitation, following the part of the form being edited */}
         <div className="hidden lg:block" data-live-preview>
-          <LivePreview template={template} content={content} focus={focus} className="mx-auto h-[min(680px,calc(100dvh-9rem))] w-full max-w-[320px] rounded-[2rem] border-[6px] border-foreground/90 shadow-xl" />
+          {/* an iPhone 15, like the template pages; a visual mirror of the form, so hidden from screen readers */}
+          <div aria-hidden inert className="mx-auto w-fit">
+            <PhoneFrame margin={200} maxWidth={340}>
+              <InviteExperience template={template} content={content} demo startOpen focus={focus} />
+            </PhoneFrame>
+          </div>
           <p className="mt-3 text-center text-xs text-foreground/70">The preview follows what you edit.</p>
           <button type="button" className="btn btn-ghost mx-auto mt-2 flex" onClick={() => setPreviewing(true)}>Open the full invitation</button>
         </div>

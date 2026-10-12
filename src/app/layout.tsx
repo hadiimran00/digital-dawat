@@ -7,7 +7,7 @@ import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 const script = Great_Vibes({ variable: "--nf-script", subsets: ["latin"], weight: "400", preload: false, display: "swap" });
 const sans = DM_Sans({ variable: "--nf-sans", subsets: ["latin"] });
-const display = Cormorant_Garamond({ variable: "--nf-display", subsets: ["latin"], weight: ["600", "700"], style: ["normal", "italic"] });
+const display = Cormorant_Garamond({ variable: "--nf-display", subsets: ["latin"], weight: ["400", "600", "700"], style: ["normal", "italic"] }); // 400: the large light type of the modern looks
 const caps = Cinzel({ variable: "--nf-caps", subsets: ["latin"], weight: ["500", "700"], preload: false, display: "swap" });
 // The Urdu font is large (about 230 KiB) and only needed for Arabic-script text, so it is not preloaded;
 // it still downloads on demand with font-display: swap.

@@ -24,7 +24,7 @@ console.log(`found ${ids.length} templates`);
 const browser = await chromium.launch({ executablePath: CHROME });
 const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 }, deviceScaleFactor: 1.5 });
 const page = await ctx.newPage();
-const CARD = 'aside [style*="container-type"]';
+const CARD = '[data-preview-card] [style*="container-type"]';
 
 /** Re-encode a PNG buffer as WebP inside the page (Chrome's encoder), returns a Buffer. */
 async function toWebp(png, quality = 0.8) {
@@ -57,7 +57,7 @@ async function shoot({ width, height, css, html, cardWidth, cardStyle, type }) {
 
 const meta = {};
 for (const id of ids) {
-  await page.goto(`${BASE}/create?t=${id}`, { waitUntil: "networkidle" });
+  await page.goto(`${BASE}/card?t=${id}`, { waitUntil: "networkidle" });
   await page.evaluate(() => localStorage.clear());
   await page.waitForSelector(CARD);
   await page.waitForTimeout(250);

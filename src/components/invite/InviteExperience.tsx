@@ -7,8 +7,9 @@ import {
   BISMILLAH, buildIcs, eventsDateText, formatEventDate, formatEventTime, type InviteContent, type InviteEvent,
 } from "@/lib/content";
 import { burst, type TapFx } from "@/lib/tapFx";
-import { ArtHero, GOLD, InviteCard, TAPE_GLASS } from "./InviteCard";
+import { ArtHero, AURORA_TEXT, GOLD, InviteCard, TAPE_GLASS } from "./InviteCard";
 import { Families } from "./Families";
+import { AuroraGlow, ModernCover } from "./ModernCover";
 import { Ornament, isTallOrnament } from "./Ornament";
 import { Rsvp } from "./Rsvp";
 import { ScratchReveal } from "./ScratchReveal";
@@ -97,6 +98,15 @@ const SCENES: { orn: "jharokha" | "rosette" | "jali" | "bars" | "floral" | "cres
 const PHOTO_POS = ["50% 18%", "50% 58%", "15% 40%", "85% 40%", "50% 90%", "50% 35%"];
 
 function SceneBackdrop({ scene, t, photo, photos = [], active = "", look, tape }: { scene: number; t: Template["theme"]; photo?: string; photos?: string[]; active?: string; look: Look; tape: boolean }) {
+  if (look.stage === "aurora") return <div aria-hidden className="pointer-events-none absolute inset-0 z-0"><AuroraGlow /></div>;
+  if (look.stage === "paper") {
+    return (
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-0" style={{ background: `linear-gradient(180deg, ${t.bg}, ${t.bg2})` }}>
+        {/* a fine gold frame around the page (monogram); plain paper for the editorial look */}
+        {look.frame && <span className="absolute inset-x-[14px] border" style={{ borderColor: look.frame, top: "calc(14px + var(--frame-top,0px))", bottom: "calc(14px + var(--frame-bottom,0px))" }} />}
+      </div>
+    );
+  }
   return (
     <div aria-hidden className={`pointer-events-none absolute inset-0 z-0 overflow-hidden ${tape ? "" : "scene-drift"}`} style={{ background: t.bg }}>
       {SCENES.map((s, i) => (
@@ -206,6 +216,10 @@ interface Look {
   tagline: string;
   /** extra class on gold lettering (the moving shine) */
   shine: string;
+  /** what sits behind the screens: section photos, moving coloured light, or plain paper */
+  stage: "photo" | "aurora" | "paper";
+  /** star dividers and other traditional ornaments (off for the modern looks, which use plain hairlines) */
+  ornate: boolean;
 }
 
 const CAPS = "var(--nf-caps), var(--nf-display), Georgia, serif";
@@ -226,7 +240,7 @@ const LOOKS: Record<Concept, Look> = {
     label: "font-mono text-[11px] font-bold uppercase tracking-[0.2em]",
     align: "end", scrim: ["rgba(12,8,5,0.52)", "rgba(12,8,5,0.68)"],
     pill: "rounded-full border border-white/30 bg-black/60 px-5 font-mono text-xs font-bold tracking-[0.25em] text-white",
-    prose: "text-[15px] leading-relaxed text-white/90", frame: null, tagline: "", shine: "",
+    prose: "text-[15px] leading-relaxed text-white/90", frame: null, tagline: "", shine: "", stage: "photo", ornate: true,
   },
   royal: {
     dark: true,
@@ -246,7 +260,7 @@ const LOOKS: Record<Concept, Look> = {
     prose: "font-display text-[17px] italic leading-relaxed text-[#f7e7c6]/90",
     frame: "rgba(232,192,106,0.45)",
     tagline: "A royal celebration of two families",
-    shine: "foil-shine",
+    shine: "foil-shine", stage: "photo", ornate: true,
   },
   ivory: {
     dark: false,
@@ -265,7 +279,61 @@ const LOOKS: Record<Concept, Look> = {
     prose: "font-display text-[17px] italic leading-relaxed text-[#4a1c20]/90",
     frame: "rgba(168,120,58,0.35)",
     tagline: "A new chapter in our dastaan",
-    shine: "foil-shine",
+    shine: "foil-shine", stage: "photo", ornate: true,
+  },
+  // Kahani: a magazine feature. Paper, near-black type, one oxblood accent, square corners, hairline rules.
+  editorial: {
+    dark: false,
+    panel: "rounded-none border-y border-[#141414] bg-[#F5F1EA] text-[#141414]",
+    ink: "text-[#141414]", muted: "text-[#141414]/65", cell: "rounded-none border-[#141414]/25 bg-white/60",
+    title: "text-center text-[12px] font-semibold uppercase tracking-[0.35em] text-[#141414]", titleStyle: { fontFamily: "var(--nf-sans), system-ui" },
+    names: { fontFamily: "var(--nf-display), Georgia, serif", fontWeight: 400, color: "#141414", letterSpacing: "-0.01em" },
+    greet: { fontFamily: "var(--nf-display), Georgia, serif", fontWeight: 400, fontStyle: "italic", color: "#8C1C13" },
+    solid: "press inline-flex min-h-11 items-center gap-1.5 rounded-none px-4 text-[11px] font-semibold uppercase tracking-[0.2em]",
+    solidStyle: () => ({ background: "#141414", color: "#F5F1EA" }),
+    ghost: "press inline-flex min-h-11 items-center gap-1.5 rounded-none border border-[#141414] px-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#141414]",
+    chip: "press inline-flex min-h-11 items-center border-b-2 border-[#141414] px-2 text-[12px] font-semibold uppercase tracking-[0.18em] hover:bg-black/5",
+    label: "text-[11px] font-semibold uppercase tracking-[0.25em] text-[#8C1C13]",
+    align: "start", scrim: ["rgba(0,0,0,0)", "rgba(0,0,0,0)"],
+    pill: "rounded-none border border-[#141414] bg-[#F5F1EA] px-5 text-[11px] font-semibold tracking-[0.3em] text-[#141414]",
+    prose: "font-display text-[18px] leading-relaxed text-[#141414]/85",
+    frame: null, tagline: "", shine: "", stage: "paper", ornate: false,
+  },
+  // Roshni: moving coloured light behind frosted glass; light sans-serif names with a soft gradient.
+  aurora: {
+    dark: true,
+    panel: "rounded-[28px] border border-white/15 bg-white/[0.07] text-white shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl",
+    ink: "text-white", muted: "text-white/70", cell: "rounded-2xl border-white/15 bg-white/5",
+    title: "text-center text-[12px] font-semibold uppercase tracking-[0.4em] text-white/80", titleStyle: { fontFamily: "var(--nf-sans), system-ui" },
+    names: { fontFamily: "var(--nf-sans), system-ui", fontWeight: 300, letterSpacing: "-0.02em", backgroundImage: AURORA_TEXT, backgroundSize: "250% 100%", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" },
+    greet: { fontFamily: "var(--nf-display), Georgia, serif", fontWeight: 600, fontStyle: "italic", color: "#F3E8FF" },
+    solid: "press inline-flex min-h-11 items-center gap-1.5 rounded-full px-5 text-[12px] font-semibold tracking-[0.06em] text-[#0B0B16]",
+    solidStyle: () => ({ background: "linear-gradient(90deg, #FFD1E8, #C9B8FF)" }),
+    ghost: "press inline-flex min-h-11 items-center gap-1.5 rounded-full border border-white/25 bg-white/5 px-5 text-[12px] font-semibold tracking-[0.06em] text-white",
+    chip: "press inline-flex min-h-11 items-center rounded-full border border-white/20 bg-white/5 px-4 text-[12px] font-medium tracking-[0.05em] hover:bg-white/10",
+    label: "text-[11px] font-semibold uppercase tracking-[0.3em] text-[#C9B8FF]",
+    align: "start", scrim: ["rgba(0,0,0,0)", "rgba(0,0,0,0)"],
+    pill: "rounded-full border border-white/20 bg-white/10 px-5 text-[11px] font-semibold tracking-[0.3em] text-white backdrop-blur-md",
+    prose: "text-[16px] leading-relaxed text-white/85",
+    frame: null, tagline: "", shine: "foil-shine", stage: "aurora", ornate: false,
+  },
+  // Mohr: off-white, ink green-black, fine gold hairlines, italic serif; the monogram is the hero.
+  monogram: {
+    dark: false,
+    panel: "rounded-none border border-[#B08D57]/50 bg-[#FAF8F3] text-[#1F2A28]",
+    ink: "text-[#1F2A28]", muted: "text-[#1F2A28]/65", cell: "rounded-none border-[#B08D57]/35 bg-white/70",
+    title: "text-center text-[12px] font-medium uppercase tracking-[0.45em] text-[#1F2A28]", titleStyle: { fontFamily: CAPS },
+    names: { fontFamily: "var(--nf-display), Georgia, serif", fontWeight: 400, fontStyle: "italic", color: "#1F2A28" },
+    greet: { fontFamily: "var(--nf-display), Georgia, serif", fontWeight: 400, fontStyle: "italic", color: "#B08D57" },
+    solid: "press inline-flex min-h-11 items-center gap-1.5 px-5 text-[11px] font-medium uppercase tracking-[0.3em] text-[#FAF8F3]",
+    solidStyle: () => ({ background: "#1F2A28", fontFamily: CAPS }),
+    ghost: "press inline-flex min-h-11 items-center gap-1.5 border border-[#1F2A28]/40 px-5 text-[11px] font-medium uppercase tracking-[0.3em] text-[#1F2A28] [font-family:var(--nf-caps)]",
+    chip: "press inline-flex min-h-11 items-center border border-[#B08D57]/50 px-4 text-[11px] uppercase tracking-[0.25em] text-[#1F2A28] [font-family:var(--nf-caps)] hover:bg-[#B08D57]/10",
+    label: "text-[11px] font-medium uppercase tracking-[0.3em] text-[#B08D57] [font-family:var(--nf-caps)]",
+    align: "start", scrim: ["rgba(0,0,0,0)", "rgba(0,0,0,0)"],
+    pill: "border border-[#1F2A28]/30 bg-[#FAF8F3]/90 px-5 text-[11px] tracking-[0.35em] text-[#1F2A28] [font-family:var(--nf-caps)]",
+    prose: "font-display text-[18px] italic leading-relaxed text-[#1F2A28]/85",
+    frame: "rgba(176,141,87,0.35)", tagline: "Two names, one story", shine: "", stage: "paper", ornate: false,
   },
 };
 
@@ -382,6 +450,7 @@ export function InviteExperience({
   const tape = concept === "tape";
   const look = LOOKS[concept ?? "tape"];
   const gated = concept === "royal" || concept === "ivory"; // doors or curtains instead of the sliding cover
+  const modern = concept === "editorial" || concept === "aurora" || concept === "monogram"; // their own opening screens
   const [opened, setOpened] = useState(startOpen);
   const [gone, setGone] = useState(startOpen);
   const [guest, setGuest] = useState("");
@@ -401,7 +470,12 @@ export function InviteExperience({
   const panel = tape ? GLASS : PLAIN;
   const muted = tape ? "text-white/75" : "text-foreground/70";
   const mono = tape ? "font-mono" : "";
-  const scratchKind: "static" | "foil" | null = tape ? "static" : scenic || template.motion === "scratch" ? "foil" : null;
+  // the gold scratch card belongs to the traditional looks (and Mohr's gold); Kahani and Roshni show a clean countdown
+  /** the little round icons (dress code, questions) in each look's colours */
+  const iconDisc: React.CSSProperties = concept === "editorial" ? { background: "#141414", color: "#F5F1EA" }
+    : concept === "aurora" ? { backgroundImage: "linear-gradient(135deg, #FFD1E8, #C9B8FF)", color: "#0B0B16" }
+    : { backgroundImage: GOLD, color: "#3a0c12" };
+  const scratchKind: "static" | "foil" | null = tape ? "static" : concept === "editorial" || concept === "aurora" ? null : scenic || template.motion === "scratch" ? "foil" : null;
   const fx: TapFx = tape ? "flash" : concept === "royal" ? "sparkles" : concept === "ivory" ? "petals" : template.motion === "sparkle" ? "sparkles" : "petals";
   const fxCaption = ur
     ? "کچھ دیکھنے کے لیے ٹیپ کریں"
@@ -548,7 +622,7 @@ export function InviteExperience({
       <div
         ref={scroller}
         onScroll={onScroll}
-        className={`relative z-[1] h-full overflow-y-auto overscroll-contain ${opened ? "" : "overflow-hidden"} ${scenic ? `snap-y snap-proximity ${look.ink} [container-type:size]` : ""}`}
+        className={`relative z-[1] h-full overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${opened ? "" : "overflow-hidden"} ${scenic ? `snap-y snap-proximity ${look.ink} [container-type:size]` : ""}`}
       >
         {scenic ? (
         <div className="mx-auto max-w-md px-5">
@@ -568,7 +642,7 @@ export function InviteExperience({
                   {content.host1}
                   {content.host2 && <><span className="my-1 block text-2xl" style={ur ? undefined : { ...look.greet, fontFamily: "var(--nf-display), Georgia, serif", fontStyle: "italic" }}>{ur ? "اور" : "and"}</span>{content.host2}</>}
                 </h2>
-                <Divider color={t.accent} />
+                {look.ornate ? <Divider color={t.accent} /> : <span aria-hidden className="mx-auto my-4 block h-px w-16" style={{ background: t.accent }} />}
                 {!ur && look.tagline && <p className="text-[11px] uppercase tracking-[0.3em] [text-wrap:balance]" style={{ fontFamily: CAPS, color: t.accent }}>{look.tagline}</p>}
                 <p className={`mt-3 ${look.prose}`}>{content.message}</p>
                 <p className="mt-3 text-[11px] uppercase tracking-[0.25em]" style={{ fontFamily: CAPS }}>{eventsDateText(content, loc)}</p>
@@ -625,6 +699,9 @@ export function InviteExperience({
                 <p aria-hidden className="mx-auto mb-5 w-fit rounded-sm border border-white/40 bg-black/55 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-white/90">
                   ✦ {ur ? fxCaption : "Tap anywhere for a photo flash"}
                 </p>
+              ) : concept === "editorial" && eventScene(e) ? (
+                // eslint-disable-next-line @next/next/no-img-element -- static export, photo comes from our storage
+                <img src={eventScene(e)} alt="" className="aspect-[16/10] w-full object-cover" />
               ) : undefined}
             >
               <article className={`relative px-5 pb-5 ${tape ? "pt-5" : "pt-12"} text-center ${look.panel}`} style={look.panelStyle}>
@@ -643,7 +720,7 @@ export function InviteExperience({
                   </p>
                 )}
                 {tape ? <TapeTitle as="h3">{e.title}</TapeTitle> : <h3 className={`text-5xl leading-tight ${ur ? "" : look.shine}`} style={ur ? { fontFamily: font } : look.names}>{e.title}</h3>}
-                {!tape && <Divider color={t.accent} />}
+                {!tape && (look.ornate ? <Divider color={t.accent} /> : <span aria-hidden className="mx-auto my-3 block h-px w-12" style={{ background: t.accent }} />)}
                 <p className="mt-2 flex items-center justify-center gap-1.5 font-display text-lg font-semibold">
                   {!tape && <CalendarDays className="size-4 shrink-0" style={{ color: t.accent }} aria-hidden />}
                   {formatEventDate(e.date, loc)}{e.time && ` · ${formatEventTime(e.time)}`}
@@ -681,12 +758,13 @@ export function InviteExperience({
           ) : (
             <Screen tape scene={4} section="couple" framed={false} align={look.align} photo={sc.couple}>
               <SceneTitle look={look} concept={concept!}>{ur ? "دولہا دلہن" : "The couple"}</SceneTitle>
-              <figure className="mx-auto mt-4 w-[74%] overflow-hidden border-[3px] shadow-2xl" style={{ borderColor: t.accent, borderTopLeftRadius: "50% 28%", borderTopRightRadius: "50% 28%" }}>
+              <figure className={`mx-auto mt-4 overflow-hidden ${look.stage === "paper" ? "w-[86%]" : "w-[74%] border-[3px] shadow-2xl"}`}
+                style={look.stage === "paper" ? undefined : { borderColor: t.accent, borderTopLeftRadius: "50% 28%", borderTopRightRadius: "50% 28%" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- static export, photo comes from our storage */}
                 <img src={couple} alt={ur ? "دولہا دلہن کی تصویر" : `Photo of ${names}`} className="aspect-[4/5] w-full object-cover" />
               </figure>
-              <p className="mt-4 pb-1 text-center text-4xl" style={ur ? { fontFamily: font } : look.dark ? look.names : { ...look.names, color: "#fbf1dc", textShadow: "0 2px 12px rgba(0,0,0,.7)" }}>{names}</p>
-              <p className={`text-center text-sm italic ${look.dark ? "text-white/85" : "text-white"}`} style={{ fontFamily: "var(--nf-display), Georgia, serif", textShadow: "0 1px 6px rgba(0,0,0,.6)" }}>Two hearts, one promise</p>
+              <p className="mt-4 pb-1 text-center text-4xl" style={ur ? { fontFamily: font } : look.dark || look.stage === "paper" ? look.names : { ...look.names, color: "#fbf1dc", textShadow: "0 2px 12px rgba(0,0,0,.7)" }}>{names}</p>
+              <p className={`text-center text-sm italic ${look.stage === "paper" ? look.muted : look.dark ? "text-white/85" : "text-white"}`} style={{ fontFamily: "var(--nf-display), Georgia, serif", textShadow: look.stage === "paper" ? undefined : "0 1px 6px rgba(0,0,0,.6)" }}>Two hearts, one promise</p>
             </Screen>
           ))}
 
@@ -699,7 +777,7 @@ export function InviteExperience({
                 <ul className={`mt-4 space-y-3 ${tape ? "" : "text-start"}`}>
                   {ordered.filter((e) => e.dressCode).map((e, i) => (
                     <li key={i} className={tape ? "" : "flex items-center gap-3"}>
-                      {!tape && <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-full" style={{ backgroundImage: GOLD }}><Shirt className="size-4 text-[#3a0c12]" /></span>}
+                      {!tape && <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-full" style={iconDisc}><Shirt className="size-4" /></span>}
                       <span>
                         <span className={`block ${look.label}`} style={tape ? { color: t.accent } : undefined}>{e.title}</span>
                         <span className={`block font-display text-[15px] ${look.dark ? "text-white/90" : "text-[#4a1c20]/90"}`}>{e.dressCode}</span>
@@ -723,7 +801,7 @@ export function InviteExperience({
                       <summary className="flex min-h-8 cursor-pointer list-none items-center gap-3 text-sm font-medium">
                         {tape
                           ? <span className="font-mono text-[11px] font-bold" style={{ color: t.accent }}>A{i + 1}</span>
-                          : <span aria-hidden className="grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold text-[#3a0c12]" style={{ backgroundImage: GOLD }}>?</span>}
+                          : <span aria-hidden className="grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold" style={iconDisc}>?</span>}
                         <span className="flex-1">{f.q}</span>
                         <span aria-hidden className={`grid size-6 shrink-0 place-items-center border text-xs transition-transform duration-200 ease-out group-open:rotate-45 ${tape ? "rounded-sm border-white/50 font-mono" : "rounded-full border-current/40"}`}>+</span>
                       </summary>
@@ -781,7 +859,7 @@ export function InviteExperience({
               </div>
             )}
           </Screen>
-          <p className={`pb-[calc(5rem+var(--frame-bottom,0px))] text-center text-xs ${look.dark ? "text-white/70" : "text-white [text-shadow:0_1px_4px_rgba(0,0,0,.6)]"}`}>Made with Digital Dawat</p>
+          <p className={`pb-[calc(5rem+var(--frame-bottom,0px))] text-center text-xs ${look.stage === "paper" ? look.muted : look.dark ? "text-white/70" : "text-white [text-shadow:0_1px_4px_rgba(0,0,0,.6)]"}`}>Made with Digital Dawat</p>
         </div>
         ) : (
         <div className="mx-auto max-w-md space-y-6 px-4 pb-[calc(1.5rem+var(--frame-bottom,0px))] pt-[calc(1.5rem+var(--frame-top,0px))]">
@@ -928,10 +1006,10 @@ export function InviteExperience({
       {scenic && !tape && opened && !atEnd && (
         <button type="button" tabIndex={-1} aria-hidden onClick={() => scroller.current?.scrollBy({ top: scroller.current.clientHeight * 0.8, behavior: reducedMotion() ? "auto" : "smooth" })}
           className="press absolute bottom-[calc(0.75rem+var(--frame-bottom,0px))] left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1 outline-none">
-          <span className={`scroll-nudge grid size-11 place-items-center rounded-full border-2 ${look.dark ? "border-[#e8c06a]/80 bg-[#2a0a0e]/60 text-[#e8c06a]" : "border-[#a8783a]/70 bg-[#fbf6ee]/80 text-[#7a2a2e]"}`}>
+          <span className={`scroll-nudge grid size-11 place-items-center rounded-full border-2 ${concept === "editorial" ? "border-[#141414] bg-[#F5F1EA]/90 text-[#141414]" : concept === "aurora" ? "border-white/40 bg-white/10 text-white backdrop-blur-md" : concept === "monogram" ? "border-[#B08D57]/70 bg-[#FAF8F3]/90 text-[#1F2A28]" : look.dark ? "border-[#e8c06a]/80 bg-[#2a0a0e]/60 text-[#e8c06a]" : "border-[#a8783a]/70 bg-[#fbf6ee]/80 text-[#7a2a2e]"}`}>
             <ChevronDown className="size-5" />
           </span>
-          <span className={`text-[9px] font-bold tracking-[0.3em] ${look.dark ? "text-[#f7e7c6]" : "text-white [text-shadow:0_1px_4px_rgba(0,0,0,.7)]"}`} style={{ fontFamily: CAPS }}>SCROLL DOWN</span>
+          <span className={`text-[9px] font-bold tracking-[0.3em] ${look.stage === "paper" ? look.ink : concept === "aurora" ? "text-white/85" : look.dark ? "text-[#f7e7c6]" : "text-white [text-shadow:0_1px_4px_rgba(0,0,0,.7)]"}`} style={{ fontFamily: CAPS }}>SCROLL DOWN</span>
         </button>
       )}
 
@@ -995,7 +1073,12 @@ export function InviteExperience({
         </div>
       )}
 
-      {!gone && !gated && (
+      {!gone && modern && (
+        <ModernCover concept={concept as "editorial" | "aurora" | "monogram"} template={template} content={content} opened={opened} onOpen={open}
+          hello={hello} dateText={eventsDateText(content, loc)} photo={backdrop} />
+      )}
+
+      {!gone && !gated && !modern && (
         <div
           data-open={opened}
           className={`cover absolute inset-0 z-20 flex flex-col items-center text-center ${coverArt || tape ? (hello ? "justify-end pb-20" : "justify-end pb-28") : "justify-center"}`}

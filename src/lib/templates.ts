@@ -43,8 +43,9 @@ export interface Template {
   /**
    * Optional storytelling concept: full-screen photo scenes, one section per screen.
    * "tape" = retro home video, "royal" = palace doors and maroon glass, "ivory" = curtains and frosted cream.
+   * Modern looks: "editorial" = a magazine feature on paper, "aurora" = moving light behind glass, "monogram" = initials drawn in gold.
    */
-  concept?: "tape" | "royal" | "ivory";
+  concept?: "tape" | "royal" | "ivory" | "editorial" | "aurora" | "monogram";
   /** Real artwork (public-domain / CC0) used as the hero image of the card. See CREDITS.md. */
   art?: { src: string; position: string; zoom: number; credit: string };
   /** Optional full-bleed photo behind the whole experience (tape concept). */
@@ -362,6 +363,46 @@ export const TEMPLATES: Template[] = [
       events: { mehndi: "/art/dw-mehndi.webp", nikkah: "/art/dw-arch.webp", baraat: "/art/dw-baraat.webp", walima: "/art/dw-walima.webp" },
     },
     theme: { bg: "#F6EFE4", bg2: "#EFE3D0", ink: "#4A1C20", accent: "#A8783A", muted: "#7A5A48", ornament: "none", headingFont: "serif" },
+  },
+  {
+    id: "kahani-wedding",
+    signature: 4,
+    motion: "rise",
+    concept: "editorial",
+    name: "Kahani",
+    category: "wedding",
+    tagline: "Your wedding week as a magazine feature: big type, real photos, white space.",
+    tags: ["modern", "editorial", "magazine", "minimal", "white", "photo", "full wedding"],
+    price: 3999,
+    // demo photos are the licensed ones already on the site (see CREDITS.md); customers' own photos replace them
+    backdrop: { src: "/art/rp-walima.webp", credit: "Via Pinterest; the site owner holds the licence (see CREDITS.md)." },
+    sample: { couple: "/art/dw-couple.webp" },
+    scenes: { events: { mehndi: "/art/rp-mehndi.webp", nikkah: "/art/rp-nikkah.webp", baraat: "/art/rp-baraat.webp", walima: "/art/dw-walima.webp" } },
+    theme: { bg: "#F5F1EA", bg2: "#ECE5D8", ink: "#141414", accent: "#8C1C13", muted: "#5B5550", ornament: "none", headingFont: "serif" },
+  },
+  {
+    id: "roshni-wedding",
+    signature: 5,
+    motion: "sparkle",
+    concept: "aurora",
+    name: "Roshni",
+    category: "wedding",
+    tagline: "Soft moving light and glass cards, like a night of fairy lights.",
+    tags: ["modern", "night", "glow", "aurora", "dark", "glass", "minimal", "full wedding"],
+    price: 3999,
+    theme: { bg: "#07060F", bg2: "#15112B", ink: "#F5F3FF", accent: "#C9B8FF", muted: "#B9B3D6", ornament: "none", headingFont: "sans" },
+  },
+  {
+    id: "mohr-wedding",
+    signature: 6,
+    motion: "rise",
+    concept: "monogram",
+    name: "Mohr",
+    category: "wedding",
+    tagline: "Your initials drawn in fine gold, on quiet off-white. Timeless and minimal.",
+    tags: ["modern", "monogram", "minimal", "gold", "white", "classic", "elegant", "full wedding"],
+    price: 3999,
+    theme: { bg: "#FAF8F3", bg2: "#F1ECE1", ink: "#1F2A28", accent: "#B08D57", muted: "#6B6F69", ornament: "none", headingFont: "serif" },
   },
 ];
 

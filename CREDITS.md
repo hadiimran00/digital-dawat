@@ -67,3 +67,9 @@ Keep the licences on file.
 | `public/art/rp-faq.webp` | faq | https://i.pinimg.com/736x/41/3a/06/413a06307bb1268380a1807922008151.jpg |
 | `public/art/rp-rsvp.webp` | rsvp | https://i.pinimg.com/736x/a5/e9/04/a5e90472039efcc2792a3e65d055916b.jpg |
 | `public/art/rp-closing.webp` | closing | https://i.pinimg.com/736x/85/23/96/852396c2260c274bd1aff36f24c4aedb.jpg |
+
+## Kahani, Roshni and Mohr (modern signature designs, 2026-10-12)
+
+- Kahani reuses licensed photos already listed above (`rp-walima`, `rp-mehndi`, `rp-nikkah`, `rp-baraat`, `dw-walima`, `dw-couple`). No new images.
+- Roshni and Mohr use no photos: their backgrounds, the moving light and the monogram are drawn by the site.
+- None has music yet; the site owner will supply licensed tracks.

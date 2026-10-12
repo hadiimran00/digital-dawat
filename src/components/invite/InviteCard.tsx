@@ -3,6 +3,9 @@ import type { Template } from "@/lib/templates";
 import { BISMILLAH, eventsDateText, eventsTitle, formatEventTime, type InviteContent } from "@/lib/content";
 import { Ornament, isTallOrnament } from "./Ornament";
 
+/** Soft pink, violet and amber: the colours of the night-glow look. */
+export const AURORA_TEXT = "linear-gradient(100deg, #FFD1E8 0%, #C9B8FF 35%, #FFFFFF 50%, #C9B8FF 65%, #FFE0B0 100%)";
+
 /** Warm see-through panel used by the video-tape concept. */
 export const TAPE_GLASS = "border-[#f3cf9a]/25 bg-[#24130a]/60 text-white backdrop-blur-[3px]";
 
@@ -57,11 +60,21 @@ export function InviteCard({ template, content, chrome = true, clear = false }: 
   const foilNames: CSSProperties | null = ur ? null
     : template.concept === "royal" ? { fontFamily: "var(--nf-display), Georgia, serif", fontStyle: "italic", fontWeight: 700, backgroundImage: GOLD, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }
     : template.concept === "ivory" ? { fontFamily: "var(--nf-caps), var(--nf-display), serif", fontWeight: 500, letterSpacing: "0.08em", backgroundImage: "linear-gradient(180deg, #9a6b3c, #6b3d22)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }
+    : template.concept === "editorial" ? { fontFamily: "var(--nf-display), Georgia, serif", fontWeight: 400, letterSpacing: "-0.01em" }
+    : template.concept === "aurora" ? { fontFamily: "var(--nf-sans), system-ui", fontWeight: 300, letterSpacing: "-0.02em", backgroundImage: AURORA_TEXT, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }
+    : template.concept === "monogram" ? { fontFamily: "var(--nf-display), Georgia, serif", fontWeight: 400, fontStyle: "italic" }
     : null;
   const names = content.host2 ? `${content.host1} & ${content.host2}` : content.host1;
   const style: CSSProperties = {
     background: clear
       ? "linear-gradient(rgba(10,7,5,0.18), rgba(10,7,5,0.5))"
+      // modern looks: a photo that fades into paper (Kahani), coloured light on night blue (Roshni), plain paper (Mohr)
+      : template.concept === "editorial"
+        ? `linear-gradient(rgba(245,241,234,0) 30%, ${t.bg} 58%)${backdrop ? `, url(${backdrop}) 50% 0 / 100% auto no-repeat` : ""}, ${t.bg}`
+      : template.concept === "aurora"
+        ? "radial-gradient(70% 45% at 15% 20%, #FF5FA266, transparent 70%), radial-gradient(70% 45% at 90% 55%, #7B61FF77, transparent 70%), radial-gradient(70% 40% at 35% 95%, #FFB34755, transparent 70%), #07060F"
+      : template.concept === "monogram"
+        ? `linear-gradient(170deg, ${t.bg}, ${t.bg2})`
       : template.concept && backdrop
         ? `linear-gradient(${template.concept === "ivory" ? "rgba(251,246,238,0.55), rgba(251,246,238,0.85)" : template.concept === "royal" ? "rgba(42,10,14,0.45), rgba(42,10,14,0.8)" : "rgba(12,8,5,0.4), rgba(12,8,5,0.72)"}), url(${backdrop}) 50% 20% / cover no-repeat`
         : `linear-gradient(170deg, ${t.bg}, ${t.bg2})`,
@@ -74,6 +87,7 @@ export function InviteCard({ template, content, chrome = true, clear = false }: 
 
   return (
     <div className="relative w-full overflow-hidden" style={style} dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"}>
+      {template.concept === "monogram" && <span aria-hidden className="pointer-events-none absolute inset-[4cqw] border" style={{ borderColor: `${t.accent}66` }} />}
       {!clear && !(template.concept && backdrop) && !(art && content.coverPhoto) && <Ornament
         kind={t.ornament}
         className={
