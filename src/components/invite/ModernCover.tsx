@@ -46,14 +46,14 @@ export function ModernCover({
 
   if (concept === "editorial") {
     return (
-      <div data-open={opened} className="cover absolute inset-0 z-20 flex flex-col" style={{ background: t.bg, color: t.ink }}>
+      <div data-open={opened} className="cover cover-editorial absolute inset-0 z-20 flex flex-col overflow-hidden" style={{ background: t.bg, color: t.ink }}>
         {photo && (
-          <div className="relative h-[44%] w-full shrink-0 overflow-hidden">
+          <div className="cover-photo relative h-[44%] w-full shrink-0 overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element -- static export */}
             <img src={photo} alt="" className="ed-zoom h-full w-full object-cover" />
           </div>
         )}
-        <div className={`flex flex-1 flex-col justify-between px-7 pb-[calc(1.75rem+var(--frame-bottom,0px))] ${photo ? "pt-5" : "pt-[calc(3.5rem+var(--frame-top,0px))]"}`}>
+        <div className={`cover-copy flex flex-1 flex-col justify-between px-7 pb-[calc(1.75rem+var(--frame-bottom,0px))] ${photo ? "pt-5" : "pt-[calc(3.5rem+var(--frame-top,0px))]"}`}>
           <p className="ed-line flex items-baseline justify-between border-b pb-2 text-[10px] font-semibold uppercase tracking-[0.3em]" style={{ borderColor: t.ink, ["--d" as string]: "0ms" }}>
             <span>The wedding of</span><span>{dateText}</span>
           </p>

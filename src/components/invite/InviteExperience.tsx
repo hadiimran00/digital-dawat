@@ -584,9 +584,9 @@ export function InviteExperience({
   }, []);
   useEffect(() => {
     if (!opened) return;
-    const id = setTimeout(() => setGone(true), videoGate ? 5000 : gated ? 1500 : 560);
+    const id = setTimeout(() => setGone(true), videoGate ? 5000 : gated ? 1500 : concept === "editorial" ? 1600 : 560); // Kahani's opening runs about 1.5s
     return () => clearTimeout(id);
-  }, [opened, gated, videoGate]);
+  }, [opened, gated, videoGate, concept]);
 
   // autoplay: open after a beat (no music), then one screen at a time; at the end, close and start over
   useEffect(() => {
@@ -646,10 +646,37 @@ export function InviteExperience({
     return () => io.disconnect();
   }, [scenic]);
 
+  const hintRef = useRef<HTMLElement>(null);
+  const [hintAway, setHintAway] = useState(false);
+  const idle = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  /** true when the hint would sit on top of words, a photo or a button (small phones, tall screens) */
+  const hintCovers = useCallback(() => {
+    const h = hintRef.current, root = scroller.current;
+    if (!h || !root) return false;
+    const r = h.getBoundingClientRect();
+    for (const x of [r.left + 6, r.left + r.width / 2, r.right - 6]) {
+      for (const y of [r.top + 4, r.top + r.height / 2, r.bottom - 4]) {
+        for (const el of document.elementsFromPoint(x, y)) {
+          if (h.contains(el) || !root.contains(el)) continue;
+          if (el.matches("p,h1,h2,h3,li,img,figure,a,button,label,input,textarea,svg") || el.closest("a,button,label")) return true;
+        }
+      }
+    }
+    return false;
+  }, []);
   const onScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
-    setAtEnd(el.scrollTop + el.clientHeight >= el.scrollHeight - 48 || el.scrollTop > el.clientHeight * 1.5);
-  }, []);
+    setAtEnd(el.scrollTop + el.clientHeight >= el.scrollHeight - 48);
+    setHintAway(true);
+    clearTimeout(idle.current);
+    idle.current = setTimeout(() => setHintAway(hintCovers()), 450);
+  }, [hintCovers]);
+  useEffect(() => {
+    if (!gone) return;
+    const id = setTimeout(() => setHintAway(hintCovers()), 300);
+    return () => clearTimeout(id);
+  }, [gone, hintCovers]);
+  useEffect(() => () => clearTimeout(idle.current), []);
   // Opening is a tap, so the browser lets the song start; a failure (blocked, offline) just leaves it silent.
   const open = () => {
     setOpened(true);
@@ -693,6 +720,7 @@ export function InviteExperience({
       <div
         ref={scroller}
         onScroll={onScroll}
+        style={scenic ? { scrollPaddingBottom: "3.5rem" } : undefined}
         className={`relative z-[1] h-full overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${opened ? "" : "overflow-hidden"} ${scenic ? `snap-y snap-proximity ${look.ink} [container-type:size]` : ""}`}
       >
         {scenic ? (
@@ -1238,25 +1266,24 @@ export function InviteExperience({
           ))}
           <p className="absolute bottom-[calc(4.75rem+var(--frame-bottom,0px))] right-5 rounded bg-black/55 px-2 py-0.5 text-sm font-bold tracking-[0.2em]" style={{ color: t.accent }}>{stamp}</p>
           {!atEnd && (
-            <button type="button" tabIndex={-1} onClick={() => scroller.current?.scrollBy({ top: scroller.current.clientHeight * 0.8, behavior: reducedMotion() ? "auto" : "smooth" })}
-              className="pointer-events-auto absolute bottom-[calc(1.5rem+var(--frame-bottom,0px))] left-1/2 flex min-h-11 -translate-x-1/2 items-center gap-2 rounded-full border border-white/30 bg-black/60 px-5 text-xs font-bold tracking-[0.25em]">
-              SCROLL DOWN <ChevronDown className="size-4" />
+            <button ref={hintRef as React.RefObject<HTMLButtonElement>} type="button" tabIndex={-1} aria-hidden onClick={() => scroller.current?.scrollBy({ top: scroller.current.clientHeight * 0.8, behavior: reducedMotion() ? "auto" : "smooth" })}
+              className={`pointer-events-auto absolute bottom-[calc(0.75rem+var(--frame-bottom,0px))] left-1/2 grid min-h-11 min-w-11 -translate-x-1/2 place-items-center transition-opacity duration-300 ${hintAway ? "pointer-events-none opacity-0" : ""}`}>
+              <span className="flex items-center gap-1 rounded-full border border-white/30 bg-black/60 px-3 py-1 text-[10px] font-bold tracking-[0.2em]">SCROLL <ChevronDown className="size-3" /></span>
             </button>
           )}
         </div>
       )}
 
       {scenic && !tape && opened && !atEnd && (
-        <button type="button" tabIndex={-1} aria-hidden onClick={() => scroller.current?.scrollBy({ top: scroller.current.clientHeight * 0.8, behavior: reducedMotion() ? "auto" : "smooth" })}
-          className="press absolute bottom-[calc(0.75rem+var(--frame-bottom,0px))] left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1 outline-none">
+        <button ref={hintRef as React.RefObject<HTMLButtonElement>} type="button" tabIndex={-1} aria-hidden onClick={() => scroller.current?.scrollBy({ top: scroller.current.clientHeight * 0.8, behavior: reducedMotion() ? "auto" : "smooth" })}
+          className={`press absolute bottom-[calc(0.5rem+var(--frame-bottom,0px))] left-1/2 z-10 grid min-h-11 min-w-11 -translate-x-1/2 place-items-center outline-none transition-opacity duration-300 ${hintAway ? "pointer-events-none opacity-0" : ""}`}>
           {concept === "embossed" || concept === "garden" ? (
-            <span className="scroll-nudge flex min-h-10 items-center gap-1.5 rounded-full bg-[#FBF7F0]/95 px-4 text-[12px] text-[#6E5A43] shadow-md">{ur ? "نیچے سکرول کریں" : "Scroll down"}<ChevronDown className="size-4" /></span>
-          ) : <>
-          <span className={`scroll-nudge grid size-11 place-items-center rounded-full border-2 ${concept === "editorial" ? "border-[#141414] bg-[#F5F1EA]/90 text-[#141414]" : concept === "aurora" ? "border-white/40 bg-white/10 text-white backdrop-blur-md" : concept === "monogram" ? "border-[#B08D57]/70 bg-[#FAF8F3]/90 text-[#1F2A28]" : look.dark ? "border-[#e8c06a]/80 bg-[#2a0a0e]/60 text-[#e8c06a]" : "border-[#a8783a]/70 bg-[#fbf6ee]/80 text-[#7a2a2e]"}`}>
-            <ChevronDown className="size-5" />
-          </span>
-          <span className={`text-[9px] font-bold tracking-[0.3em] ${onPaper ? look.ink : concept === "aurora" ? "text-white/85" : look.dark ? "text-[#f7e7c6]" : "text-white [text-shadow:0_1px_4px_rgba(0,0,0,.7)]"}`} style={{ fontFamily: CAPS }}>SCROLL DOWN</span>
-          </>}
+            <span className="scroll-nudge flex items-center gap-1 rounded-full bg-[#FBF7F0]/95 px-3 py-1 text-[11px] text-[#6E5A43] shadow-md">{ur ? "نیچے" : "Scroll"}<ChevronDown className="size-3.5" /></span>
+          ) : (
+            <span className={`scroll-nudge grid size-8 place-items-center rounded-full border ${concept === "editorial" ? "border-[#141414] bg-[#F5F1EA]/90 text-[#141414]" : concept === "aurora" ? "border-white/40 bg-white/10 text-white backdrop-blur-md" : concept === "monogram" ? "border-[#B08D57]/70 bg-[#FAF8F3]/90 text-[#1F2A28]" : look.dark ? "border-[#e8c06a]/80 bg-[#2a0a0e]/60 text-[#e8c06a]" : "border-[#a8783a]/70 bg-[#fbf6ee]/80 text-[#7a2a2e]"}`}>
+              <ChevronDown className="size-4" />
+            </span>
+          )}
         </button>
       )}
 

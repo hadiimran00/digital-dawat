@@ -13,6 +13,7 @@
   /* Motion tokens: strong custom curves (built-in CSS easings are too weak). */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1); /* strong ease-in-out: deliberate on-screen movement */
 }
 
 @theme inline {
@@ -375,4 +376,26 @@ summary,
   .ed-line, .ed-zoom, .mono-line { animation: none; }
   .aurora-a, .aurora-b, .aurora-c { animation: none; }
   .mono-draw { animation: none; stroke-dashoffset: 0; fill: currentColor; }
+}
+
+/* Kahani's opening, a once-per-guest moment, so it takes its time: the words lift away first, then the page glides up
+   (strong ease-in-out over 1.1s) while the photo drifts a little slower than the page, for depth. */
+@media (prefers-reduced-motion: no-preference) {
+  .cover-editorial {
+    transition: transform 1100ms var(--ease-in-out) 380ms;
+  }
+  .cover-editorial .cover-copy,
+  .cover-editorial .cover-photo {
+    transition: opacity 380ms var(--ease-out), transform 1100ms var(--ease-in-out) 380ms;
+  }
+  .cover-editorial .cover-copy {
+    transition: opacity 550ms var(--ease-in-out), transform 550ms var(--ease-in-out);
+  }
+  .cover-editorial[data-open="true"] .cover-copy {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  .cover-editorial[data-open="true"] .cover-photo {
+    transform: translateY(22%);
+  }
 }
