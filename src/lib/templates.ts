@@ -45,7 +45,13 @@ export interface Template {
    * "tape" = retro home video, "royal" = palace doors and maroon glass, "ivory" = curtains and frosted cream.
    * Modern looks: "editorial" = a magazine feature on paper, "aurora" = moving light behind glass, "monogram" = initials drawn in gold.
    */
-  concept?: "tape" | "royal" | "ivory" | "editorial" | "aurora" | "monogram";
+  concept?: "tape" | "royal" | "ivory" | "editorial" | "aurora" | "monogram" | "embossed" | "garden";
+  /** "garden": the Bismillah as calligraphy artwork (transparent image) instead of typeset text */
+  bismillahArt?: string;
+  /** "embossed": a short video of the closing doors opening, played when the guest taps open (the `gate` image is its first frame) */
+  gateVideo?: string;
+  /** "embossed": the ornamental frame drawn around the date */
+  dateFrame?: string;
   /** Real artwork (public-domain / CC0) used as the hero image of the card. See CREDITS.md. */
   art?: { src: string; position: string; zoom: number; credit: string };
   /** Optional full-bleed photo behind the whole experience (tape concept). */
@@ -403,6 +409,44 @@ export const TEMPLATES: Template[] = [
     tags: ["modern", "monogram", "minimal", "gold", "white", "classic", "elegant", "full wedding"],
     price: 3999,
     theme: { bg: "#FAF8F3", bg2: "#F1ECE1", ink: "#1F2A28", accent: "#B08D57", muted: "#6B6F69", ornament: "none", headingFont: "serif" },
+  },
+  {
+    id: "afreen-wedding",
+    signature: 7,
+    motion: "rise",
+    concept: "embossed",
+    name: "Afreen",
+    category: "wedding",
+    tagline: "Ivory doors with a wax seal open onto an embossed flower arch.",
+    tags: ["ivory", "embossed", "wax seal", "doors", "floral", "elegant", "minimal", "full wedding"],
+    price: 3999,
+    // design files from in-vitely.com's Elysee theme, used with the site owner's permission from them (see CREDITS.md)
+    gate: "/art/afreen-doors.webp",
+    gateVideo: "/art/afreen-doors-open.mp4",
+    backdrop: { src: "/art/afreen-frame.webp", credit: "Elysee design by in-vitely.com, used with permission (see CREDITS.md)." },
+    dateFrame: "/art/afreen-date-frame.webp",
+    sample: { couple: "/art/dw-couple.webp" },
+    theme: { bg: "#EFE8DD", bg2: "#E7DDCF", ink: "#6E5A43", accent: "#9C8462", muted: "#8A7660", ornament: "none", headingFont: "script" },
+  },
+  {
+    id: "qabool-nikkah",
+    signature: 8,
+    motion: "rise",
+    concept: "garden",
+    name: "Qabool",
+    category: "nikkah",
+    tagline: "A pearl curtain parts on a blush flower arch: Bismillah, your names, and Qabool Hai.",
+    tags: ["nikkah", "pastel", "pink", "blush", "sage", "floral", "illustrated", "couple", "chandelier", "qabool hai"],
+    price: 2999,
+    // artwork and song from ShubhamArt's video invitation, used with the site owner's permission (see CREDITS.md);
+    // the frames were cleaned of text and AI-upscaled 4x
+    music: { src: "/audio/qabool-song.m4a", title: "Qabool" },
+    gate: "/art/qabool-curtain.webp",
+    gateVideo: "/art/qabool-curtain.mp4",
+    backdrop: { src: "/art/qabool-scene.webp", credit: "ShubhamArt, used with permission (see CREDITS.md)." },
+    bismillahArt: "/art/qabool-bismillah.webp",
+    scenes: { couple: "/art/qabool-couple.webp", closing: "/art/qabool-couple.webp" },
+    theme: { bg: "#F6E9E8", bg2: "#F1E2E0", ink: "#4F5F57", accent: "#7F9A88", muted: "#6E7D74", ornament: "none", headingFont: "script" },
   },
 ];
 

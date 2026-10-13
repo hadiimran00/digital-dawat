@@ -63,6 +63,8 @@ export function InviteCard({ template, content, chrome = true, clear = false }: 
     : template.concept === "editorial" ? { fontFamily: "var(--nf-display), Georgia, serif", fontWeight: 400, letterSpacing: "-0.01em" }
     : template.concept === "aurora" ? { fontFamily: "var(--nf-sans), system-ui", fontWeight: 300, letterSpacing: "-0.02em", backgroundImage: AURORA_TEXT, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }
     : template.concept === "monogram" ? { fontFamily: "var(--nf-display), Georgia, serif", fontWeight: 400, fontStyle: "italic" }
+    : template.concept === "embossed" ? { fontFamily: "var(--nf-script), cursive", fontWeight: 400, color: t.accent }
+    : template.concept === "garden" ? { fontFamily: "var(--nf-script), cursive", fontWeight: 400, color: "#5F7466" }
     : null;
   const names = content.host2 ? `${content.host1} & ${content.host2}` : content.host1;
   const style: CSSProperties = {
@@ -75,6 +77,8 @@ export function InviteCard({ template, content, chrome = true, clear = false }: 
         ? "radial-gradient(70% 45% at 15% 20%, #FF5FA266, transparent 70%), radial-gradient(70% 45% at 90% 55%, #7B61FF77, transparent 70%), radial-gradient(70% 40% at 35% 95%, #FFB34755, transparent 70%), #07060F"
       : template.concept === "monogram"
         ? `linear-gradient(170deg, ${t.bg}, ${t.bg2})`
+      : template.concept === "embossed" || template.concept === "garden"
+        ? `url(${template.backdrop?.src}) 50% 50% / cover no-repeat, ${t.bg}`
       : template.concept && backdrop
         ? `linear-gradient(${template.concept === "ivory" ? "rgba(251,246,238,0.55), rgba(251,246,238,0.85)" : template.concept === "royal" ? "rgba(42,10,14,0.45), rgba(42,10,14,0.8)" : "rgba(12,8,5,0.4), rgba(12,8,5,0.72)"}), url(${backdrop}) 50% 20% / cover no-repeat`
         : `linear-gradient(170deg, ${t.bg}, ${t.bg2})`,

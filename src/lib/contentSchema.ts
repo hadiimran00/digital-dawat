@@ -27,6 +27,13 @@ export const FaqSchema = z.object({
   a: z.string().trim().min(1, "Type the answer, or remove the question").max(400),
 });
 
+/** One moment in the day's programme, e.g. 19:00 Nikkah. */
+export const TimelineSchema = z.object({
+  time: z.string().trim().max(10),
+  title: z.string().trim().min(1, "Type what happens, or remove this line").max(40),
+  note: z.string().trim().max(120),
+});
+
 /** A family member guests can call. The phone is optional. */
 export const MemberSchema = z.object({
   name: z.string().trim().min(1, "Type a name, or remove this person").max(60),
@@ -40,6 +47,7 @@ export const MemberSchema = z.object({
 export const MAX_MEMBERS = 5;
 export const MAX_EVENTS = 6;
 export const MAX_FAQ = 6;
+export const MAX_TIMELINE = 8;
 
 export const ContentSchema = z.object({
   language: z.enum(["en", "ur"]),
@@ -56,6 +64,8 @@ export const ContentSchema = z.object({
   members2: z.array(MemberSchema).max(MAX_MEMBERS).default([]),
   events: z.array(EventSchema).min(1, "Add at least one event").max(MAX_EVENTS),
   faq: z.array(FaqSchema).max(MAX_FAQ),
+  /** the programme of the day (optional; shown by the designs that have a timeline screen) */
+  timeline: z.array(TimelineSchema).max(MAX_TIMELINE).default([]),
   closing: z.string().trim().max(120),
   rsvpEnabled: z.boolean(),
   contactPhone: z.string().trim().max(20),
@@ -66,3 +76,4 @@ export const ContentSchema = z.object({
 export type InviteContent = z.infer<typeof ContentSchema>;
 export type InviteEvent = z.infer<typeof EventSchema>;
 export type FamilyMember = z.infer<typeof MemberSchema>;
+export type TimelineItem = z.infer<typeof TimelineSchema>;

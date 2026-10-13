@@ -73,3 +73,36 @@ Keep the licences on file.
 - Kahani reuses licensed photos already listed above (`rp-walima`, `rp-mehndi`, `rp-nikkah`, `rp-baraat`, `dw-walima`, `dw-couple`). No new images.
 - Roshni and Mohr use no photos: their backgrounds, the moving light and the monogram are drawn by the site.
 - None has music yet; the site owner will supply licensed tracks.
+
+## Afreen (2026-10-13)
+
+Design files from the **Elysee** theme by in-vitely.com, used with permission: the site owner stated on 2026-10-13 that they have
+permission from in-vitely to use them. Keep that permission on file.
+
+| File | Source |
+|---|---|
+| `public/art/afreen-doors.webp` | https://in-vitely.com/themes/couple/elysee/intro-poster-v2.jpg (converted to WebP) |
+| `public/art/afreen-doors-open.mp4` | https://in-vitely.com/themes/couple/elysee/intro-v3.mp4 |
+| `public/art/afreen-frame.webp` | https://in-vitely.com/themes/couple/elysee/bg-frame-v2.jpg (resized, WebP) |
+| `public/art/afreen-date-frame.webp` | https://in-vitely.com/themes/couple/elysee/tarih-frame.png (WebP) |
+
+Not copied: their music (2CELLOS, "Shape of My Heart": needs its own licence) and their demo couple photos. The demo uses
+`dw-couple.webp` (licensed, above).
+
+## Qabool (2026-10-13)
+
+Artwork and song from a video invitation by **ShubhamArt** (Instagram @weddingartinvitee; Pinterest pin
+https://www.pinterest.com/pin/1112178070498751017/), used with permission: the site owner stated on 2026-10-13 that they
+have permission from ShubhamArt, and that they hold the licence for the song. Keep both on file.
+
+How the files were made: frames were taken from the 576x1024 video, the invitation text was removed (inpainting), and the
+frames were upscaled 4x with Real-ESRGAN x4plus (official Qualcomm AI Hub ONNX export, BSD-3-Clause) before resizing.
+
+| File | From the video |
+|---|---|
+| `public/art/qabool-curtain.webp` | first frame (closed pearl curtain) |
+| `public/art/qabool-curtain.mp4` | the first 3.4 seconds (curtain parting), copied without re-encoding |
+| `public/art/qabool-scene.webp` | the arch, flower columns and chandelier (7 s), text removed |
+| `public/art/qabool-couple.webp` | the same with the illustrated couple (13 s), text removed |
+| `public/art/qabool-bismillah.webp` | the Bismillah calligraphy, cut out on transparency |
+| `public/audio/qabool-song.m4a` | the video's soundtrack, copied without re-encoding |

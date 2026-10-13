@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import type { InviteContent } from "@/lib/content";
 import type { Template } from "@/lib/templates";
@@ -119,6 +120,51 @@ export function ModernCover({
       <button type="button" onClick={onOpen} className="press rise mt-10 min-h-12 border px-9 text-[11px] uppercase tracking-[0.35em]" style={{ borderColor: `${t.ink}55`, fontFamily: CAPS, animationDelay: "1450ms" }}>
         Open
       </button>
+    </div>
+  );
+}
+
+/**
+ * Afreen ("embossed"): the closed ivory doors with a wax seal. Tapping plays a short video of the doors opening onto
+ * the flower arch, then the gate fades away. If the video can't play (data saver, old phone) it simply fades.
+ */
+export function VideoGate({
+  poster, video, opened, onOpen, hello, accent,
+}: { poster: string; video?: string; opened: boolean; onOpen: () => void; hello: string; accent: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (!opened) return;
+    const v = ref.current;
+    const finish = () => setDone(true);
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!v || reduce) { finish(); return; }
+    v.addEventListener("ended", finish);
+    v.play().then(() => setPlaying(true), finish);
+    const fallback = setTimeout(finish, 4000); // never leave guests stuck behind the doors
+    return () => { v.removeEventListener("ended", finish); clearTimeout(fallback); };
+  }, [opened]);
+
+  return (
+    <div className="absolute inset-0 z-20 overflow-hidden transition-opacity duration-700 ease-out" style={{ opacity: done ? 0 : 1, pointerEvents: done ? "none" : "auto" }}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- static export */}
+      <img src={poster} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      {video && <video ref={ref} src={video} poster={poster} muted playsInline preload="auto" aria-hidden className="absolute inset-0 h-full w-full object-cover" style={{ opacity: playing ? 1 : 0 }} />}
+      <div className="absolute inset-x-0 bottom-0 flex flex-col items-center px-8 pb-[calc(3.5rem+var(--frame-bottom,0px))] text-center transition-opacity duration-300" style={{ opacity: opened ? 0 : 1 }}>
+        {hello && <p className="rise mb-4 text-3xl" style={{ fontFamily: "var(--nf-script), cursive", color: accent, textShadow: "0 1px 8px rgba(255,250,242,.95)" }}>{hello}</p>}
+        <span aria-hidden className="mb-3 flex w-32 items-center gap-2" style={{ color: accent }}>
+          <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, transparent, ${accent})` }} />
+          <span className="size-1.5 rotate-45" style={{ background: accent }} />
+          <span className="h-px flex-1" style={{ background: `linear-gradient(270deg, transparent, ${accent})` }} />
+        </span>
+        <button type="button" onClick={onOpen} disabled={opened}
+          className="press min-h-12 rounded-full border px-10 text-[13px] uppercase tracking-[0.32em] shadow-[0_6px_24px_rgba(110,90,67,0.25)]"
+          style={{ fontFamily: CAPS, color: "#6E5A43", borderColor: `${accent}99`, background: "linear-gradient(180deg, #FBF7F0, #EFE5D6)" }}>
+          Tap to open
+        </button>
+      </div>
     </div>
   );
 }

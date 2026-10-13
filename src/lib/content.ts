@@ -91,6 +91,14 @@ export function defaultContent(category: CategoryId, language: "en" | "ur" = "en
             { q: ur ? "پارکنگ کہاں ہے؟" : "Where do I park?", a: ur ? "مقام پر پارکنگ دستیاب ہے۔" : "Parking is available at the venue." },
           ]
         : [],
+    timeline:
+      category === "wedding" || category === "nikkah"
+        ? [
+            { time: "19:00", title: ur ? "نکاح" : "Nikkah", note: ur ? "خاندان اور عزیزوں کی موجودگی میں نکاح کی تقریب۔" : "The nikkah ceremony, with our families and loved ones." },
+            { time: "20:30", title: ur ? "عشائیہ" : "Dinner", note: ur ? "کھانا، ملاقاتیں اور خوشیاں۔" : "Dinner, catching up and celebrating together." },
+            { time: "22:00", title: ur ? "رخصتی" : "Rukhsati", note: ur ? "دعاؤں کے ساتھ رخصتی۔" : "We say goodbye to the bride with our prayers." },
+          ]
+        : [],
     closing: ur ? "آپ کی آمد کے منتظر" : "We can’t wait to celebrate with you",
     rsvpEnabled: true,
     contactPhone: "",

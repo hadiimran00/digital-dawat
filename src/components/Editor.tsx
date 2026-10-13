@@ -6,7 +6,7 @@ import { Eye, Plus, Trash2, Undo2, X } from "lucide-react";
 import {
   defaultContent, newEvent, randomSlug, type InviteContent, type InviteEvent,
 } from "@/lib/content";
-import { ContentSchema, MAX_EVENTS, MAX_FAQ, MAX_MEMBERS } from "@/lib/contentSchema";
+import { ContentSchema, MAX_EVENTS, MAX_FAQ, MAX_MEMBERS, MAX_TIMELINE } from "@/lib/contentSchema";
 import { TEMPLATES, formatPKR, getTemplate } from "@/lib/templates";
 import { backendConfigured } from "@/lib/config";
 import { InviteExperience } from "@/components/invite/InviteExperience";
@@ -197,9 +197,11 @@ export function Editor() {
   }
 
   const here = `/create?t=${template.id}`;
-  const photoless = template.concept === "aurora" || template.concept === "monogram";
+  // designs whose background is the design itself: no cover photo or event photos
+  const photoless = template.concept === "aurora" || template.concept === "monogram" || template.concept === "embossed" || template.concept === "garden";
+  const hasTimeline = template.concept === "embossed";
   /** remove an item from a list, keeping a one-tap undo */
-  type ListKey = "events" | "faq" | "members1" | "members2";
+  type ListKey = "events" | "faq" | "members1" | "members2" | "timeline";
   const removeWithUndo = (label: string, key: ListKey, i: number) => {
     const item = content[key][i];
     const splice = (c: InviteContent, insert: boolean) => {
@@ -363,6 +365,38 @@ export function Editor() {
             </fieldset>
           ))}
         </section>
+
+        {hasTimeline && (
+          <section data-preview="timeline" className="space-y-4" aria-label="Day timeline">
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-2xl font-bold">Day timeline <span className="text-base font-normal text-foreground/70">(optional)</span></h2>
+              <button type="button" className="btn btn-ghost" disabled={content.timeline.length >= MAX_TIMELINE} onClick={() => set({ timeline: [...content.timeline, { time: "", title: "", note: "" }] })}>
+                <Plus className="size-4" aria-hidden /> Add a moment
+              </button>
+            </div>
+            <p className="text-sm text-foreground/70">What happens when on the day, for example 19:00 Nikkah, 20:30 Dinner, 22:00 Rukhsati.</p>
+            {content.timeline.map((it, i) => (
+              <fieldset key={i} className="grid grid-cols-[6.5rem_1fr] gap-3 rounded-2xl border border-line bg-card p-4">
+                <legend className="flex w-full items-center justify-between px-1 text-sm font-semibold">
+                  <span>Moment {i + 1}</span>
+                  <button type="button" className="inline-flex min-h-11 items-center gap-1 text-red-700" onClick={() => removeWithUndo(it.title || `Moment ${i + 1}`, "timeline", i)}>
+                    <Trash2 className="size-4" aria-hidden /> Remove
+                  </button>
+                </legend>
+                <label className="block">Time
+                  <input type="time" className="field" value={it.time} onChange={(e) => set({ timeline: content.timeline.map((x, j) => (j === i ? { ...x, time: e.target.value } : x)) })} />
+                </label>
+                <label className="block">What happens
+                  <input className="field" value={it.title} maxLength={40} onChange={(e) => set({ timeline: content.timeline.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)) })} />
+                  {err(`timeline.${i}.title`)}
+                </label>
+                <label className="col-span-2 block">Note (optional)
+                  <input className="field" value={it.note} maxLength={120} onChange={(e) => set({ timeline: content.timeline.map((x, j) => (j === i ? { ...x, note: e.target.value } : x)) })} />
+                </label>
+              </fieldset>
+            ))}
+          </section>
+        )}
 
         <section data-preview="faq" className="space-y-4" aria-label="Questions">
           <div className="flex items-center justify-between">
