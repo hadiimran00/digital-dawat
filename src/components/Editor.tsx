@@ -199,7 +199,7 @@ export function Editor() {
   const here = `/create?t=${template.id}`;
   // designs whose background is the design itself: no cover photo or event photos
   const photoless = template.concept === "aurora" || template.concept === "monogram" || template.concept === "embossed" || template.concept === "garden";
-  const hasTimeline = template.concept === "embossed";
+  const hasTimeline = template.concept === "embossed" || template.concept === "royal" || template.concept === "ivory";
   /** remove an item from a list, keeping a one-tap undo */
   type ListKey = "events" | "faq" | "members1" | "members2" | "timeline";
   const removeWithUndo = (label: string, key: ListKey, i: number) => {

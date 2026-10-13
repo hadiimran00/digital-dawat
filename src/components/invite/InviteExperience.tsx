@@ -524,7 +524,9 @@ export function InviteExperience({
   const [seats, setSeats] = useState<number | null>(null);
   const [scene, setScene] = useState(0);
   const [bgPhoto, setBgPhoto] = useState("");
-  const [atEnd, setAtEnd] = useState(false); // the scroll-down hint stays until the very bottom
+  // the scroll-down hint is for the first screens only: once the guest is scrolling it would just cover content
+  // (on small phones some screens are taller than the space above it); it comes back at the top
+  const [atEnd, setAtEnd] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const scroller = useRef<HTMLDivElement>(null);
   const song = useRef<HTMLAudioElement>(null);
@@ -646,7 +648,7 @@ export function InviteExperience({
 
   const onScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
-    setAtEnd(el.scrollTop + el.clientHeight >= el.scrollHeight - 48);
+    setAtEnd(el.scrollTop + el.clientHeight >= el.scrollHeight - 48 || el.scrollTop > el.clientHeight * 1.5);
   }, []);
   // Opening is a tap, so the browser lets the song start; a failure (blocked, offline) just leaves it silent.
   const open = () => {
@@ -699,6 +701,41 @@ export function InviteExperience({
             <Screen tape scene={0} section="cover" framed={false}>
               <div className="mx-auto w-full overflow-hidden rounded-md" style={{ maxWidth: "calc((100cqh - 10.5rem - var(--frame-top, 0px) - var(--frame-bottom, 0px)) * 0.5625)" }}><InviteCard template={template} content={content} chrome={false} clear={!!backdrop} /></div>
             </Screen>
+          ) : concept === "royal" || concept === "ivory" ? (
+            <>
+              <Screen tape scene={0} section="cover" framed={false} align={look.align}>
+                {/* one focal point: the names, straight over the photo, with a soft glow behind them for contrast */}
+                <section className={`relative px-6 py-[min(2.5rem,5cqh)] text-center ${look.dark ? "" : "rounded-[32px] border border-[#a8783a]/35 bg-[#fbf6ee]/82 shadow-[0_18px_50px_rgba(40,20,10,0.3)] backdrop-blur-sm"}`}>
+                  {look.dark && <span aria-hidden className="absolute inset-x-[-10%] inset-y-0 -z-10 rounded-[50%] blur-2xl" style={{ background: "radial-gradient(closest-side, rgba(30,6,8,0.78), rgba(30,6,8,0))" }} />}
+                  {content.bismillah && <p lang="ar" dir="rtl" className="ed-line text-2xl" style={{ color: t.accent, fontFamily: "var(--nf-naskh), serif", lineHeight: 1.9 }}>{BISMILLAH}</p>}
+                  <p className="ed-line mt-2 text-[12px] uppercase tracking-[0.4em]" style={{ fontFamily: CAPS, color: look.dark ? "#f7e7c6" : t.ink, ["--d" as string]: "150ms" }}>{ur ? "شادی" : "The wedding of"}</p>
+                  <h2 className={`ed-line mt-4 text-[min(3.6rem,8cqh)] leading-[1.02] [overflow-wrap:anywhere] ${ur ? "" : look.shine}`} style={{ ...(ur ? { fontFamily: font, color: t.accent } : look.names), ["--d" as string]: "300ms" }}>
+                    {content.host1}
+                    {content.host2 && <><span className="my-1 block text-2xl" style={ur ? undefined : { ...look.greet, fontFamily: "var(--nf-display), Georgia, serif", fontStyle: "italic" }}>{ur ? "اور" : "and"}</span>{content.host2}</>}
+                  </h2>
+                  <span aria-hidden className="mx-auto mt-4 block h-px w-24" style={{ background: t.accent }} />
+                  <p className="ed-line mt-4 text-[12px] uppercase tracking-[0.3em]" style={{ fontFamily: CAPS, color: look.dark ? "#f7e7c6" : t.ink, ["--d" as string]: "450ms" }}>{eventsDateText(content, loc)}</p>
+                </section>
+              </Screen>
+              <Screen tape scene={1} section="intro" framed={false} align={look.align}>
+                <section className={`relative px-6 pb-7 pt-12 text-center ${look.panel}`} style={look.panelStyle}>
+                  {concept === "royal" && <Finial />}<PanelFrame look={look} />
+                  <p className="mx-auto max-w-[16rem] text-xs uppercase leading-6 tracking-[0.2em] [text-wrap:balance]" style={{ fontFamily: CAPS, color: t.accent }}>
+                    {ur ? content.headline : "Together with their families, we joyfully invite you"}
+                  </p>
+                  {(content.family1 || content.family2) && (
+                    <div className="mt-5 grid grid-cols-2 gap-3">
+                      {[content.family1, content.family2].filter(Boolean).map((f, i) => (
+                        <p key={i} className="font-display text-[15px] font-bold leading-snug">{f}</p>
+                      ))}
+                    </div>
+                  )}
+                  <Divider color={t.accent} />
+                  {!ur && look.tagline && <p className="text-[11px] uppercase tracking-[0.3em] [text-wrap:balance]" style={{ fontFamily: CAPS, color: t.accent }}>{look.tagline}</p>}
+                  <p className={`mt-3 ${look.prose}`}>{content.message}</p>
+                </section>
+              </Screen>
+            </>
           ) : concept === "garden" ? (
             <>
               <Screen tape scene={0} section="cover" framed={false} align={look.align}>
@@ -788,7 +825,7 @@ export function InviteExperience({
           ) : (
             <Screen tape scene={0} section="cover" framed={false} align={look.align}>
               <section className={`relative mt-4 px-6 pb-7 pt-12 text-center ${look.panel}`} style={look.panelStyle}>
-                {concept === "royal" && <Finial />}<PanelFrame look={look} />
+                <PanelFrame look={look} />
                 {content.bismillah && <p lang="ar" dir="rtl" className="text-2xl" style={{ color: t.accent, fontFamily: "var(--nf-naskh), serif", lineHeight: 1.9 }}>{BISMILLAH}</p>}
                 <p className="mx-auto mt-1 max-w-[16rem] text-xs uppercase leading-6 tracking-[0.2em] [text-wrap:balance]" style={{ fontFamily: CAPS, color: t.accent }}>
                   {ur ? content.headline : "Together with their families, we joyfully invite you to the wedding of"}
@@ -924,17 +961,18 @@ export function InviteExperience({
             </Screen>
           ))}
 
-          {concept === "embossed" && content.timeline.length > 0 && (
-            <Screen tape scene={4} section="timeline" framed={false} align={look.align}>
-              <section className="px-4 text-center">
+          {(concept === "embossed" || concept === "royal" || concept === "ivory") && content.timeline.length > 0 && (
+            <Screen tape scene={4} section="timeline" framed={false} align={look.align} photo={sc.dress}>
+              <section className={concept === "embossed" ? "px-4 text-center" : `relative px-5 pb-6 pt-12 text-center ${look.panel}`} style={concept === "embossed" ? undefined : look.panelStyle}>
+                {concept === "royal" && <Finial />}{concept !== "embossed" && <PanelFrame look={look} />}
                 <SceneTitle look={look} concept={concept}>{ur ? "دن کا پروگرام" : "The day's programme"}</SceneTitle>
-                <ol className="mt-5 space-y-5">
+                <ol className={`mt-5 ${concept === "embossed" ? "space-y-5" : "space-y-3"}`}>
                   {content.timeline.map((it, i) => (
                     <li key={i}>
                       {it.time && <p className="text-[12px] tracking-[0.3em]" style={{ fontFamily: CAPS, color: t.accent }}>{formatEventTime(it.time)}</p>}
-                      <p className="font-display text-2xl italic" style={{ color: t.ink }}>{it.title}</p>
-                      {it.note && <p className={`mx-auto mt-0.5 max-w-[17rem] text-[13px] leading-relaxed ${look.muted}`}>{it.note}</p>}
-                      {i < content.timeline.length - 1 && <span aria-hidden className="mx-auto mt-4 block size-1.5 rotate-45" style={{ background: t.accent }} />}
+                      <p className="font-display text-2xl italic" style={{ color: look.dark ? "#f7e7c6" : t.ink }}>{it.title}</p>
+                      {it.note && <p className={`mx-auto mt-0.5 max-w-[17rem] leading-snug ${concept === "embossed" ? "text-[13px]" : "text-[12px]"} ${look.muted}`}>{it.note}</p>}
+                      {i < content.timeline.length - 1 && <span aria-hidden className={`mx-auto block size-1.5 rotate-45 ${concept === "embossed" ? "mt-4" : "mt-3"}`} style={{ background: t.accent }} />}
                     </li>
                   ))}
                 </ol>
@@ -957,7 +995,7 @@ export function InviteExperience({
           ) : (
             <Screen tape scene={4} section="couple" framed={false} align={look.align} photo={sc.couple}>
               <SceneTitle look={look} concept={concept!}>{ur ? "دولہا دلہن" : "The couple"}</SceneTitle>
-              <figure className={`mx-auto mt-4 overflow-hidden ${onPaper ? "w-[86%]" : "w-[74%] border-[3px] shadow-2xl"}`}
+              <figure className={`mx-auto mt-4 overflow-hidden ${onPaper ? "w-[86%]" : look.dark ? "w-[64%] border-[3px] shadow-2xl" : "w-[56%] border-[3px] shadow-2xl"}`}
                 style={look.stage === "paper" ? undefined : concept === "embossed" ? { borderTopLeftRadius: "50% 24%", borderTopRightRadius: "50% 24%" } : { borderColor: t.accent, borderTopLeftRadius: "50% 28%", borderTopRightRadius: "50% 28%" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- static export, photo comes from our storage */}
                 <img src={couple} alt={ur ? "دولہا دلہن کی تصویر" : `Photo of ${names}`} className="aspect-[4/5] w-full object-cover" />
@@ -1263,7 +1301,7 @@ export function InviteExperience({
                 </div>
               </div>
             ) : (
-              <div>
+              <div className="rounded-[28px] border border-[#a8783a]/40 bg-[#fbf6ee]/80 px-7 py-5 shadow-[0_10px_40px_rgba(40,20,10,0.25)] backdrop-blur-sm">
                 {hello && (
                   <>
                     <p className="text-4xl" style={ur ? { fontFamily: font, color: "#7a2a2e" } : { fontFamily: "var(--nf-script), cursive", color: "#7a2a2e", textShadow: "0 1px 10px rgba(255,250,240,.95)" }}>{hello}</p>
