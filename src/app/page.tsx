@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { JsonLd } from "@/components/JsonLd";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
-import { Eye, Video, Link2, ListChecks, UserRound, Languages, ChevronDown, Send, Image as ImageIcon } from "lucide-react";
+import { Eye, Video, Link2, ListChecks, UserRound, Languages, ChevronDown, Send, Image as ImageIcon, RotateCcw, Smartphone } from "lucide-react";
 import { TemplateGallery } from "@/components/TemplateGallery";
 import { InviteCard } from "@/components/invite/InviteCard";
 import { HeroDemo } from "@/components/HeroDemo";
@@ -15,6 +15,17 @@ export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 const PRICES = TEMPLATES.map((t) => t.price);
 const FROM = formatPKR(Math.min(...PRICES));
+const SIGNATURE_COUNT = TEMPLATES.filter((t) => t.signature).length;
+/** what a wedding family actually pays: the full week, and the cheapest single wedding event */
+const WEEK = formatPKR(Math.max(...TEMPLATES.filter((t) => t.category === "wedding").map((t) => t.price)));
+const SINGLE_EVENT = formatPKR(Math.min(...TEMPLATES.filter((t) => ["nikkah", "mehndi", "baraat", "walima", "dholki"].includes(t.category)).map((t) => t.price)));
+
+/** the three worries that stop people paying a site they found today */
+const REASSURANCE = [
+  { icon: Eye, text: "See it before you pay" },
+  { icon: RotateCcw, text: "48-hour full refund", href: "/policies" },
+  { icon: Smartphone, text: "Guests need no app" },
+];
 
 const FEATURES = [
   { icon: Eye, title: "See it before you pay", text: "Edit names, events and venues with a live preview. The price is on every template page, and you pay after you have previewed your own invitation." },
@@ -30,7 +41,7 @@ const FEATURES = [
 const STEPS = [
   ["Pick a design", `${TEMPLATES.length} designs for nikkah, mehndi, baraat, walima and more. Every page shows the price.`],
   ["Add your details", "Names, events, venues, dress codes and your photos. The preview updates as you type."],
-  ["Pay by bank transfer", "Send the amount and upload the receipt. We publish your invitation once we confirm it."],
+  ["Pay by bank transfer", "Upload the receipt. Your invitation goes live within 48 hours, or you get your money back."],
   ["Send it to your guests", "Add your guest list, then send each person their own link on WhatsApp with one tap."],
 ];
 
@@ -45,8 +56,10 @@ const FAQ = [
   ["Will older relatives be able to open it?", "Yes. They tap the link in WhatsApp and it opens in their phone's browser. One more tap opens the invitation, and they reply on the same page. Guests never need an app or an account."],
   ["Can I see the invitation before I pay?", "Yes. You edit and preview your own invitation first, and the price is shown on every template page."],
   ["How do I pay?", "By online bank transfer to the account shown at checkout. Upload a screenshot of the receipt and we publish your invitation after we confirm the payment."],
+  ["What if something is wrong after I pay?", "Message us and we correct names, dates, venues and spelling for free. If we can't put it right, you get a full refund. The pricing and refunds page has the details."],
   ["Some guests are only invited to the Walima. Can I do that?", "Yes. In your guest list, pick the events for each guest. Their personal link shows only those events, and they can only reply to those."],
   ...(supportWhatsapp ? [["I live outside Pakistan. Can I still order?", "Yes. Your guests can open the invitation from anywhere. To pay from abroad, message us on WhatsApp and we'll arrange a way that works for you."]] : []),
+  ["Is it only for weddings?", "No. There are designs for Nikkah, Mehndi, Baraat, Walima, Dholki, engagements, Eid, birthdays and baby showers, each with its own price."],
   ["Can I use Urdu?", "Yes. Switch the card to Urdu and the layout turns right to left. You can also type your own wording in either language."],
   ["Why is there no video button on my phone?", "Video export needs a recent browser that can encode MP4. Your invitation link works on any phone either way."],
 ];
@@ -66,10 +79,20 @@ export default function Home() {
               Mehndi to Walima in one invitation that opens with music, maps and a countdown. Each guest gets a link with their name and only the events they&apos;re invited to, and you see who&apos;s coming.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/templates" className="btn bg-gold-light text-brand">See the invitations</Link>
+              <Link href="/templates" className="btn bg-gold-light text-brand">Choose your design</Link>
               <a href="#how" className="btn border border-brand-ink/30">How it works</a>
             </div>
-            <p className="mt-5 text-sm text-brand-ink/70">From {FROM}, one flat price. You preview your own invitation before you pay.</p>
+            <p className="mt-5 max-w-lg text-sm text-brand-ink/80 [text-wrap:pretty]">
+              <strong className="font-semibold text-brand-ink">{WEEK}</strong> for the whole wedding week. Single events from {SINGLE_EVENT}. No per-guest fees.
+            </p>
+            <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-brand-ink/90">
+              {REASSURANCE.map(({ icon: Icon, text, href }) => (
+                <li key={text} className="flex items-center gap-1.5">
+                  <Icon className="size-4 text-gold-light" aria-hidden />
+                  {href ? <Link href={href} className="underline decoration-brand-ink/40 underline-offset-4 hover:decoration-brand-ink">{text}</Link> : text}
+                </li>
+              ))}
+            </ul>
           </div>
           <div className="mx-auto w-full max-w-xs rise" style={{ animationDelay: "0.12s" }}>
             <div className="-rotate-2 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10">
@@ -89,8 +112,9 @@ export default function Home() {
         <p className="text-sm font-semibold uppercase tracking-[0.25em] text-gold-deep">Signature collection</p>
         <h2 className="font-display text-4xl font-bold text-brand">Invitations that open like a film</h2>
         <p className="mb-8 mt-2 max-w-3xl text-foreground/70">
-          Replay plays like a home video from your Mehndi. Shahi Darbar opens through carved palace doors, and Wisaal behind a silk curtain.
-          Each one has a scene for every event and its own song. Hover a card, or scroll on your phone, to watch it play.
+          {SIGNATURE_COUNT} signature designs, each with its own opening. Shahi Darbar swings open through carved palace doors, Wisaal
+          behind a silk curtain, Kahani like a magazine cover and Replay like a home video from your Mehndi. Every event gets its own
+          scene, and some come with their own song. Hover a card, or scroll on your phone, to watch one play.
         </p>
         <TemplateGallery limit={4} />
       </section>
@@ -135,7 +159,7 @@ export default function Home() {
           ))}
         </ul>
         <div className="mt-10 flex flex-wrap items-center gap-4">
-          <Link href="/templates" className="btn btn-primary">See the invitations</Link>
+          <Link href="/templates" className="btn btn-primary">Choose your design</Link>
           <p className="text-sm text-foreground/70">Every design includes all of this, from {FROM}.</p>
         </div>
       </section>
@@ -161,8 +185,11 @@ export default function Home() {
       <section className="bg-brand text-brand-ink">
         <div className="mx-auto max-w-3xl px-4 py-16 text-center">
           <h2 className="font-display text-4xl font-bold">See your own names on the invitation</h2>
-          <p className="mt-3 text-brand-ink/80">Choose a design and type your names and events. You see the finished invitation before you pay anything.</p>
+          <p className="mt-3 text-brand-ink/80">Choose a design and type your names and events. Editing and previewing are free, and you pay only when it looks right.</p>
           <Link href="/templates" className="btn mt-8 bg-gold-light text-brand">Choose your design</Link>
+          <p className="mt-4 text-sm text-brand-ink/80">
+            Live within 48 hours of payment, or your money back. <Link href="/policies" className="underline underline-offset-4">Pricing &amp; refunds</Link>
+          </p>
         </div>
       </section>
     </>
