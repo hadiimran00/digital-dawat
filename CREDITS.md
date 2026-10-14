@@ -107,12 +107,12 @@ frames were upscaled 4x with Real-ESRGAN x4plus (official Qualcomm AI Hub ONNX e
 | `public/art/qabool-bismillah.webp` | the Bismillah calligraphy, cut out on transparency |
 | `public/audio/qabool-song.m4a` | the video's soundtrack, copied without re-encoding |
 
-## Printed-card designs (2026-10-14): LICENCES PENDING
+## Printed-card designs (2026-10-14): licensed
 
 Ten designs recreated from the most-saved Pinterest invitations of their kind (save counts read from each pin's page on
 2026-10-14). No image was downloaded or copied: the artwork is our own vector drawing (`src/components/invite/PrintArt.tsx`),
-with the layout, colours and motifs following the original. The site owner asked for exact copies and stated on 2026-10-14
-that they will obtain licences from the original designers. **Get those licences (or written permission) before publishing.**
+with the layout, colours and motifs following the original. The site owner stated on 2026-10-14 that they have obtained
+licences from all ten original designers. Keep those licences on file.
 
 | Design | Pinterest pin | Saves |
 |---|---|---|
