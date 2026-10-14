@@ -107,6 +107,13 @@ frames were upscaled 4x with Real-ESRGAN x4plus (official Qualcomm AI Hub ONNX e
 | `public/art/qabool-bismillah.webp` | the Bismillah calligraphy, cut out on transparency |
 | `public/audio/qabool-song.m4a` | the video's soundtrack, copied without re-encoding |
 
+## Birthday music (2026-10-14)
+
+`public/audio/birthday-musicbox.m4a`, `birthday-piano.m4a` and `birthday-celebration.m4a` are our own arrangements of
+"Happy Birthday to You", synthesised from scratch in code (no samples or recordings). The melody (Mildred and Patty Hill's
+"Good Morning to All", 1893) is in the public domain: the US copyright claim was ruled invalid in 2015/2016, and the
+authors died in 1916 and 1946, beyond Pakistan's life-plus-50-years term.
+
 ## Printed-card designs (2026-10-14): licensed
 
 Ten designs recreated from the most-saved Pinterest invitations of their kind (save counts read from each pin's page on

@@ -2,7 +2,17 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarDays, CalendarPlus, ChevronDown, MapPin, Music, Phone, Shirt, VolumeX } from "lucide-react";
-import type { Template } from "@/lib/templates";
+import { openingOf, type Opening, type Template } from "@/lib/templates";
+import { Envelope, Halves } from "./Openings";
+
+/** how long each opening runs before the cover is removed (matches the transitions in globals.css) */
+const OPENING_MS: Record<Opening, number> = {
+  envelope: 2500, doors: 1900, curtain: 1600, split: 1600, fold: 1800, float: 1700, bloom: 1200, veil: 1200, settle: 1200, glide: 1300,
+};
+/** printed cards: when the invitation itself fades in behind the opening cover */
+const REVEAL_MS: Record<Opening, number> = {
+  envelope: 1900, doors: 1000, curtain: 700, split: 700, fold: 950, float: 500, bloom: 350, veil: 350, settle: 350, glide: 450,
+};
 import {
   BISMILLAH, buildIcs, eventsDateText, formatEventDate, formatEventTime, type InviteContent, type InviteEvent,
 } from "@/lib/content";
@@ -100,7 +110,7 @@ const SCENES: { orn: "jharokha" | "rosette" | "jali" | "bars" | "floral" | "cres
 const PHOTO_POS = ["50% 18%", "50% 58%", "15% 40%", "85% 40%", "50% 90%", "50% 35%"];
 
 function SceneBackdrop({ scene, t, photo, photos = [], active = "", look, tape, print }: { scene: number; t: Template["theme"]; photo?: string; photos?: string[]; active?: string; look: Look; tape: boolean; print?: Template["print"] }) {
-  if (look.stage === "print" && print) return <PrintArt art={print.art} className="z-0" />;
+  if (look.stage === "print" && print) return <PrintArt art={print.art} className="print-stage z-0" />;
   if (look.stage === "aurora") return <div aria-hidden className="pointer-events-none absolute inset-0 z-0"><AuroraGlow /></div>;
   if (look.stage === "frame") return <div aria-hidden className="pointer-events-none absolute inset-0 z-0" style={{ background: `${photo ? `url(${photo}) 50% 50% / cover no-repeat, ` : ""}${t.bg}` }} />;
   if (look.stage === "paper") {
@@ -555,6 +565,8 @@ export function InviteExperience({
   const gated = concept === "royal" || concept === "ivory"; // doors or curtains instead of the sliding cover
   const modern = concept === "editorial" || concept === "aurora" || concept === "monogram"; // their own opening screens
   const videoGate = concept === "embossed" || concept === "garden"; // doors / a pearl curtain that open in a short video
+  /** how the "Tap to open" cover leaves, for the designs that use it (printed cards and the classic cards) */
+  const opening = openingOf(template);
   /** light backgrounds (paper, the embossed arch): dark lettering, no photo shadows */
   const onPaper = look.stage === "paper" || look.stage === "frame" || look.stage === "print";
   const [opened, setOpened] = useState(startOpen);
@@ -624,9 +636,10 @@ export function InviteExperience({
   }, []);
   useEffect(() => {
     if (!opened) return;
-    const id = setTimeout(() => setGone(true), videoGate ? 5000 : gated ? 1500 : concept === "editorial" ? 1600 : 1300); // Kahani's opening runs about 1.5s
+    // Kahani's opening runs about 1.5s; the printed and classic cards each have their own (OPENING_MS)
+    const id = setTimeout(() => setGone(true), videoGate ? 5000 : gated ? 1500 : concept === "editorial" ? 1600 : modern ? 1300 : OPENING_MS[opening]);
     return () => clearTimeout(id);
-  }, [opened, gated, videoGate, concept]);
+  }, [opened, gated, videoGate, concept, modern, opening]);
 
   // autoplay: open after a beat (no music), then one screen at a time; at the end, close and start over
   useEffect(() => {
@@ -770,15 +783,40 @@ export function InviteExperience({
   const sceneAttr = (n: number) => (tape ? { "data-scene": n } : {});
   const stamp = new Date(`${ordered[0].date}T00:00:00`).toLocaleDateString("en-GB", { month: "short", day: "2-digit", year: "numeric" }).toUpperCase().replace(/(\w+) (\d+) (\d+)/, "$1 $2 $3");
 
+  /** The envelope opening (Lifafa and the classic "envelope" cards): words above, the sealed envelope, the button below. */
+  const envelopeCover = (ink: string) => (
+    <div data-open={opened} className="cover open-envelope absolute inset-0 z-20 flex flex-col items-center justify-center gap-7 overflow-hidden px-6 text-center"
+      style={{ background: `radial-gradient(120% 80% at 50% 40%, ${print ? "#6e1a28" : t.bg2}, ${print ? "#3e0c15" : t.bg})`, color: ink }}>
+      <div className="cover-ui">
+        {hello && <p className="mb-1 text-3xl leading-tight" style={{ fontFamily: ur ? font : "var(--nf-script), cursive" }}>{hello}</p>}
+        <p className="text-[12px] uppercase tracking-[0.35em] opacity-85" style={{ fontFamily: CAPS }}>{ur ? "آپ کے لیے ایک دعوت نامہ" : "An invitation for you"}</p>
+      </div>
+      <Envelope env={print ? "#7d2030" : t.accent} flap={print ? "#8a2637" : t.accent} card={print ? "#efe6d6" : "#fbf7f0"} cardInk={print ? print.title : "#3a2a20"}>
+        <p className="text-[10px] uppercase tracking-[0.3em] opacity-80" style={{ fontFamily: CAPS }}>{ordered[0]?.title}</p>
+        <p className="mt-1 text-3xl leading-tight [overflow-wrap:anywhere]" style={{ fontFamily: ur ? font : "var(--nf-script), cursive" }}>{names}</p>
+      </Envelope>
+      <div className="cover-ui">
+        <button type="button" onClick={open} className={print ? `${look.solid} min-h-12 px-7 text-xs shadow-xl` : "btn shadow-xl"}
+          style={print ? { background: "#c9a24a", color: "#3e0c15", fontFamily: CAPS } : { background: t.accent, color: t.bg }}>
+          {ur ? "لفافہ کھولیں" : "Open the envelope"}
+        </button>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="relative h-full w-full overflow-hidden bg-background" dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"} onPointerDown={onTap} style={print ? printVars(template) : undefined}>
+    // printed cards: the invitation waits on a dark "table" until its card has opened (otherwise the doors, fold and
+    // curtain would part onto the very same artwork and the opening would be invisible)
+    <div className="relative h-full w-full overflow-hidden bg-background" dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"} onPointerDown={onTap}
+      data-reveal={print ? (opened ? "in" : "wait") : undefined}
+      style={print ? { ...printVars(template), background: "#2a2522", ["--reveal-delay" as string]: `${REVEAL_MS[opening]}ms` } : undefined}>
       {scenic && <SceneBackdrop scene={scene} t={t} photo={concept === "embossed" ? template.backdrop?.src : backdrop} photos={scenePhotos} active={bgPhoto} look={look} tape={tape} print={print} />}
 
       <div
         ref={scroller}
         onScroll={onScroll}
         style={scenic ? { scrollPaddingBottom: "3.5rem" } : undefined}
-        className={`relative z-[1] h-full overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${opened ? "" : "overflow-hidden"} ${scenic ? `snap-y snap-proximity ${look.ink} [container-type:size]` : ""}`}
+        className={`${print ? "print-stage" : ""} relative z-[1] h-full overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${opened ? "" : "overflow-hidden"} ${scenic ? `snap-y snap-proximity ${look.ink} [container-type:size]` : ""}`}
       >
         {scenic ? (
         <div className="mx-auto max-w-md px-5">
@@ -1431,9 +1469,12 @@ export function InviteExperience({
       )}
 
       {!gone && print && (
-        // the printed card's opening: its artwork, the names, and one button
-        <div data-open={opened} className="cover absolute inset-0 z-20 overflow-hidden">
-          <PrintArt art={print.art} />
+        // the printed card's opening: its artwork (whole, in halves, or an envelope), the names, and one button
+        opening === "envelope" ? envelopeCover("#f5e9d6") : (
+        <div data-open={opened} className={`cover open-${opening} absolute inset-0 z-20 overflow-hidden`}>
+          {opening === "doors" || opening === "curtain" || opening === "split"
+            ? <Halves dir={opening === "split" ? "tb" : "lr"}><PrintArt art={print.art} /></Halves>
+            : <PrintArt art={print.art} />}
           <div className="cover-ui relative flex h-full flex-col items-center justify-center gap-3 px-12 text-center" style={{ containerType: "inline-size" }}>
             {hello && <p className="text-3xl leading-tight" style={ur ? { fontFamily: font, color: print.title } : { fontFamily: "var(--nf-script), cursive", color: print.title }}>{hello}</p>}
             <p className="text-[12px] uppercase tracking-[0.35em]" style={{ fontFamily: CAPS, color: print.caps }}>{ur ? "آپ مدعو ہیں" : hello ? "you are invited" : "You're invited"}</p>
@@ -1446,12 +1487,15 @@ export function InviteExperience({
             </button>
           </div>
         </div>
+        )
       )}
 
-      {!gone && !gated && !modern && !videoGate && !print && (
+      {!gone && !gated && !modern && !videoGate && !print && opening === "envelope" && !tape && envelopeCover(t.ink)}
+
+      {!gone && !gated && !modern && !videoGate && !print && !(opening === "envelope" && !tape) && (
         <div
           data-open={opened}
-          className={`cover absolute inset-0 z-20 flex flex-col items-center text-center ${coverArt || tape ? (hello ? "justify-end pb-20" : "justify-end pb-28") : "justify-center"}`}
+          className={`cover ${tape ? "" : `open-${opening}`} absolute inset-0 z-20 flex flex-col items-center text-center ${coverArt || tape ? (hello ? "justify-end pb-20" : "justify-end pb-28") : "justify-center"}`}
           style={{
             background: tape && backdrop
               ? `linear-gradient(to top, rgba(12,8,5,0.92) 18%, rgba(12,8,5,0.35) 62%, rgba(12,8,5,0.15)), url(${backdrop}) 50% 12% / cover no-repeat`

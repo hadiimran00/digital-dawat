@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 :root {
   --background: #fbf7f0;
@@ -145,6 +145,92 @@ summary,
     opacity: 0;
     transform: translateY(-12px) scale(0.98);
   }
+
+  /* Each design leaves in its own way (Template.opening). The words always fade first (above); then: */
+  /* the cover stays put while its two halves part, or while it fades in place */
+  .cover:is(.open-doors, .open-curtain, .open-split, .open-envelope, .open-bloom, .open-veil, .open-settle)[data-open="true"] {
+    transform: none;
+    box-shadow: none;
+  }
+  .cover .half {
+    transition: transform 1100ms var(--ease-in-out) 260ms, opacity 500ms var(--ease-out) 900ms;
+  }
+  .cover.open-doors {
+    perspective: 1400px;
+  }
+  .cover.open-doors .half-a { transform-origin: 0 50%; }
+  .cover.open-doors .half-b { transform-origin: 100% 50%; }
+  .cover.open-doors[data-open="true"] .half-a { transform: rotateY(-100deg); opacity: 0; }
+  .cover.open-doors[data-open="true"] .half-b { transform: rotateY(100deg); opacity: 0; }
+  .cover.open-curtain[data-open="true"] .half-a { transform: translateX(-52%); }
+  .cover.open-curtain[data-open="true"] .half-b { transform: translateX(52%); }
+  .cover.open-split[data-open="true"] .half-a { transform: translateY(-52%); }
+  .cover.open-split[data-open="true"] .half-b { transform: translateY(52%); }
+
+  /* greeting card: the front opens on its left edge */
+  .cover.open-fold {
+    transform-origin: 0 50%;
+    transition: transform 1300ms var(--ease-in-out) 240ms, opacity 400ms var(--ease-out) 1200ms;
+  }
+  .cover.open-fold[data-open="true"] {
+    transform: perspective(1400px) rotateY(-105deg);
+    opacity: 0;
+    box-shadow: none;
+  }
+  /* floats up and away, turning a little, like a balloon let go */
+  .cover.open-float {
+    transition: transform 1400ms var(--ease-in-out) 240ms;
+  }
+  .cover.open-float[data-open="true"] {
+    transform: translateY(-115%) rotate(-4deg);
+  }
+  /* fade-in-place family: swell (bloom), blur and lift (veil), sink back (settle) */
+  .cover:is(.open-bloom, .open-veil, .open-settle) {
+    transition: transform 900ms var(--ease-out) 220ms, opacity 900ms var(--ease-out) 220ms, filter 900ms var(--ease-out) 220ms;
+  }
+  .cover.open-bloom[data-open="true"] { transform: scale(1.12); opacity: 0; }
+  .cover.open-veil[data-open="true"] { transform: translateY(-5%); opacity: 0; filter: blur(10px); }
+  .cover.open-settle[data-open="true"] { transform: scale(0.92); opacity: 0; }
+
+  /* envelope: the seal lifts, the flap swings up and over (and behind the card), the card slides out, then all fades */
+  .cover.open-envelope {
+    transition: opacity 450ms var(--ease-out) 1950ms, transform 450ms var(--ease-out) 1950ms;
+  }
+  .cover.open-envelope[data-open="true"] { transform: scale(1.03); opacity: 0; }
+  .env-seal { transition: opacity 260ms var(--ease-out) 200ms, transform 260ms var(--ease-out) 200ms; }
+  .env-flap { z-index: 3; transition: transform 700ms var(--ease-in-out) 420ms, z-index 0s 770ms; }
+  .env-card { transition: transform 800ms var(--ease-in-out) 1080ms; }
+  .open-envelope[data-open="true"] .env-seal { opacity: 0; transform: scale(0.85) translateY(-6px); }
+  .open-envelope[data-open="true"] .env-flap { transform: rotateX(180deg); z-index: 0; }
+  .open-envelope[data-open="true"] .env-card { transform: translateY(-58%); }
+  .env-seal { z-index: 4; }
+
+  /* printed cards: the invitation fades in once its card has opened (InviteExperience sets --reveal-delay) */
+  [data-reveal] > .print-stage {
+    transition: opacity 700ms var(--ease-out) var(--reveal-delay, 0ms);
+  }
+  [data-reveal="wait"] > .print-stage {
+    opacity: 0;
+  }
+  /* the halves: a soft shadow at the parting edge, so the doors and curtain read as two panels */
+  .cover .half::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0; /* the seam only shows once the cover starts to part */
+    transition: opacity 300ms var(--ease-out) 200ms;
+  }
+  .cover[data-open="true"] .half::after {
+    opacity: 1;
+  }
+  .cover.open-doors .half {
+    transition: transform 1400ms var(--ease-in-out) 250ms, opacity 400ms var(--ease-out) 1350ms;
+  }
+  .cover .half-a::after { background: linear-gradient(90deg, transparent 43%, rgba(0, 0, 0, 0.3) 50%, transparent 50%); }
+  .cover .half-b::after { background: linear-gradient(90deg, transparent 50%, rgba(0, 0, 0, 0.3) 50%, transparent 57%); }
+  .cover.open-split .half-a::after { background: linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, 0.25) 50%, transparent 50%); }
+  .cover.open-split .half-b::after { background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.25) 50%, transparent 55%); }
 }
 
 /* Scene gates: palace doors swing open (royal), curtains draw apart (ivory), then the gate fades away. */
@@ -334,8 +420,12 @@ summary,
     transform: none;
     opacity: 0;
   }
-  .cover[data-open="true"] .cover-ui {
+  .cover[data-open="true"] .cover-ui,
+  .cover[data-open="true"] :is(.half, .env-flap, .env-card, .env-seal) {
     transform: none;
+  }
+  .cover[data-open="true"] {
+    filter: none;
   }
   .btn:active,
   .press:active {

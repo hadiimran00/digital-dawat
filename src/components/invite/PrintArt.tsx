@@ -247,16 +247,27 @@ function Lifafa() {
       </div>
       {(["top", "left", "right"] as const).map((d) => <div key={d} aria-hidden className="pointer-events-none absolute" style={scallop(d)} />)}
       {/* gold wax seal where the flap comes to a point */}
-      <Piece at={{ left: "39%", bottom: "7.5%" }} w={22} vb="-30 -30 60 60">
-        <path d="M0-27C8-28 12-23 19-21C26-17 26-10 27-3C29 5 26 11 22 17C17 24 10 27 2 27C-6 29-12 25-18 21C-25 16-28 9-27 1C-29-7-25-13-20-19C-14-25-7-26 0-27Z" fill="#a7832f" />
-        <circle r="19" fill="#c9a24a" />
-        <circle r="19" fill="none" stroke="#8a6a22" strokeWidth="1.2" />
-        <circle r="15.5" fill="none" stroke="#e8cf86" strokeWidth=".7" />
-        <path d="M0 10V-6M0-6C-4-9-7-7-6-3M0-6C4-9 7-7 6-3M0 0C-4-2-7 0-6 3M0 0C4-2 7 0 6 3M0 5C-3 4-5 6-4 8M0 5C3 4 5 6 4 8" stroke="#7d5e1c" strokeWidth="1.3" fill="none" strokeLinecap="round" />
-        <ellipse cx="-8" cy="-10" rx="5" ry="2.5" fill="#fff" opacity=".25" transform="rotate(-35 -8 -10)" />
-      </Piece>
+      <Piece at={{ left: "39%", bottom: "7.5%" }} w={22} vb="-30 -30 60 60"><SealShape /></Piece>
     </>
   );
+}
+
+function SealShape() {
+  return (
+    <>
+      <path d="M0-27C8-28 12-23 19-21C26-17 26-10 27-3C29 5 26 11 22 17C17 24 10 27 2 27C-6 29-12 25-18 21C-25 16-28 9-27 1C-29-7-25-13-20-19C-14-25-7-26 0-27Z" fill="#a7832f" />
+      <circle r="19" fill="#c9a24a" />
+      <circle r="19" fill="none" stroke="#8a6a22" strokeWidth="1.2" />
+      <circle r="15.5" fill="none" stroke="#e8cf86" strokeWidth=".7" />
+      <path d="M0 10V-6M0-6C-4-9-7-7-6-3M0-6C4-9 7-7 6-3M0 0C-4-2-7 0-6 3M0 0C4-2 7 0 6 3M0 5C-3 4-5 6-4 8M0 5C3 4 5 6 4 8" stroke="#7d5e1c" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+      <ellipse cx="-8" cy="-10" rx="5" ry="2.5" fill="#fff" opacity=".25" transform="rotate(-35 -8 -10)" />
+    </>
+  );
+}
+
+/** The gold wax seal on its own (the envelope opening). */
+export function WaxSeal({ className = "", style }: { className?: string; style?: CSSProperties }) {
+  return <svg aria-hidden viewBox="-30 -30 60 60" className={className} style={style}><SealShape /></svg>;
 }
 
 function Gubbara() {

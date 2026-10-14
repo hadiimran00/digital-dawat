@@ -29,6 +29,16 @@ export type VideoStyle = "rise" | "envelope" | "scratch" | "sparkle";
 
 export type Ornament = "none" | "bars" | "arch" | "jharokha" | "rosette" | "jali" | "geometric" | "floral" | "crescent" | "confetti";
 
+/**
+ * The opening of the "Tap to open" cover. envelope: the seal lifts, the flap opens and the card slides out;
+ * doors / curtain / split: the cover parts in two (swinging, sideways, up and down); fold: opens like a greeting card;
+ * float: drifts up and away; bloom: swells and fades; veil: blurs and lifts; settle: sinks back and fades; glide: slides up.
+ */
+export type Opening = "envelope" | "doors" | "curtain" | "split" | "fold" | "float" | "bloom" | "veil" | "settle" | "glide";
+
+export const openingOf = (t: Template): Opening =>
+  t.opening ?? (t.motion === "envelope" ? "envelope" : t.motion === "sparkle" ? "veil" : t.motion === "scratch" ? "bloom" : "glide");
+
 export type PrintArtId = "lifafa" | "gubbara" | "neelam" | "pehli" | "gulnaar" | "teddy" | "bhalu" | "saadgi" | "zaitoon" | "surkh";
 
 export interface PrintSpec {
@@ -68,6 +78,8 @@ export interface Template {
    * Modern looks: "editorial" = a magazine feature on paper, "aurora" = moving light behind glass, "monogram" = initials drawn in gold.
    */
   concept?: "tape" | "royal" | "ivory" | "editorial" | "aurora" | "monogram" | "embossed" | "garden" | "print";
+  /** How the "Tap to open" cover leaves (see globals.css .open-*). Unset: from `motion` (see openingOf). */
+  opening?: Opening;
   /** "print": a printed-card design (illustrated artwork from PrintArt.tsx, the words laid out like the card) */
   print?: PrintSpec;
   /** "garden": the Bismillah as calligraphy artwork (transparent image) instead of typeset text */
@@ -191,6 +203,8 @@ export const TEMPLATES: Template[] = [
     tagline: "Bright confetti for any age.",
     tags: ["colourful", "fun", "confetti"],
     price: 999,
+    // our own arrangement of the public-domain melody (see CREDITS.md)
+    music: { src: "/audio/birthday-musicbox.m4a", title: "Happy Birthday (music box)" },
     theme: { bg: "#FFF4D6", bg2: "#FFE3EC", ink: "#2B1B4A", accent: "#E5446D", muted: "#6D5A8F", ornament: "confetti", headingFont: "sans" },
   },
   {
@@ -304,6 +318,8 @@ export const TEMPLATES: Template[] = [
     tagline: "Lavender and raspberry blooms.",
     tags: ["lavender", "raspberry", "floral", "party"],
     price: 999,
+    // our own arrangement of the public-domain melody (see CREDITS.md)
+    music: { src: "/audio/birthday-celebration.m4a", title: "Happy Birthday (celebration)" },
     theme: { bg: "#F3E8FF", bg2: "#FFE8F0", ink: "#3B1B5A", accent: "#D6336C", muted: "#7A5A9A", ornament: "floral", headingFont: "script" },
   },
   {
@@ -476,6 +492,7 @@ export const TEMPLATES: Template[] = [
   // artwork with the words laid out the same way. The owner is arranging licences from the original designers (see CREDITS.md).
   {
     id: "lifafa-birthday",
+    opening: "envelope",
     motion: "rise",
     concept: "print",
     name: "Lifafa",
@@ -483,11 +500,14 @@ export const TEMPLATES: Template[] = [
     tagline: "A lace-edged card tucked into a maroon envelope, sealed with gold wax.",
     tags: ["birthday", "elegant", "adult", "maroon", "cream", "gold", "wax seal", "envelope", "lace"],
     price: 1499,
+    // our own arrangement of the public-domain melody (see CREDITS.md)
+    music: { src: "/audio/birthday-piano.m4a", title: "Happy Birthday (piano waltz)" },
     print: { art: "lifafa", box: { top: 5, bottom: 30, x: 15 }, title: "#5B3A2E", caps: "#4A3A2E", body: "#5B4A3E", titleFont: "serif" },
     theme: { bg: "#5A1420", bg2: "#3E0C15", ink: "#4A3A2E", accent: "#B08A3E", muted: "#7A6656", ornament: "none", headingFont: "script" },
   },
   {
     id: "gubbara-birthday",
+    opening: "bloom",
     motion: "sparkle",
     concept: "print",
     name: "Gubbara",
@@ -495,11 +515,14 @@ export const TEMPLATES: Template[] = [
     tagline: "Blush and gold balloons, butterflies and roses around a soft pink arch.",
     tags: ["birthday", "girl", "pink", "blush", "gold", "balloons", "butterflies", "floral", "arch"],
     price: 1499,
+    // our own arrangement of the public-domain melody (see CREDITS.md)
+    music: { src: "/audio/birthday-musicbox.m4a", title: "Happy Birthday (music box)" },
     print: { art: "gubbara", box: { top: 15, bottom: 13, x: 19 }, title: "#D2697E", caps: "#8A5A62", body: "#7A4A52" },
     theme: { bg: "#FBE3E6", bg2: "#F7D3D9", ink: "#7A4A52", accent: "#D2697E", muted: "#9A6E75", ornament: "none", headingFont: "script" },
   },
   {
     id: "neelam-birthday",
+    opening: "fold",
     motion: "rise",
     concept: "print",
     name: "Neelam",
@@ -507,11 +530,14 @@ export const TEMPLATES: Template[] = [
     tagline: "Navy watercolour roses and a fine gold frame on crisp white.",
     tags: ["birthday", "elegant", "adult", "navy", "blue", "white", "gold", "floral", "minimal"],
     price: 1499,
+    // our own arrangement of the public-domain melody (see CREDITS.md)
+    music: { src: "/audio/birthday-piano.m4a", title: "Happy Birthday (piano waltz)" },
     print: { art: "neelam", box: { top: 15, bottom: 15, x: 17 }, title: "#1B1B1B", caps: "#1F2A44", body: "#2C2C2C" },
     theme: { bg: "#FFFFFF", bg2: "#F4F6FA", ink: "#1F2A44", accent: "#B8952E", muted: "#5A6378", ornament: "none", headingFont: "script" },
   },
   {
     id: "pehli-birthday",
+    opening: "bloom",
     motion: "sparkle",
     concept: "print",
     name: "Pehli Salgirah",
@@ -519,11 +545,14 @@ export const TEMPLATES: Template[] = [
     tagline: "A first-birthday card with your baby's photo, pink balloons, roses and a gold number.",
     tags: ["birthday", "first birthday", "1st", "baby", "girl", "pink", "gold", "balloons", "photo", "floral", "kids"],
     price: 1499,
+    // our own arrangement of the public-domain melody (see CREDITS.md)
+    music: { src: "/audio/birthday-musicbox.m4a", title: "Happy Birthday (music box)" },
     print: { art: "pehli", box: { top: 6, bottom: 6, x: 9 }, title: "#D86F86", caps: "#A3707A", body: "#7A5A60", photo: "circle" },
     theme: { bg: "#FFF6EE", bg2: "#FDEBE4", ink: "#7A5A60", accent: "#D86F86", muted: "#A3707A", ornament: "none", headingFont: "script" },
   },
   {
     id: "gulnaar-aqiqah",
+    opening: "veil",
     motion: "rise",
     concept: "print",
     name: "Gulnaar",
@@ -536,6 +565,7 @@ export const TEMPLATES: Template[] = [
   },
   {
     id: "dua-aqiqah",
+    opening: "split",
     motion: "rise",
     concept: "print",
     name: "Dua",
@@ -548,6 +578,7 @@ export const TEMPLATES: Template[] = [
   },
   {
     id: "bhalu-aqiqah",
+    opening: "float",
     motion: "rise",
     concept: "print",
     name: "Bhalu",
@@ -560,6 +591,7 @@ export const TEMPLATES: Template[] = [
   },
   {
     id: "saadgi-engagement",
+    opening: "settle",
     motion: "rise",
     concept: "print",
     name: "Saadgi",
@@ -572,6 +604,7 @@ export const TEMPLATES: Template[] = [
   },
   {
     id: "zaitoon-engagement",
+    opening: "doors",
     motion: "rise",
     concept: "print",
     name: "Zaitoon",
@@ -584,6 +617,7 @@ export const TEMPLATES: Template[] = [
   },
   {
     id: "surkh-nikkah",
+    opening: "curtain",
     motion: "rise",
     concept: "print",
     name: "Surkh",
