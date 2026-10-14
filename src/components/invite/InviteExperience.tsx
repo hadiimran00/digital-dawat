@@ -10,6 +10,8 @@ import { burst, type TapFx } from "@/lib/tapFx";
 import { ArtHero, AURORA_TEXT, GOLD, InviteCard, TAPE_GLASS } from "./InviteCard";
 import { Families } from "./Families";
 import { AuroraGlow, ModernCover, VideoGate } from "./ModernCover";
+import { PrintArt } from "./PrintArt";
+import { PrintText, onColor, printBox, readable } from "./PrintCard";
 import { Ornament, isTallOrnament } from "./Ornament";
 import { Rsvp } from "./Rsvp";
 import { ScratchReveal } from "./ScratchReveal";
@@ -97,7 +99,8 @@ const SCENES: { orn: "jharokha" | "rosette" | "jali" | "bars" | "floral" | "cres
 /** Fixed background "scenes" that cross-fade as the guest scrolls. Our own graphics, easy to swap for photos later. */
 const PHOTO_POS = ["50% 18%", "50% 58%", "15% 40%", "85% 40%", "50% 90%", "50% 35%"];
 
-function SceneBackdrop({ scene, t, photo, photos = [], active = "", look, tape }: { scene: number; t: Template["theme"]; photo?: string; photos?: string[]; active?: string; look: Look; tape: boolean }) {
+function SceneBackdrop({ scene, t, photo, photos = [], active = "", look, tape, print }: { scene: number; t: Template["theme"]; photo?: string; photos?: string[]; active?: string; look: Look; tape: boolean; print?: Template["print"] }) {
+  if (look.stage === "print" && print) return <PrintArt art={print.art} className="z-0" />;
   if (look.stage === "aurora") return <div aria-hidden className="pointer-events-none absolute inset-0 z-0"><AuroraGlow /></div>;
   if (look.stage === "frame") return <div aria-hidden className="pointer-events-none absolute inset-0 z-0" style={{ background: `${photo ? `url(${photo}) 50% 50% / cover no-repeat, ` : ""}${t.bg}` }} />;
   if (look.stage === "paper") {
@@ -218,7 +221,7 @@ interface Look {
   /** extra class on gold lettering (the moving shine) */
   shine: string;
   /** what sits behind the screens: section photos, moving coloured light, or plain paper */
-  stage: "photo" | "aurora" | "paper" | "frame";
+  stage: "photo" | "aurora" | "paper" | "frame" | "print";
   /** star dividers and other traditional ornaments (off for the modern looks, which use plain hairlines) */
   ornate: boolean;
 }
@@ -227,7 +230,40 @@ const CAPS = "var(--nf-caps), var(--nf-display), Georgia, serif";
 /** Gold with a bright band that slowly sweeps across (see .foil-shine). */
 const SHINE = "linear-gradient(110deg, #b98a35 0%, #e8c06a 28%, #fff6d8 42%, #e8c06a 56%, #b98a35 100%)";
 const IVORY_FOIL = "linear-gradient(110deg, #6b3d22 0%, #9a6b3c 30%, #d9b27a 44%, #9a6b3c 58%, #6b3d22 100%)";
-const LOOKS: Record<Concept, Look> = {
+/**
+ * Printed-card designs: the card's illustrated artwork stays behind every screen; panels are near-white (or the
+ * card's own dark colour) and every colour comes from CSS variables set from the template (see printVars).
+ */
+const PRINT_LOOK = (dark: boolean): Look => ({
+  dark,
+  panel: "rounded-[22px] border border-(--p-line) bg-(--p-panel) text-(--p-ink) shadow-[0_12px_40px_rgba(0,0,0,0.14)] backdrop-blur-sm",
+  ink: "text-(--p-ink)", muted: "text-(--p-ink)/75", cell: "rounded-xl border-(--p-line) bg-(--p-panel)",
+  title: "text-center text-[12px] font-semibold uppercase tracking-[0.3em] text-(--p-accent) [text-wrap:balance]", titleStyle: { fontFamily: CAPS },
+  names: { fontFamily: "var(--nf-script), cursive", fontWeight: 400, color: "var(--p-title)" },
+  greet: { fontFamily: "var(--nf-script), cursive", fontWeight: 400, color: "var(--p-title)" },
+  solid: "press inline-flex min-h-11 items-center gap-1.5 rounded-full px-5 text-[11px] font-semibold uppercase tracking-[0.2em] shadow-sm",
+  solidStyle: () => ({ background: "var(--p-accent)", color: "var(--p-on-accent)", fontFamily: CAPS }),
+  ghost: "press inline-flex min-h-11 items-center gap-1.5 rounded-full border border-(--p-line) bg-(--p-panel) px-5 text-[11px] font-semibold uppercase tracking-[0.2em] text-(--p-ink) [font-family:var(--nf-caps)]",
+  chip: "press inline-flex min-h-11 items-center rounded-full border border-(--p-line) bg-(--p-panel) px-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-(--p-ink) [font-family:var(--nf-caps)]",
+  label: "text-[11px] font-semibold uppercase tracking-[0.25em] text-(--p-accent) [font-family:var(--nf-caps)]",
+  align: "start", scrim: ["rgba(0,0,0,0)", "rgba(0,0,0,0)"],
+  pill: "rounded-full bg-(--p-panel) px-4 text-[11px] text-(--p-ink) shadow-md",
+  prose: "font-display text-[17px] italic leading-relaxed text-(--p-ink)/90",
+  frame: null, tagline: "", shine: "", stage: "print", ornate: false,
+});
+
+/** The colours a printed-card design hands to its screens, adjusted so small text keeps 4.5:1 on the panels. */
+function printVars(tpl: Template): React.CSSProperties {
+  const p = tpl.print!;
+  const panel = p.dark ? tpl.theme.bg2 : "#ffffff";
+  const accent = readable(tpl.theme.accent, panel);
+  return {
+    "--p-panel": `${panel}eb`, "--p-line": `${tpl.theme.accent}66`, "--p-ink": readable(p.dark ? tpl.theme.ink : p.body, panel),
+    "--p-accent": accent, "--p-on-accent": onColor(accent), "--p-title": readable(p.title, panel, 3),
+  } as React.CSSProperties;
+}
+
+const LOOKS: Record<Exclude<Concept, "print">, Look> = {
   tape: {
     dark: true,
     panel: `rounded-md border ${TAPE_GLASS}`,
@@ -512,12 +548,15 @@ export function InviteExperience({
   const concept = template.concept;
   const scenic = !!concept; // full-screen photo scenes, one section per screen
   const tape = concept === "tape";
-  const look = LOOKS[concept ?? "tape"];
+  const print = concept === "print" ? template.print : undefined;
+  const look = print ? PRINT_LOOK(!!print.dark) : LOOKS[(concept === "print" ? undefined : concept) ?? "tape"];
+  /** non-couple occasions (birthdays, aqiqah) get their own wording where the wedding looks speak of a couple */
+  const coupleCat = !["birthday", "aqiqah", "baby-shower", "eid"].includes(template.category);
   const gated = concept === "royal" || concept === "ivory"; // doors or curtains instead of the sliding cover
   const modern = concept === "editorial" || concept === "aurora" || concept === "monogram"; // their own opening screens
   const videoGate = concept === "embossed" || concept === "garden"; // doors / a pearl curtain that open in a short video
   /** light backgrounds (paper, the embossed arch): dark lettering, no photo shadows */
-  const onPaper = look.stage === "paper" || look.stage === "frame";
+  const onPaper = look.stage === "paper" || look.stage === "frame" || look.stage === "print";
   const [opened, setOpened] = useState(startOpen);
   const [gone, setGone] = useState(startOpen);
   const [guest, setGuest] = useState("");
@@ -545,6 +584,7 @@ export function InviteExperience({
     : concept === "embossed" ? { background: "#9C8462", color: "#FBF7F0" }
     : concept === "garden" ? { background: "#7F9A88", color: "#FFFFFF" }
     : concept === "aurora" ? { backgroundImage: "linear-gradient(135deg, #FFD1E8, #C9B8FF)", color: "#0B0B16" }
+    : print ? { background: "var(--p-accent)", color: "var(--p-on-accent)" }
     : { backgroundImage: GOLD, color: "#3a0c12" };
   const scratchKind: "static" | "foil" | null = tape ? "static" : concept === "editorial" || concept === "aurora" || concept === "embossed" || concept === "garden" ? null : scenic || template.motion === "scratch" ? "foil" : null;
   const fx: TapFx = tape ? "flash" : concept === "royal" ? "sparkles" : concept === "ivory" ? "petals" : template.motion === "sparkle" ? "sparkles" : "petals";
@@ -646,6 +686,23 @@ export function InviteExperience({
     return () => io.disconnect();
   }, [scenic]);
 
+  // printed cards: on a short screen the opening card's words may need more room than there is; shrink them to fit
+  useEffect(() => {
+    const box = print && scroller.current?.querySelector<HTMLElement>("[data-section='cover'] [data-print-text]");
+    const inner = box?.firstElementChild as HTMLElement | null | undefined;
+    if (!box || !inner) return;
+    const fit = () => {
+      box.style.setProperty("--print-fit", "1");
+      const s = Math.min(1, box.clientHeight / Math.max(1, inner.offsetHeight));
+      box.style.setProperty("--print-fit", String(Math.floor(s * 100) / 100));
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(box);
+    document.fonts?.ready.then(fit).catch(() => {});
+    return () => ro.disconnect();
+  }, [print, content]);
+
   const hintRef = useRef<HTMLElement>(null);
   const [hintAway, setHintAway] = useState(false);
   const idle = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -714,8 +771,8 @@ export function InviteExperience({
   const stamp = new Date(`${ordered[0].date}T00:00:00`).toLocaleDateString("en-GB", { month: "short", day: "2-digit", year: "numeric" }).toUpperCase().replace(/(\w+) (\d+) (\d+)/, "$1 $2 $3");
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-background" dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"} onPointerDown={onTap}>
-      {scenic && <SceneBackdrop scene={scene} t={t} photo={concept === "embossed" ? template.backdrop?.src : backdrop} photos={scenePhotos} active={bgPhoto} look={look} tape={tape} />}
+    <div className="relative h-full w-full overflow-hidden bg-background" dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"} onPointerDown={onTap} style={print ? printVars(template) : undefined}>
+      {scenic && <SceneBackdrop scene={scene} t={t} photo={concept === "embossed" ? template.backdrop?.src : backdrop} photos={scenePhotos} active={bgPhoto} look={look} tape={tape} print={print} />}
 
       <div
         ref={scroller}
@@ -729,6 +786,14 @@ export function InviteExperience({
             <Screen tape scene={0} section="cover" framed={false}>
               <div className="mx-auto w-full overflow-hidden rounded-md" style={{ maxWidth: "calc((100cqh - 10.5rem - var(--frame-top, 0px) - var(--frame-bottom, 0px)) * 0.5625)" }}><InviteCard template={template} content={content} chrome={false} clear={!!backdrop} /></div>
             </Screen>
+          ) : print ? (
+            // the printed card itself: the words in the artwork's clear space, the artwork behind (SceneBackdrop)
+            <div data-section="cover" data-scene={0} className="relative -mx-5 h-[100cqh] snap-start">
+              <div className="absolute inset-0" style={{ containerType: "inline-size" }}>
+                <PrintText template={template} content={content} className="absolute"
+                  style={printBox(print, "calc(var(--frame-top, 0px) + 0.5rem)", "calc(var(--frame-bottom, 0px) + 3rem)")} />
+              </div>
+            </div>
           ) : concept === "royal" || concept === "ivory" ? (
             <>
               <Screen tape scene={0} section="cover" framed={false} align={look.align}>
@@ -1022,14 +1087,18 @@ export function InviteExperience({
             </Screen>
           ) : (
             <Screen tape scene={4} section="couple" framed={false} align={look.align} photo={sc.couple}>
-              <SceneTitle look={look} concept={concept!}>{ur ? "دولہا دلہن" : "The couple"}</SceneTitle>
+              <SceneTitle look={look} concept={concept!}>
+                {template.category === "birthday" ? (ur ? "سالگرہ مبارک" : "The birthday star")
+                  : template.category === "aqiqah" ? (ur ? "ہماری ننھی نعمت" : "Our little blessing")
+                  : ur ? "دولہا دلہن" : "The couple"}
+              </SceneTitle>
               <figure className={`mx-auto mt-4 overflow-hidden ${onPaper ? "w-[86%]" : look.dark ? "w-[64%] border-[3px] shadow-2xl" : "w-[56%] border-[3px] shadow-2xl"}`}
                 style={look.stage === "paper" ? undefined : concept === "embossed" ? { borderTopLeftRadius: "50% 24%", borderTopRightRadius: "50% 24%" } : { borderColor: t.accent, borderTopLeftRadius: "50% 28%", borderTopRightRadius: "50% 28%" }}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- static export, photo comes from our storage */}
                 <img src={couple} alt={ur ? "دولہا دلہن کی تصویر" : `Photo of ${names}`} className="aspect-[4/5] w-full object-cover" />
               </figure>
               <p className="mt-4 pb-1 text-center text-4xl" style={ur ? { fontFamily: font } : look.dark || onPaper ? look.names : { ...look.names, color: "#fbf1dc", textShadow: "0 2px 12px rgba(0,0,0,.7)" }}>{names}</p>
-              <p className={`text-center text-sm italic ${onPaper ? look.muted : look.dark ? "text-white/85" : "text-white"}`} style={{ fontFamily: "var(--nf-display), Georgia, serif", textShadow: onPaper ? undefined : "0 1px 6px rgba(0,0,0,.6)" }}>Two hearts, one promise</p>
+              <p className={`text-center text-sm italic ${onPaper ? look.muted : look.dark ? "text-white/85" : "text-white"}`} style={{ fontFamily: "var(--nf-display), Georgia, serif", textShadow: onPaper ? undefined : "0 1px 6px rgba(0,0,0,.6)" }}>{coupleCat ? "Two hearts, one promise" : template.category === "aqiqah" ? "Alhamdulillah" : ""}</p>
             </Screen>
           ))}
 
@@ -1045,7 +1114,7 @@ export function InviteExperience({
                       {!tape && <span aria-hidden className="grid size-9 shrink-0 place-items-center rounded-full" style={iconDisc}><Shirt className="size-4" /></span>}
                       <span>
                         <span className={`block ${look.label}`} style={tape ? { color: t.accent } : undefined}>{e.title}</span>
-                        <span className={`block font-display text-[15px] ${look.dark ? "text-white/90" : "text-[#4a1c20]/90"}`}>{e.dressCode}</span>
+                        <span className={`block font-display text-[15px] ${look.dark ? "text-white/90" : print ? "text-(--p-ink)" : "text-[#4a1c20]/90"}`}>{e.dressCode}</span>
                       </span>
                     </li>
                   ))}
@@ -1060,7 +1129,7 @@ export function InviteExperience({
                 {concept === "royal" && <Finial />}<PanelFrame look={look} />
                 {tape && <Tag tape label="Q & A" accent={t.accent} />}
                 {tape ? <TapeTitle>{ur ? "عام سوالات" : "A few questions"}</TapeTitle> : <SceneTitle look={look} concept={concept!}>{ur ? "عام سوالات" : "A few questions"}</SceneTitle>}
-                <div className={`mt-4 divide-y border-t ${look.dark ? "divide-white/15 border-white/15" : "divide-[#4a1c20]/15 border-[#4a1c20]/15"}`}>
+                <div className={`mt-4 divide-y border-t ${look.dark ? "divide-white/15 border-white/15" : print ? "divide-(--p-line) border-(--p-line)" : "divide-[#4a1c20]/15 border-[#4a1c20]/15"}`}>
                   {content.faq.map((f, i) => (
                     <details key={i} className="group py-3">
                       <summary className="flex min-h-8 cursor-pointer list-none items-center gap-3 text-sm font-medium">
@@ -1070,7 +1139,7 @@ export function InviteExperience({
                         <span className="flex-1">{f.q}</span>
                         <span aria-hidden className={`grid size-6 shrink-0 place-items-center border text-xs transition-transform duration-200 ease-out group-open:rotate-45 ${tape ? "rounded-sm border-white/50 font-mono" : "rounded-full border-current/40"}`}>+</span>
                       </summary>
-                      <p className={`mt-2 pl-10 font-display text-[15px] ${look.dark ? "text-white/85" : "text-[#4a1c20]/85"}`}>{f.a}</p>
+                      <p className={`mt-2 pl-10 font-display text-[15px] ${look.dark ? "text-white/85" : print ? "text-(--p-ink)" : "text-[#4a1c20]/85"}`}>{f.a}</p>
                     </details>
                   ))}
                 </div>
@@ -1130,7 +1199,10 @@ export function InviteExperience({
               </div>
             )}
           </Screen>
-          <p className={`pb-[calc(5rem+var(--frame-bottom,0px))] text-center text-xs ${onPaper ? look.muted : look.dark ? "text-white/70" : "text-white [text-shadow:0_1px_4px_rgba(0,0,0,.6)]"}`}>Made with Digital Dawat</p>
+          <p className={`pb-[calc(5rem+var(--frame-bottom,0px))] text-center text-xs ${print ? "" : onPaper ? look.muted : look.dark ? "text-white/70" : "text-white [text-shadow:0_1px_4px_rgba(0,0,0,.6)]"}`}>
+            {/* the printed cards' artwork can be dark or busy at the very bottom: the credit sits on a small panel */}
+            {print ? <span className="rounded-full bg-(--p-panel) px-3 py-1 text-(--p-ink)">Made with Digital Dawat</span> : "Made with Digital Dawat"}
+          </p>
         </div>
         ) : (
         <div className="mx-auto max-w-md space-y-6 px-4 pb-[calc(1.5rem+var(--frame-bottom,0px))] pt-[calc(1.5rem+var(--frame-top,0px))]">
@@ -1277,7 +1349,9 @@ export function InviteExperience({
       {scenic && !tape && opened && !atEnd && (
         <button ref={hintRef as React.RefObject<HTMLButtonElement>} type="button" tabIndex={-1} aria-hidden onClick={() => scroller.current?.scrollBy({ top: scroller.current.clientHeight * 0.8, behavior: reducedMotion() ? "auto" : "smooth" })}
           className={`press absolute bottom-[calc(0.5rem+var(--frame-bottom,0px))] left-1/2 z-10 grid min-h-11 min-w-11 -translate-x-1/2 place-items-center outline-none transition-opacity duration-300 ${hintAway ? "pointer-events-none opacity-0" : ""}`}>
-          {concept === "embossed" || concept === "garden" ? (
+          {print ? (
+            <span className="scroll-nudge flex items-center gap-1 rounded-full bg-(--p-panel) px-3 py-1 text-[11px] text-(--p-ink) shadow-md">{ur ? "نیچے" : "Scroll"}<ChevronDown className="size-3.5" /></span>
+          ) : concept === "embossed" || concept === "garden" ? (
             <span className="scroll-nudge flex items-center gap-1 rounded-full bg-[#FBF7F0]/95 px-3 py-1 text-[11px] text-[#6E5A43] shadow-md">{ur ? "نیچے" : "Scroll"}<ChevronDown className="size-3.5" /></span>
           ) : (
             <span className={`scroll-nudge grid size-8 place-items-center rounded-full border ${concept === "editorial" ? "border-[#141414] bg-[#F5F1EA]/90 text-[#141414]" : concept === "aurora" ? "border-white/40 bg-white/10 text-white backdrop-blur-md" : concept === "monogram" ? "border-[#B08D57]/70 bg-[#FAF8F3]/90 text-[#1F2A28]" : look.dark ? "border-[#e8c06a]/80 bg-[#2a0a0e]/60 text-[#e8c06a]" : "border-[#a8783a]/70 bg-[#fbf6ee]/80 text-[#7a2a2e]"}`}>
@@ -1356,7 +1430,25 @@ export function InviteExperience({
         <VideoGate poster={template.gate} video={template.gateVideo} opened={opened} onOpen={open} hello={hello} accent={t.accent} />
       )}
 
-      {!gone && !gated && !modern && !videoGate && (
+      {!gone && print && (
+        // the printed card's opening: its artwork, the names, and one button
+        <div data-open={opened} className="cover absolute inset-0 z-20 overflow-hidden">
+          <PrintArt art={print.art} />
+          <div className="relative flex h-full flex-col items-center justify-center gap-3 px-12 text-center" style={{ containerType: "inline-size" }}>
+            {hello && <p className="text-3xl leading-tight" style={ur ? { fontFamily: font, color: print.title } : { fontFamily: "var(--nf-script), cursive", color: print.title }}>{hello}</p>}
+            <p className="text-[12px] uppercase tracking-[0.35em]" style={{ fontFamily: CAPS, color: print.caps }}>{ur ? "آپ مدعو ہیں" : hello ? "you are invited" : "You're invited"}</p>
+            <p className="text-[min(14cqw,3.6rem)] leading-[1.1] [overflow-wrap:anywhere]" style={{ fontFamily: ur ? font : "var(--nf-script), cursive", color: print.title }}>
+              {content.host1}{content.host2 && <><span className="block text-[0.5em]">&amp;</span>{content.host2}</>}
+            </p>
+            <p className="text-[12px] uppercase tracking-[0.3em]" style={{ fontFamily: CAPS, color: print.caps }}>{ordered[0]?.title}</p>
+            <button type="button" onClick={open} className={`${look.solid} mt-4 min-h-12 px-7 text-xs shadow-xl`} style={look.solidStyle(t.accent, t.bg)}>
+              {ur ? "کھولنے کے لیے ٹیپ کریں" : "Tap to open"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!gone && !gated && !modern && !videoGate && !print && (
         <div
           data-open={opened}
           className={`cover absolute inset-0 z-20 flex flex-col items-center text-center ${coverArt || tape ? (hello ? "justify-end pb-20" : "justify-end pb-28") : "justify-center"}`}

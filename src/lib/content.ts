@@ -17,6 +17,7 @@ const EVENT_KINDS: Record<string, { en: string; ur: string; dressEn: string; dre
   engagement: { en: "Engagement", ur: "منگنی", dressEn: "Semi-formal", dressUr: "نیم رسمی" },
   eid: { en: "Eid Gathering", ur: "عید ملن", dressEn: "", dressUr: "" },
   birthday: { en: "Birthday Celebration", ur: "سالگرہ", dressEn: "", dressUr: "" },
+  aqiqah: { en: "Aqiqah", ur: "عقیقہ", dressEn: "", dressUr: "" },
   "baby-shower": { en: "Baby Shower", ur: "بے بی شاور", dressEn: "", dressUr: "" },
 };
 
@@ -58,6 +59,20 @@ export function defaultContent(category: CategoryId, language: "en" | "ur" = "en
         ]
       : [blankEvent(category, ur, addDays(d0), "19:00")];
 
+  if (category === "aqiqah") {
+    return {
+      ...defaultContent("birthday", language),
+      bismillah: true,
+      headline: ur ? "اللہ کے فضل و کرم سے" : "With the blessings of Allah",
+      host1: ur ? "زارا فاطمہ" : "Zara Fatima",
+      family1: ur ? "مسٹر اور مسز حمزہ شاہد" : "Mr. & Mrs. Hamza Shahid",
+      message: ur
+        ? "ہماری بیٹی کی نعمت پر اللہ کا شکر ادا کرنے میں ہمارے ساتھ شریک ہوں۔"
+        : "Join us as we give thanks to Allah for the gift of our daughter.",
+      events: [blankEvent("aqiqah", ur, addDays(d0), "13:00")],
+      closing: ur ? "آپ کی دعاؤں کے منتظر" : "Your duas mean the world to us",
+    };
+  }
   return {
     language,
     bismillah: couple && category !== "engagement" && category !== "dholki",

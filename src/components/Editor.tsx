@@ -198,7 +198,9 @@ export function Editor() {
 
   const here = `/create?t=${template.id}`;
   // designs whose background is the design itself: no cover photo or event photos
-  const photoless = template.concept === "aurora" || template.concept === "monogram" || template.concept === "embossed" || template.concept === "garden";
+  const photoless = template.concept === "aurora" || template.concept === "monogram" || template.concept === "embossed" || template.concept === "garden"
+    || (template.concept === "print" && !template.print?.photo);
+  const forOne = template.category === "birthday" || template.category === "aqiqah" || template.category === "baby-shower";
   const hasTimeline = template.concept === "embossed" || template.concept === "royal" || template.concept === "ivory";
   /** remove an item from a list, keeping a one-tap undo */
   type ListKey = "events" | "faq" | "members1" | "members2" | "timeline";
@@ -267,10 +269,11 @@ export function Editor() {
           <div className="space-y-4 rounded-2xl border border-line bg-card p-4">
             {/* Roshni (light) and Mohr (monogram) are designed without a cover photo */}
             {!photoless && <div data-preview="cover"><PhotoField label="Cover photo" next={here}
-              hint={template.concept === "editorial" ? "Shown at the top of the opening page." : template.concept ? "Shown behind the whole invitation." : "Shown at the top of the card."}
+              hint={template.concept === "editorial" ? "Shown at the top of the opening page." : template.concept === "print" ? "Shown in the round frame on the card." : template.concept ? "Shown behind the whole invitation." : "Shown at the top of the card."}
               value={content.coverPhoto} fallback={template.backdrop?.src ?? template.art?.src} onChange={(url) => set({ coverPhoto: url })} /></div>}
             {err("coverPhoto")}
-            <div data-preview="couple"><PhotoField label="Couple photo" next={here} hint="A portrait of the two of you (or the host)."
+            <div data-preview="couple"><PhotoField label={forOne ? "Portrait photo" : "Couple photo"} next={here}
+              hint={forOne ? "A portrait of the birthday star or your little one, shown on its own screen." : "A portrait of the two of you (or the host)."}
               value={content.couplePhoto} fallback={template.sample?.couple} onChange={(url) => set({ couplePhoto: url })} /></div>
             {err("couplePhoto")}
           </div>
@@ -355,7 +358,7 @@ export function Editor() {
                 <input className="field" inputMode="url" value={ev.mapUrl} onChange={(e) => setEvent(i, { mapUrl: e.target.value })} placeholder="https://maps.app.goo.gl/…" />
                 {err(`events.${i}.mapUrl`)}
               </label>
-              {template.concept && !photoless && (
+              {template.concept && template.concept !== "print" && !photoless && (
                 <div className="sm:col-span-2">
                   <PhotoField label="Event photo (optional)" next={here} hint={template.concept === "editorial" ? "Shown above this event, like a magazine photo." : "Shown behind this event's screen."}
                     value={ev.photo} onChange={(url) => setEvent(i, { photo: url })} />

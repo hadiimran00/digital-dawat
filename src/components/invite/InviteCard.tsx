@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import type { Template } from "@/lib/templates";
 import { BISMILLAH, eventsDateText, eventsTitle, formatEventTime, type InviteContent } from "@/lib/content";
 import { Ornament, isTallOrnament } from "./Ornament";
+import { PrintCard } from "./PrintCard";
 
 /** Soft pink, violet and amber: the colours of the night-glow look. */
 export const AURORA_TEXT = "linear-gradient(100deg, #FFD1E8 0%, #C9B8FF 35%, #FFFFFF 50%, #C9B8FF 65%, #FFE0B0 100%)";
@@ -45,6 +46,7 @@ export function ArtHero({ art, bg }: { art: NonNullable<Template["art"]>; bg: st
  */
 /** `clear` lets a photo behind the card show through (used when the template has a full-bleed backdrop). */
 export function InviteCard({ template, content, chrome = true, clear = false }: { template: Template; content: InviteContent; chrome?: boolean; clear?: boolean }) {
+  if (template.concept === "print" && template.print) return <PrintCard template={template} content={content} />;
   const t = template.theme;
   const ur = content.language === "ur";
   const e = content.events[0];

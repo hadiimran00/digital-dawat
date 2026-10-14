@@ -106,3 +106,23 @@ frames were upscaled 4x with Real-ESRGAN x4plus (official Qualcomm AI Hub ONNX e
 | `public/art/qabool-couple.webp` | the same with the illustrated couple (13 s), text removed |
 | `public/art/qabool-bismillah.webp` | the Bismillah calligraphy, cut out on transparency |
 | `public/audio/qabool-song.m4a` | the video's soundtrack, copied without re-encoding |
+
+## Printed-card designs (2026-10-14): LICENCES PENDING
+
+Ten designs recreated from the most-saved Pinterest invitations of their kind (save counts read from each pin's page on
+2026-10-14). No image was downloaded or copied: the artwork is our own vector drawing (`src/components/invite/PrintArt.tsx`),
+with the layout, colours and motifs following the original. The site owner asked for exact copies and stated on 2026-10-14
+that they will obtain licences from the original designers. **Get those licences (or written permission) before publishing.**
+
+| Design | Pinterest pin | Saves |
+|---|---|---|
+| Lifafa (birthday) | https://www.pinterest.com/pin/4362930885217569/ | 3,381 |
+| Gubbara (birthday) | https://www.pinterest.com/pin/11751649024015398/ | 2,226 |
+| Neelam (birthday) | https://www.pinterest.com/pin/4714774603102856/ | 1,200 |
+| Pehli Salgirah (birthday) | https://www.pinterest.com/pin/78390849761474558/ | 848 |
+| Gulnaar (aqiqah) | https://www.pinterest.com/pin/10625749120107251/ | 724 |
+| Dua (aqiqah) | https://www.pinterest.com/pin/121315783710415070/ | 471 |
+| Bhalu (aqiqah) | https://www.pinterest.com/pin/329607266504638269/ | 260 |
+| Saadgi (engagement) | https://www.pinterest.com/pin/19914423348354916/ | 1,858 |
+| Zaitoon (engagement) | https://www.pinterest.com/pin/242068548717909594/ | 1,587 |
+| Surkh (nikkah) | https://www.pinterest.com/pin/69805862969725117/ | 2,841 |

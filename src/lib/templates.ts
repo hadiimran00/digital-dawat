@@ -8,6 +8,7 @@ export type CategoryId =
   | "engagement"
   | "eid"
   | "birthday"
+  | "aqiqah"
   | "baby-shower";
 
 export const CATEGORIES: { id: CategoryId; label: string; urdu: string }[] = [
@@ -20,12 +21,33 @@ export const CATEGORIES: { id: CategoryId; label: string; urdu: string }[] = [
   { id: "engagement", label: "Engagement", urdu: "منگنی" },
   { id: "eid", label: "Eid", urdu: "عید" },
   { id: "birthday", label: "Birthday", urdu: "سالگرہ" },
+  { id: "aqiqah", label: "Aqiqah", urdu: "عقیقہ" },
   { id: "baby-shower", label: "Baby Shower", urdu: "بے بی شاور" },
 ];
 
 export type VideoStyle = "rise" | "envelope" | "scratch" | "sparkle";
 
 export type Ornament = "none" | "bars" | "arch" | "jharokha" | "rosette" | "jali" | "geometric" | "floral" | "crescent" | "confetti";
+
+export type PrintArtId = "lifafa" | "gubbara" | "neelam" | "pehli" | "gulnaar" | "teddy" | "bhalu" | "saadgi" | "zaitoon" | "surkh";
+
+export interface PrintSpec {
+  art: PrintArtId;
+  /** where the words sit, in % of the card: top and bottom edges, and the inset from each side */
+  box: { top: number; bottom: number; x: number; topW?: number; bottomW?: number };
+  // topW / bottomW: at least this much room (in % of the card's width) for artwork that grows with the width, such as
+  // a teddy at the top or the couple at the bottom, so the words clear it on tall phones as well as on the card
+  /** the big title (script), the small spaced capitals, and the body text */
+  title: string;
+  caps: string;
+  body: string;
+  /** the title's font: flowing script, or engraved serif capitals */
+  titleFont?: "script" | "serif";
+  /** a frame on the card for the customer's cover photo */
+  photo?: "circle";
+  /** the artwork is dark (light panels and lettering on the following screens) */
+  dark?: boolean;
+}
 
 export interface Template {
   id: string;
@@ -45,7 +67,9 @@ export interface Template {
    * "tape" = retro home video, "royal" = palace doors and maroon glass, "ivory" = curtains and frosted cream.
    * Modern looks: "editorial" = a magazine feature on paper, "aurora" = moving light behind glass, "monogram" = initials drawn in gold.
    */
-  concept?: "tape" | "royal" | "ivory" | "editorial" | "aurora" | "monogram" | "embossed" | "garden";
+  concept?: "tape" | "royal" | "ivory" | "editorial" | "aurora" | "monogram" | "embossed" | "garden" | "print";
+  /** "print": a printed-card design (illustrated artwork from PrintArt.tsx, the words laid out like the card) */
+  print?: PrintSpec;
   /** "garden": the Bismillah as calligraphy artwork (transparent image) instead of typeset text */
   bismillahArt?: string;
   /** "embossed": a short video of the closing doors opening, played when the guest taps open (the `gate` image is its first frame) */
@@ -448,6 +472,128 @@ export const TEMPLATES: Template[] = [
     scenes: { couple: "/art/qabool-couple.webp", closing: "/art/qabool-couple.webp" },
     theme: { bg: "#F6E9E8", bg2: "#F1E2E0", ink: "#4F5F57", accent: "#7F9A88", muted: "#6E7D74", ornament: "none", headingFont: "script" },
   },
+  // Printed-card designs: the most-saved Pinterest invitations of their kind (October 2026), redrawn as our own vector
+  // artwork with the words laid out the same way. The owner is arranging licences from the original designers (see CREDITS.md).
+  {
+    id: "lifafa-birthday",
+    motion: "rise",
+    concept: "print",
+    name: "Lifafa",
+    category: "birthday",
+    tagline: "A lace-edged card tucked into a maroon envelope, sealed with gold wax.",
+    tags: ["birthday", "elegant", "adult", "maroon", "cream", "gold", "wax seal", "envelope", "lace"],
+    price: 999,
+    print: { art: "lifafa", box: { top: 5, bottom: 30, x: 15 }, title: "#5B3A2E", caps: "#4A3A2E", body: "#5B4A3E", titleFont: "serif" },
+    theme: { bg: "#5A1420", bg2: "#3E0C15", ink: "#4A3A2E", accent: "#B08A3E", muted: "#7A6656", ornament: "none", headingFont: "script" },
+  },
+  {
+    id: "gubbara-birthday",
+    motion: "sparkle",
+    concept: "print",
+    name: "Gubbara",
+    category: "birthday",
+    tagline: "Blush and gold balloons, butterflies and roses around a soft pink arch.",
+    tags: ["birthday", "girl", "pink", "blush", "gold", "balloons", "butterflies", "floral", "arch"],
+    price: 999,
+    print: { art: "gubbara", box: { top: 15, bottom: 13, x: 19 }, title: "#D2697E", caps: "#8A5A62", body: "#7A4A52" },
+    theme: { bg: "#FBE3E6", bg2: "#F7D3D9", ink: "#7A4A52", accent: "#D2697E", muted: "#9A6E75", ornament: "none", headingFont: "script" },
+  },
+  {
+    id: "neelam-birthday",
+    motion: "rise",
+    concept: "print",
+    name: "Neelam",
+    category: "birthday",
+    tagline: "Navy watercolour roses and a fine gold frame on crisp white.",
+    tags: ["birthday", "elegant", "adult", "navy", "blue", "white", "gold", "floral", "minimal"],
+    price: 999,
+    print: { art: "neelam", box: { top: 15, bottom: 15, x: 17 }, title: "#1B1B1B", caps: "#1F2A44", body: "#2C2C2C" },
+    theme: { bg: "#FFFFFF", bg2: "#F4F6FA", ink: "#1F2A44", accent: "#B8952E", muted: "#5A6378", ornament: "none", headingFont: "script" },
+  },
+  {
+    id: "pehli-birthday",
+    motion: "sparkle",
+    concept: "print",
+    name: "Pehli Salgirah",
+    category: "birthday",
+    tagline: "A first-birthday card with your baby's photo, pink balloons, roses and a gold number.",
+    tags: ["birthday", "first birthday", "1st", "baby", "girl", "pink", "gold", "balloons", "photo", "floral", "kids"],
+    price: 999,
+    print: { art: "pehli", box: { top: 6, bottom: 6, x: 9 }, title: "#D86F86", caps: "#A3707A", body: "#7A5A60", photo: "circle" },
+    theme: { bg: "#FFF6EE", bg2: "#FDEBE4", ink: "#7A5A60", accent: "#D86F86", muted: "#A3707A", ornament: "none", headingFont: "script" },
+  },
+  {
+    id: "gulnaar-aqiqah",
+    motion: "rise",
+    concept: "print",
+    name: "Gulnaar",
+    category: "aqiqah",
+    tagline: "Pink watercolour blossoms, a butterfly and a little pram around a fine arch, with Bismillah.",
+    tags: ["aqiqah", "aqeeqah", "baby", "girl", "pink", "floral", "pram", "butterfly", "arch", "bismillah"],
+    price: 1499,
+    print: { art: "gulnaar", box: { top: 15, bottom: 17, x: 17 }, title: "#B8607A", caps: "#8A5F6C", body: "#6E5560" },
+    theme: { bg: "#FFFFFF", bg2: "#FBF1F4", ink: "#6E5560", accent: "#C77A92", muted: "#8A6F79", ornament: "none", headingFont: "script" },
+  },
+  {
+    id: "dua-aqiqah",
+    motion: "rise",
+    concept: "print",
+    name: "Dua",
+    category: "aqiqah",
+    tagline: "Bismillah in calligraphy on warm linen, with taupe balloons and teddy bears.",
+    tags: ["aqiqah", "aqeeqah", "baby", "neutral", "beige", "taupe", "balloons", "teddy", "bismillah", "boy", "girl"],
+    price: 1499,
+    print: { art: "teddy", box: { top: 12, bottom: 17, x: 13 }, title: "#6B5444", caps: "#6B5A4C", body: "#5C4B3E" },
+    theme: { bg: "#E8E1D6", bg2: "#DED5C7", ink: "#5C4B3E", accent: "#9C8268", muted: "#7E6D5E", ornament: "none", headingFont: "script" },
+  },
+  {
+    id: "bhalu-aqiqah",
+    motion: "rise",
+    concept: "print",
+    name: "Bhalu",
+    category: "aqiqah",
+    tagline: "A teddy floats in on balloons above a soft taupe arch, with hot-air balloons either side.",
+    tags: ["aqiqah", "aqeeqah", "baby", "boy", "neutral", "taupe", "teddy", "balloons", "hot air balloon", "arch"],
+    price: 1499,
+    print: { art: "bhalu", box: { top: 24, bottom: 9, x: 18, topW: 54 }, title: "#5E4636", caps: "#5E4A3C", body: "#4E3E33", titleFont: "serif" },
+    theme: { bg: "#F7F1EA", bg2: "#D9C3B3", ink: "#4E3E33", accent: "#8C6A55", muted: "#6E5A4C", ornament: "none", headingFont: "serif" },
+  },
+  {
+    id: "saadgi-engagement",
+    motion: "rise",
+    concept: "print",
+    name: "Saadgi",
+    category: "engagement",
+    tagline: "White and sage florals on a clean white card, with Bismillah in calligraphy.",
+    tags: ["engagement", "mangni", "minimal", "white", "sage", "green", "floral", "bismillah", "elegant"],
+    price: 1999,
+    print: { art: "saadgi", box: { top: 12, bottom: 17, x: 14 }, title: "#4A4A4A", caps: "#5A5A5A", body: "#4A4A4A" },
+    theme: { bg: "#FFFFFF", bg2: "#F6F7F3", ink: "#4A4A4A", accent: "#7D8F74", muted: "#6E6E6E", ornament: "none", headingFont: "script" },
+  },
+  {
+    id: "zaitoon-engagement",
+    motion: "rise",
+    concept: "print",
+    name: "Zaitoon",
+    category: "engagement",
+    tagline: "An olive-green arch with ivory lettering and white blossoms over the top.",
+    tags: ["engagement", "mangni", "olive", "green", "ivory", "arch", "floral", "rings", "bismillah"],
+    price: 1999,
+    print: { art: "zaitoon", box: { top: 12, bottom: 8, x: 15 }, title: "#F3EBD8", caps: "#EFE6D0", body: "#E9DFC8", dark: true },
+    theme: { bg: "#5C5A2E", bg2: "#4A4824", ink: "#F3EBD8", accent: "#D9C58E", muted: "#D8CDB0", ornament: "none", headingFont: "script" },
+  },
+  {
+    id: "surkh-nikkah",
+    motion: "rise",
+    concept: "print",
+    name: "Surkh",
+    category: "nikkah",
+    tagline: "Deep red roses on blush satin, with the bride and groom in silhouette.",
+    tags: ["nikkah", "red", "roses", "blush", "maroon", "couple", "bismillah", "romantic", "floral"],
+    price: 2499,
+    print: { art: "surkh", box: { top: 8, bottom: 20, x: 12, bottomW: 47 }, title: "#6E1622", caps: "#5A2A2E", body: "#4E2A2E" },
+    theme: { bg: "#F7E7E2", bg2: "#F0D9D2", ink: "#4E2A2E", accent: "#8E1B2A", muted: "#7A5257", ornament: "none", headingFont: "script" },
+  },
 ];
 
 export const getTemplate = (id: string) => TEMPLATES.find((t) => t.id === id);
@@ -467,6 +613,7 @@ const ALIASES: Record<string, string> = {
   valima: "walima", nikah: "nikkah", nikaah: "nikkah", barat: "baraat", baarat: "baraat",
   mehendi: "mehndi", mehandi: "mehndi", henna: "mehndi", mayun: "mehndi", mayoun: "mehndi",
   dholak: "dholki", mangni: "engagement", mangi: "engagement", salgira: "birthday", salgirah: "birthday",
+  aqeeqah: "aqiqah", aqeeqa: "aqiqah", aqiqa: "aqiqah", akika: "aqiqah", aqeqah: "aqiqah",
 };
 /** Every template has these, so they shouldn't narrow the results. */
 const EVERY_TEMPLATE = new Set(["urdu", "english", "bismillah", "rsvp", "invitation", "invitations", "invite", "card", "cards", "digital", "whatsapp", "template", "templates", "video", "design", "designs", "online"]);
@@ -477,7 +624,7 @@ export function searchTemplates(q: string, category: CategoryId | "all") {
     if (category !== "all" && t.category !== category) return false;
     if (!words.length) return true;
     const cat = CATEGORIES.find((c) => c.id === t.category);
-    const hay = [t.name, t.tagline, cat?.label, cat?.urdu, t.signature ? "signature" : "", t.music ? "music song" : "", t.concept ? "photo photos cinematic" : "", ...t.tags]
+    const hay = [t.name, t.tagline, cat?.label, cat?.urdu, t.signature ? "signature" : "", t.music ? "music song" : "", t.concept && t.concept !== "print" ? "photo photos cinematic" : "", t.print?.photo ? "photo" : "", ...t.tags]
       .join(" ").toLowerCase();
     return words.every((w) => hay.includes(w));
   });
