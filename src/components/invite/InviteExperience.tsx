@@ -624,7 +624,7 @@ export function InviteExperience({
   }, []);
   useEffect(() => {
     if (!opened) return;
-    const id = setTimeout(() => setGone(true), videoGate ? 5000 : gated ? 1500 : concept === "editorial" ? 1600 : 560); // Kahani's opening runs about 1.5s
+    const id = setTimeout(() => setGone(true), videoGate ? 5000 : gated ? 1500 : concept === "editorial" ? 1600 : 1300); // Kahani's opening runs about 1.5s
     return () => clearTimeout(id);
   }, [opened, gated, videoGate, concept]);
 
@@ -1434,7 +1434,7 @@ export function InviteExperience({
         // the printed card's opening: its artwork, the names, and one button
         <div data-open={opened} className="cover absolute inset-0 z-20 overflow-hidden">
           <PrintArt art={print.art} />
-          <div className="relative flex h-full flex-col items-center justify-center gap-3 px-12 text-center" style={{ containerType: "inline-size" }}>
+          <div className="cover-ui relative flex h-full flex-col items-center justify-center gap-3 px-12 text-center" style={{ containerType: "inline-size" }}>
             {hello && <p className="text-3xl leading-tight" style={ur ? { fontFamily: font, color: print.title } : { fontFamily: "var(--nf-script), cursive", color: print.title }}>{hello}</p>}
             <p className="text-[12px] uppercase tracking-[0.35em]" style={{ fontFamily: CAPS, color: print.caps }}>{ur ? "آپ مدعو ہیں" : hello ? "you are invited" : "You're invited"}</p>
             <p className="text-[min(14cqw,3.6rem)] leading-[1.1] [overflow-wrap:anywhere]" style={{ fontFamily: ur ? font : "var(--nf-script), cursive", color: print.title }}>
@@ -1472,6 +1472,8 @@ export function InviteExperience({
               {!hello && <p aria-hidden className="absolute left-7 top-[calc(4rem+var(--frame-top,0px))] font-mono text-xs tracking-widest" style={{ color: t.accent }}><span className="animate-pulse text-red-400">●</span> REC</p>}
             </>
           )}
+          {/* the entrance (rise) and the opening fade (cover-ui) sit on separate elements so neither overrides the other */}
+          <div className="cover-ui relative">
           <div className="rise relative flex flex-col items-center gap-4 px-8" style={coverArt ? { textShadow: `0 0 8px ${t.bg}, 0 0 18px ${t.bg}` } : undefined}>
             {hello && (
               <p className={`-mb-1 leading-tight ${tape ? "text-2xl" : "text-3xl"}`} style={ur ? { fontFamily: font, color: t.accent } : tape ? goldScript : { fontFamily: "var(--nf-script), cursive", color: t.accent }}>{hello}</p>
@@ -1487,6 +1489,7 @@ export function InviteExperience({
               {ur ? "کھولنے کے لیے ٹیپ کریں" : tape ? "▶ Press play" : "Tap to open"}
             </button>
             <ChevronDown className="mt-2 size-5 opacity-60" aria-hidden />
+          </div>
           </div>
         </div>
       )}

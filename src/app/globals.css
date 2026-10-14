@@ -129,12 +129,21 @@ summary,
     border-color: var(--gold);
   }
 
-  /* "Tap to open" cover: slides up like a drawer (ease-out family, under 600ms). */
+  /* "Tap to open" cover, a once-per-invitation moment: the words lift and fade first, then the whole card glides up
+     (strong ease-in-out, ~1.2s in all), with a soft shadow under its edge so it reads as a sheet being lifted away. */
   .cover {
-    transition: transform 520ms var(--ease-drawer);
+    transition: transform 1000ms var(--ease-in-out) 220ms, box-shadow 1000ms var(--ease-in-out) 220ms;
   }
   .cover[data-open="true"] {
     transform: translateY(-100%);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  }
+  .cover .cover-ui {
+    transition: opacity 320ms var(--ease-out), transform 420ms var(--ease-out);
+  }
+  .cover[data-open="true"] .cover-ui {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
   }
 }
 
@@ -324,6 +333,9 @@ summary,
   .cover[data-open="true"] {
     transform: none;
     opacity: 0;
+  }
+  .cover[data-open="true"] .cover-ui {
+    transform: none;
   }
   .btn:active,
   .press:active {
