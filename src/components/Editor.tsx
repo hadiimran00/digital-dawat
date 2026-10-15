@@ -259,6 +259,14 @@ export function Editor() {
           <label>Family 2 (optional)
             <input className="field" value={content.family2} maxLength={120} onChange={(e) => set({ family2: e.target.value })} />
           </label>
+          {template.category === "birthday" && (
+            <label>Age they are turning (optional)
+              <input className="field" inputMode="numeric" value={content.age ?? ""} maxLength={3} placeholder="5"
+                onChange={(e) => set({ age: e.target.value.replace(/\D/g, "").slice(0, 3) })} />
+              <span className="mt-1 block text-sm text-foreground/70">Shown as a big number on the designs that have one.</span>
+              {err("age")}
+            </label>
+          )}
         </fieldset>
 
         <section className="space-y-4" aria-label="Photos">

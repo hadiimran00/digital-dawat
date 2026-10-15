@@ -34,8 +34,8 @@ const GLASS = TAPE_GLASS;
 const PLAIN = "border-line bg-card";
 
 function Countdown({
-  events, ur, tape, scratchKind, accent, panel, muted,
-}: { events: InviteEvent[]; ur: boolean; tape: boolean; scratchKind: "static" | "foil" | null; accent: string; panel: string; muted: string }) {
+  events, ur, tape, scratchKind, accent, panel, muted, kind = "cells",
+}: { events: InviteEvent[]; ur: boolean; tape: boolean; scratchKind: "static" | "foil" | null; accent: string; panel: string; muted: string; kind?: NonNullable<Template["print"]>["countdown"] }) {
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     const first = setTimeout(() => setNow(Date.now()), 0);
@@ -68,13 +68,60 @@ function Countdown({
           </div>
         </ScratchReveal>
       )}
-      <div className="grid grid-cols-3 gap-2 text-center" role="timer" aria-label={`${d} days ${h} hours ${m} minutes to ${upcoming.title}`}>
-        {[d, h, m].map((v, i) => (
-          <div key={i} className={`rounded-xl border py-3 ${panel}`}>
-            <p className={`text-3xl font-bold ${tape ? "font-mono" : "font-display"}`}>{String(v).padStart(i === 0 ? 1 : 2, "0")}</p>
-            <p className={`text-xs uppercase tracking-widest ${muted}`}>{labels[i]}</p>
-          </div>
-        ))}
+      <div className={`grid grid-cols-3 text-center ${kind === "balloons" ? "gap-3" : "gap-2"}`} role="timer" aria-label={`${d} days ${h} hours ${m} minutes to ${upcoming.title}`}>
+        {[d, h, m].map((v, i) => {
+          const num = String(v).padStart(i === 0 ? 1 : 2, "0");
+          const label = <p className={`text-xs uppercase tracking-widest ${muted}`}>{labels[i]}</p>;
+          if (kind === "balloons") return (
+            // each number floats in its own glossy balloon, bobbing a little out of step
+            <div key={i} className="kid-anim kid-bob flex flex-col items-center" style={{ animationDelay: `${i * 0.5}s`, ["--sway" as string]: `${i % 2 ? -3 : 3}deg` }}>
+              <div className="grid aspect-[5/6] w-full max-w-[5.5rem] place-items-center" style={{ borderRadius: "50% 50% 47% 47% / 55% 55% 45% 45%", background: "radial-gradient(circle at 32% 25%, #fff 0 5%, color-mix(in srgb, var(--p-accent) 45%, white) 16%, var(--p-accent) 52%, color-mix(in srgb, var(--p-accent) 70%, black))", color: "var(--p-on-accent)", boxShadow: "inset -6px -8px 14px rgba(0,0,0,.18)" }}>
+                <p className="font-display text-3xl font-bold">{num}</p>
+              </div>
+              <span aria-hidden className="block h-4 w-px bg-current opacity-40" />
+              {label}
+            </div>
+          );
+          if (kind === "flip") return (
+            // flip-clock tiles: dark, split across the middle
+            <div key={i}>
+              <div className="relative overflow-hidden rounded-lg bg-[#16131f] py-3 text-white shadow-[0_8px_18px_rgba(0,0,0,.35)]">
+                <p className="font-mono text-3xl font-bold tracking-wider">{num}</p>
+                <span aria-hidden className="absolute inset-x-0 top-1/2 h-px bg-black/60" />
+                <span aria-hidden className="absolute inset-x-0 top-0 h-1/2 bg-white/5" />
+              </div>
+              <div className="mt-1">{label}</div>
+            </div>
+          );
+          if (kind === "rings") {
+            const pct = Math.min(100, Math.round((v / [60, 24, 60][i]) * 100));
+            return (
+              // a ring that fills with what is left of the day, hour, minute
+              <div key={i} className="flex flex-col items-center">
+                <div className="relative grid aspect-square w-full max-w-[5.5rem] place-items-center">
+                  <span aria-hidden className="absolute inset-0 rounded-full" style={{ background: `conic-gradient(var(--p-accent) ${pct}%, color-mix(in srgb, var(--p-accent) 18%, transparent) 0)`, WebkitMask: "radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px))", mask: "radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px))" }} />
+                  <p className="font-display text-3xl font-bold">{num}</p>
+                </div>
+                <div className="mt-1">{label}</div>
+              </div>
+            );
+          }
+          if (kind === "stamps") return (
+            // postage stamps, each a little crooked
+            <div key={i} className="bg-(--p-panel) p-1.5 shadow-md" style={{ rotate: `${[-3, 2, -1][i]}deg`, outline: "2px dashed color-mix(in srgb, var(--p-accent) 55%, transparent)", outlineOffset: "-5px" }}>
+              <div className="py-3">
+                <p className="font-display text-3xl font-bold" style={{ color: "var(--p-title)" }}>{num}</p>
+                {label}
+              </div>
+            </div>
+          );
+          return (
+            <div key={i} className={`rounded-xl border py-3 ${panel}`}>
+              <p className={`text-3xl font-bold ${tape ? "font-mono" : "font-display"}`}>{num}</p>
+              {label}
+            </div>
+          );
+        })}
       </div>
       <p className={`mt-2 text-center text-sm ${muted}`}>{ur ? `${upcoming.title} تک` : `Until ${upcoming.title}`}</p>
     </section>
@@ -244,9 +291,26 @@ const IVORY_FOIL = "linear-gradient(110deg, #6b3d22 0%, #9a6b3c 30%, #d9b27a 44%
  * Printed-card designs: the card's illustrated artwork stays behind every screen; panels are near-white (or the
  * card's own dark colour) and every colour comes from CSS variables set from the template (see printVars).
  */
-const PRINT_LOOK = (dark: boolean): Look => ({
+/** each printed design's panel shape (classes are spelled out in full so Tailwind finds them) */
+const PRINT_PANEL: Record<NonNullable<NonNullable<Template["print"]>["panel"]>, { panel: string; style?: React.CSSProperties }> = {
+  rounded: { panel: "rounded-[22px] border border-(--p-line) bg-(--p-panel) text-(--p-ink) shadow-[0_12px_40px_rgba(0,0,0,0.14)] backdrop-blur-sm" },
+  arch: { panel: "rounded-b-[22px] border border-(--p-line) bg-(--p-panel) text-(--p-ink) shadow-[0_12px_40px_rgba(0,0,0,0.14)] backdrop-blur-sm", style: { borderTopLeftRadius: "50% 70px", borderTopRightRadius: "50% 70px" } },
+  frame: { panel: "rounded-none border-[5px] border-double border-(--p-accent) bg-(--p-panel) text-(--p-ink) shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur-sm" },
+  ticket: {
+    panel: "rounded-[16px] bg-(--p-panel) text-(--p-ink) drop-shadow-[0_10px_18px_rgba(0,0,0,0.18)] backdrop-blur-sm",
+    // half-moon notches either side, like a ticket
+    style: { WebkitMask: "radial-gradient(circle 15px at 0 50%, #0000 98%, #000) 0 0 / 51% 100% no-repeat, radial-gradient(circle 15px at 100% 50%, #0000 98%, #000) 100% 0 / 51% 100% no-repeat", mask: "radial-gradient(circle 15px at 0 50%, #0000 98%, #000) 0 0 / 51% 100% no-repeat, radial-gradient(circle 15px at 100% 50%, #0000 98%, #000) 100% 0 / 51% 100% no-repeat" },
+  },
+  cloud: { panel: "rounded-[46px] border-2 border-dashed border-(--p-line) bg-(--p-panel) text-(--p-ink) shadow-[0_14px_40px_rgba(0,0,0,0.10)] backdrop-blur-sm" },
+  line: { panel: "rounded-none border-x-0 border-y border-(--p-accent) bg-(--p-panel) text-(--p-ink) backdrop-blur-sm" },
+  sticker: { panel: "rounded-[22px] border-[3px] border-(--p-title) bg-(--p-panel) text-(--p-ink) shadow-[7px_7px_0_var(--p-accent)]" },
+  bubble: { panel: "rounded-[30px] border-2 border-(--p-line) bg-(--p-panel) text-(--p-ink) shadow-[0_0_38px_var(--p-glow)] backdrop-blur-md" },
+};
+
+const PRINT_LOOK = (dark: boolean, shape: keyof typeof PRINT_PANEL = "rounded"): Look => ({
   dark,
-  panel: "rounded-[22px] border border-(--p-line) bg-(--p-panel) text-(--p-ink) shadow-[0_12px_40px_rgba(0,0,0,0.14)] backdrop-blur-sm",
+  panel: PRINT_PANEL[shape].panel,
+  panelStyle: PRINT_PANEL[shape].style,
   ink: "text-(--p-ink)", muted: "text-(--p-ink)/75", cell: "rounded-xl border-(--p-line) bg-(--p-panel)",
   title: "text-center text-[12px] font-semibold uppercase tracking-[0.3em] text-(--p-accent) [text-wrap:balance]", titleStyle: { fontFamily: CAPS },
   names: { fontFamily: "var(--nf-script), cursive", fontWeight: 400, color: "var(--p-title)" },
@@ -269,7 +333,7 @@ function printVars(tpl: Template): React.CSSProperties {
   const accent = readable(tpl.theme.accent, panel);
   return {
     "--p-panel": `${panel}eb`, "--p-line": `${tpl.theme.accent}66`, "--p-ink": readable(p.dark ? tpl.theme.ink : p.body, panel),
-    "--p-accent": accent, "--p-on-accent": onColor(accent), "--p-title": readable(p.title, panel, 3),
+    "--p-accent": accent, "--p-on-accent": onColor(accent), "--p-title": readable(p.title, panel, 3), "--p-glow": `${tpl.theme.accent}66`,
   } as React.CSSProperties;
 }
 
@@ -559,7 +623,7 @@ export function InviteExperience({
   const scenic = !!concept; // full-screen photo scenes, one section per screen
   const tape = concept === "tape";
   const print = concept === "print" ? template.print : undefined;
-  const look = print ? PRINT_LOOK(!!print.dark) : LOOKS[(concept === "print" ? undefined : concept) ?? "tape"];
+  const look = print ? PRINT_LOOK(!!print.dark, print.panel) :LOOKS[(concept === "print" ? undefined : concept) ?? "tape"];
   /** non-couple occasions (birthdays, aqiqah) get their own wording where the wedding looks speak of a couple */
   const coupleCat = !["birthday", "aqiqah", "baby-shower", "eid"].includes(template.category);
   const gated = concept === "royal" || concept === "ivory"; // doors or curtains instead of the sliding cover
@@ -599,10 +663,10 @@ export function InviteExperience({
     : print ? { background: "var(--p-accent)", color: "var(--p-on-accent)" }
     : { backgroundImage: GOLD, color: "#3a0c12" };
   const scratchKind: "static" | "foil" | null = tape ? "static" : concept === "editorial" || concept === "aurora" || concept === "embossed" || concept === "garden" ? null : scenic || template.motion === "scratch" ? "foil" : null;
-  const fx: TapFx = tape ? "flash" : concept === "royal" ? "sparkles" : concept === "ivory" ? "petals" : template.motion === "sparkle" ? "sparkles" : "petals";
+  const fx: TapFx = print ? print.tap : tape ? "flash" : concept === "royal" ? "sparkles" : concept === "ivory" ? "petals" : template.motion === "sparkle" ? "sparkles" : "petals";
   const fxCaption = ur
     ? "کچھ دیکھنے کے لیے ٹیپ کریں"
-    : fx === "flash" ? "Tap anywhere for a camera flash" : fx === "sparkles" ? "Tap anywhere for sparkles" : "Tap anywhere for petals";
+    : fx === "flash" ? "Tap anywhere for a camera flash" : `Tap anywhere for ${fx}`;
 
   useEffect(() => {
     // personalised greeting: .../i?s=slug&g=Sarah%20%26%20Family and reserved places: ...&n=2
@@ -763,7 +827,8 @@ export function InviteExperience({
     document.getElementById(`ev-${i}`)?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "center" });
   const onTap = (e: React.PointerEvent) => {
     if ((e.target as HTMLElement).closest("a,button,summary,input,textarea,select,label,canvas,[role=tab]")) return;
-    burst(fx, e.clientX, e.clientY, fx === "sparkles" ? [t.accent, "#fff3c4"] : [t.accent, "#c2185b", "#e8b95c"]);
+    // printed cards throw petals in their artwork's own colours (Neelam's navy roses, Surkh's reds, ...)
+    burst(fx, e.clientX, e.clientY, print ? print.petals : fx === "sparkles" ? [t.accent, "#fff3c4"] : [t.accent, "#c2185b", "#e8b95c"]);
   };
 
   // customer photos take the place of the template's own artwork
@@ -975,13 +1040,22 @@ export function InviteExperience({
 
           {(guest || demo) && (
             <Screen tape scene={2} section="message" framed={tape} align={look.align} photo={sc.message}>
-              <section className={`relative px-5 pb-5 ${tape ? "pt-5" : "pt-12"} text-center ${look.panel}`} style={look.panelStyle}>
-                {concept === "royal" && <Finial />}<PanelFrame look={look} />
+              <section
+                className={print?.message === "letter"
+                  // a handwritten note on lined paper, set down a little crooked
+                  ? "relative rotate-[-1.2deg] rounded-[3px] px-6 pb-6 pt-9 text-start text-[#3a2e28] shadow-[0_14px_34px_rgba(0,0,0,.22)]"
+                  : `relative px-5 pb-5 ${tape ? "pt-5" : "pt-12"} text-center ${look.panel}`}
+                style={print?.message === "letter"
+                  ? { background: "repeating-linear-gradient(180deg, transparent 0 29px, rgba(70,90,140,.16) 29px 30px), linear-gradient(90deg, transparent 34px, rgba(200,60,60,.25) 34px 35px, transparent 35px), #fffdf6" }
+                  : look.panelStyle}>
+                {concept === "royal" && <Finial />}{print?.message !== "letter" && <PanelFrame look={look} />}
+                {/* the speech bubble's tail */}
+                {print?.message === "bubble" && <span aria-hidden className="absolute -bottom-3 left-10 size-7 rotate-45 rounded-[4px] bg-(--p-panel)" />}
                 {tape && <Tag tape label={ur ? "پیغام" : "Message"} accent={t.accent} />}
-                <p className={`pb-1 text-4xl leading-tight ${ur ? "" : look.shine}`} style={ur ? { fontFamily: font } : look.greet}>
+                <p className={`pb-1 text-4xl leading-tight ${ur ? "" : look.shine}`} style={ur ? { fontFamily: font } : print?.message === "letter" ? { ...look.greet, color: "#3a2e28" } : look.greet}>
                   {guest ? (ur ? `محترم ${guest}،` : `Dear ${guest},`) : ur ? "محترم مہمان،" : "Dear guest,"}
                 </p>
-                <p className={`mt-3 ${look.prose}`}>
+                <p className={`mt-3 ${print?.message === "letter" ? "font-display text-[17px] italic leading-[30px] text-[#3a2e28]" : look.prose}`}>
                   {ur
                     ? "ہمیں آپ کی میزبانی کا شرف ملے گا۔ ہم نے آپ کے لیے جگہ رکھی ہے۔"
                     : "Your presence is the blessing we are asking for. It would not be complete without the people who have loved us all our lives. We have saved you a place."}
@@ -993,7 +1067,8 @@ export function InviteExperience({
                     ))}
                   </nav>
                 )}
-                {demo && !guest && <p className={`mt-3 text-xs ${look.muted}`}>Each guest can get a link that greets them by name.</p>}
+                {print?.message === "letter" && <p className="mt-4 text-end text-3xl text-[#3a2e28]" style={{ fontFamily: ur ? font : "var(--nf-script), cursive" }}>{ur ? "محبت کے ساتھ، " : "With love, "}{content.host1}</p>}
+                {demo && !guest && <p className={`mt-3 text-xs ${print?.message === "letter" ? "text-[#3a2e28]/70" : look.muted}`}>Each guest can get a link that greets them by name.</p>}
               </section>
             </Screen>
           )}
@@ -1028,7 +1103,7 @@ export function InviteExperience({
               {concept === "royal" && <Finial />}<PanelFrame look={look} />
               {tape ? <Tag tape label={ur ? "الٹی گنتی" : "Countdown"} accent={t.accent} /> : <SceneTitle look={look} concept={concept!}>{ur ? "الٹی گنتی" : "Counting the days"}</SceneTitle>}
               <div className={tape ? "" : "mt-4"}>
-                <Countdown events={ordered} ur={ur} tape={tape} scratchKind={scratchKind} accent={t.accent} panel={look.cell} muted={look.muted} />
+                <Countdown events={ordered} ur={ur} tape={tape} scratchKind={scratchKind} accent={t.accent} panel={look.cell} muted={look.muted} kind={print?.countdown} />
               </div>
             </div>
           </Screen>
@@ -1052,9 +1127,30 @@ export function InviteExperience({
                 <img src={eventScene(e)} alt="" className="aspect-[16/10] w-full object-cover" />
               ) : undefined}
             >
-              <article className={`relative px-5 pb-5 ${tape ? "pt-5" : "pt-12"} text-center ${look.panel}`} style={look.panelStyle}>
-                {concept === "royal" && <Finial />}<PanelFrame look={look} />
-                {tape ? (
+              <article
+                className={print?.eventStyle === "polaroid"
+                  // a polaroid: white frame, the event as its picture, the date written underneath
+                  ? `relative bg-white px-3 pb-5 pt-3 text-center text-[#2b2b2b] shadow-[0_16px_36px_rgba(0,0,0,.25)] ${i % 2 ? "rotate-[1.6deg]" : "rotate-[-1.6deg]"}`
+                  : `relative px-5 pb-5 ${tape ? "pt-5" : "pt-12"} text-center ${look.panel}`}
+                style={print?.eventStyle === "polaroid" ? undefined : look.panelStyle}>
+                {concept === "royal" && <Finial />}{print?.eventStyle !== "polaroid" && <PanelFrame look={look} />}
+                {print?.eventStyle === "polaroid" && (
+                  <div className="relative mb-3 grid aspect-[4/3] place-items-center overflow-hidden" style={{ background: eventScene(e) || content.couplePhoto ? undefined : "radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--p-accent) 35%, white), var(--p-accent))" }}>
+                    {(eventScene(e) || content.couplePhoto) && (
+                      // eslint-disable-next-line @next/next/no-img-element -- static export, photo comes from our storage
+                      <img src={eventScene(e) || content.couplePhoto} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                    )}
+                    <p className={`relative px-4 leading-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,.35)] [text-wrap:balance] ${e.title.length > 12 ? "text-4xl" : "text-5xl"}`} style={{ fontFamily: ur ? font : "var(--nf-script), cursive" }}>{e.title}</p>
+                  </div>
+                )}
+                {print?.eventStyle === "ticket" && (
+                  <p className="mx-auto mb-2 w-fit rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.3em]" style={{ fontFamily: CAPS, background: "var(--p-accent)", color: "var(--p-on-accent)" }}>
+                    {ur ? "داخلہ" : "Admit"} · {seats ?? (ur ? "سب" : "all")}
+                  </p>
+                )}
+                {print?.eventStyle === "polaroid" ? (
+                  <p className="text-2xl" style={{ fontFamily: ur ? font : "var(--nf-script), cursive" }}>{formatEventDate(e.date, loc)}</p>
+                ) : tape ? (
                   <Tag tape label={`Tape ${pad(i + 1)} / ${pad(ordered.length)}`} accent={t.accent} />
                 ) : (
                   <p className="mb-1 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em]" style={{ fontFamily: CAPS }}>
@@ -1067,16 +1163,24 @@ export function InviteExperience({
                     {ur ? `${seats} مہمان مدعو` : `${seats} ${seats === 1 ? "guest" : "guests"} invited`}
                   </p>
                 )}
-                {tape ? <TapeTitle as="h3">{e.title}</TapeTitle> : <h3 className={`text-5xl leading-tight ${ur ? "" : look.shine}`} style={ur ? { fontFamily: font } : look.names}>{e.title}</h3>}
-                {!tape && (look.ornate ? <Divider color={t.accent} /> : <span aria-hidden className="mx-auto my-3 block h-px w-12" style={{ background: t.accent }} />)}
+                {print?.eventStyle === "polaroid"
+                  ? <h3 className="sr-only">{e.title}</h3>
+                  : tape ? <TapeTitle as="h3">{e.title}</TapeTitle> : <h3 className={`text-5xl leading-tight ${ur ? "" : look.shine}`} style={ur ? { fontFamily: font } : look.names}>{e.title}</h3>}
+                {!tape && print?.eventStyle !== "polaroid" && (look.ornate ? <Divider color={t.accent} /> : <span aria-hidden className="mx-auto my-3 block h-px w-12" style={{ background: t.accent }} />)}
                 {concept === "embossed" && <ArchMap color={t.accent} label={e.venue || e.title} />}
-                <p className="mt-2 flex items-center justify-center gap-1.5 font-display text-lg font-semibold">
-                  {!tape && <CalendarDays className="size-4 shrink-0" style={{ color: t.accent }} aria-hidden />}
-                  {formatEventDate(e.date, loc)}{e.time && ` · ${formatEventTime(e.time)}`}
-                </p>
+                {print?.eventStyle === "polaroid" ? (
+                  e.time && <p className="text-sm font-semibold">{formatEventTime(e.time)}</p>
+                ) : (
+                  <p className="mt-2 flex items-center justify-center gap-1.5 font-display text-lg font-semibold">
+                    {!tape && <CalendarDays className="size-4 shrink-0" style={{ color: t.accent }} aria-hidden />}
+                    {formatEventDate(e.date, loc)}{e.time && ` · ${formatEventTime(e.time)}`}
+                  </p>
+                )}
                 {e.venue && <p className="mt-1 flex items-center justify-center gap-1.5 text-sm">{!tape && <MapPin className="size-3.5 shrink-0" style={{ color: t.accent }} aria-hidden />}{e.venue}</p>}
                 {e.address && <p className={`text-xs ${look.muted}`}>{e.address}</p>}
                 {e.dressCode && <p className={`mt-1 text-xs ${look.muted}`}>{ur ? "ڈریس کوڈ: " : "Dress code: "}{e.dressCode}</p>}
+                {/* the ticket's tear-off line */}
+                {print?.eventStyle === "ticket" && <span aria-hidden className="-mx-5 mt-4 block border-t-2 border-dashed border-(--p-line)" />}
                 <div className="mt-4 flex flex-wrap justify-center gap-2">
                   {mapLink(e) && (
                     <a className={look.solid} style={look.solidStyle(t.accent, t.bg)} href={mapLink(e)} target="_blank" rel="noopener noreferrer">
@@ -1471,11 +1575,12 @@ export function InviteExperience({
       {!gone && print && (
         // the printed card's opening: its artwork (whole, in halves, or an envelope), the names, and one button
         opening === "envelope" ? envelopeCover("#f5e9d6") : (
-        <div data-open={opened} className={`cover open-${opening} absolute inset-0 z-20 overflow-hidden`}>
+        <div data-open={opened} className={`cover open-${opening} absolute inset-0 z-20 overflow-hidden`} style={{ containerType: "size" }}>
           {opening === "doors" || opening === "curtain" || opening === "split"
             ? <Halves dir={opening === "split" ? "tb" : "lr"}><PrintArt art={print.art} /></Halves>
             : <PrintArt art={print.art} />}
-          <div className="cover-ui relative flex h-full flex-col items-center justify-center gap-3 px-12 text-center" style={{ containerType: "inline-size" }}>
+          <div className={`cover-ui relative flex h-full flex-col items-center gap-3 px-12 text-center ${print.coverAt ? "justify-start" : "justify-center"}`}
+            style={{ containerType: "inline-size", paddingTop: print.coverAt ? `${print.coverAt}cqh` : undefined }}>
             {hello && <p className="text-3xl leading-tight" style={ur ? { fontFamily: font, color: print.title } : { fontFamily: "var(--nf-script), cursive", color: print.title }}>{hello}</p>}
             <p className="text-[12px] uppercase tracking-[0.35em]" style={{ fontFamily: CAPS, color: print.caps }}>{ur ? "آپ مدعو ہیں" : hello ? "you are invited" : "You're invited"}</p>
             <p className="text-[min(14cqw,3.6rem)] leading-[1.1] [overflow-wrap:anywhere]" style={{ fontFamily: ur ? font : "var(--nf-script), cursive", color: print.title }}>

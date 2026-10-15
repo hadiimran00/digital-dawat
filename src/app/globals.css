@@ -306,12 +306,57 @@ summary,
 }
 
 /* Each scene's panel rises in once, the first time its screen comes into view (ease-out, short). */
+/* Kids' party designs (KidsArt.tsx): continuous, gentle motion; all of it stops for reduced motion (below). */
+@keyframes kid-bob {
+  0%, 100% { transform: translateY(0) rotate(calc(var(--sway, 3deg) * -1)); }
+  50% { transform: translateY(-1.6cqw) rotate(var(--sway, 3deg)); }
+}
+@keyframes kid-flame {
+  0%, 100% { transform: scale(1, 1) rotate(-2deg); }
+  25% { transform: scale(0.92, 1.12) rotate(2deg); }
+  50% { transform: scale(1.04, 0.92) rotate(-1deg); }
+  75% { transform: scale(0.96, 1.06) rotate(3deg); }
+}
+@keyframes kid-glow { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+@keyframes kid-twinkle { 0%, 100% { opacity: 0.25; } 50% { opacity: 0.95; } }
+@keyframes kid-fall { from { transform: translateY(-12cqh) rotate(0deg); } to { transform: translateY(112cqh) rotate(720deg); } }
+@keyframes kid-drift { from { transform: translateX(-40cqw); } to { transform: translateX(120cqw); } }
+@keyframes kid-swing { 0%, 100% { rotate: -7deg; } 50% { rotate: 7deg; } }
+@keyframes kid-burst {
+  0% { transform: scale(0.2); opacity: 0; }
+  12% { opacity: 1; }
+  45% { transform: scale(1); opacity: 1; }
+  70%, 100% { transform: scale(1.25); opacity: 0; }
+}
+@keyframes kid-rise { 0% { transform: translateY(0) scale(0.8); opacity: 0; } 12% { opacity: 0.9; } 100% { transform: translateY(-105cqh) scale(1.1); opacity: 0; } }
+.kid-bob { animation: kid-bob 5s ease-in-out infinite; }
+.kid-flame { animation: kid-flame 0.9s ease-in-out infinite; }
+.kid-glow { animation: kid-glow 1.6s ease-in-out infinite; }
+.kid-twinkle { animation: kid-twinkle 4s ease-in-out infinite; }
+.kid-fall { animation: kid-fall 8s linear infinite; }
+.kid-drift { animation: kid-drift 40s linear infinite; }
+.kid-swing { animation: kid-swing 3.2s ease-in-out infinite; }
+.kid-burst { animation: kid-burst 4.6s ease-out infinite; }
+.kid-rise { animation: kid-rise 9s ease-in infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .kid-anim { animation: none !important; }
+  .kid-fall, .kid-rise { display: none; }
+  .kid-burst { opacity: 0; }
+}
+
+/* The fade is on the panel itself, never on this wrapper: a see-through wrapper becomes the panel's "backdrop root",
+   so its frosted-glass blur would sample nothing (the photo shows through sharp and light) until the fade finished. */
 .scene-reveal {
-  transition: opacity 560ms var(--ease-out), transform 560ms var(--ease-out);
+  transition: transform 560ms var(--ease-out);
+}
+.scene-reveal > * {
+  transition: opacity 560ms var(--ease-out);
 }
 [data-scene]:not([data-in]) > .scene-reveal {
-  opacity: 0;
   transform: translateY(16px);
+}
+[data-scene]:not([data-in]) > .scene-reveal > * {
+  opacity: 0;
 }
 
 /* Scene photos drift very slowly, like a held camera. */
@@ -410,7 +455,7 @@ summary,
   .scroll-nudge {
     animation: none;
   }
-  .scene-reveal {
+  .scene-reveal > * {
     transition: opacity 300ms ease-out;
   }
   [data-scene]:not([data-in]) > .scene-reveal {

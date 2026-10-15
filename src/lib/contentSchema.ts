@@ -67,6 +67,8 @@ export const ContentSchema = z.object({
   /** the programme of the day (optional; shown by the designs that have a timeline screen) */
   timeline: z.array(TimelineSchema).max(MAX_TIMELINE).default([]),
   closing: z.string().trim().max(120),
+  /** birthdays: the age the birthday star is turning, shown as a big 3D number on the designs that have one */
+  age: z.string().trim().regex(/^\d{0,3}$/, "Type the age as a number").default(""),
   rsvpEnabled: z.boolean(),
   contactPhone: z.string().trim().max(20),
   coverPhoto: Photo,

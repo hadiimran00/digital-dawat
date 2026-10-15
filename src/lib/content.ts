@@ -115,6 +115,7 @@ export function defaultContent(category: CategoryId, language: "en" | "ur" = "en
           ]
         : [],
     closing: ur ? "آپ کی آمد کے منتظر" : "We can’t wait to celebrate with you",
+    age: "",
     rsvpEnabled: true,
     contactPhone: "",
     coverPhoto: "",

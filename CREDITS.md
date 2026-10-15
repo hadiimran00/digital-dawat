@@ -107,6 +107,13 @@ frames were upscaled 4x with Real-ESRGAN x4plus (official Qualcomm AI Hub ONNX e
 | `public/art/qabool-bismillah.webp` | the Bismillah calligraphy, cut out on transparency |
 | `public/audio/qabool-song.m4a` | the video's soundtrack, copied without re-encoding |
 
+## Kids' 3D characters (2026-10-15)
+
+`public/art/kids/khilona-boy.webp` (boy holding a cake, cut out of its white background), `jashn-scene.webp` (curly-haired
+boy behind birthday candles) and `pari-scene.webp` (girl with a pink cake) are 3D-cartoon images supplied by the site owner
+on 2026-10-15, who stated they may be used. Edits: background removal, Real-ESRGAN x4 upscaling (boy, girl), resizing and
+WebP conversion; the live candle glows are drawn on top in code.
+
 ## Birthday music (2026-10-14)
 
 `public/audio/birthday-musicbox.m4a`, `birthday-piano.m4a` and `birthday-celebration.m4a` are our own arrangements of

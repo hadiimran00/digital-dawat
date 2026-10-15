@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { PrintArtId } from "@/lib/templates";
+import { KIDS_ART, KIDS_BG } from "./KidsArt";
 
 /*
  * Illustrated artwork for the printed-card designs, drawn as vectors. Each design is a set of pieces pinned to the
@@ -226,6 +227,7 @@ const BG: Record<PrintArtId, string> = {
   saadgi: "#ffffff",
   zaitoon: "#f4efe4",
   surkh: "radial-gradient(90% 60% at 30% 30%, #fbf0ec, transparent 70%), radial-gradient(80% 60% at 80% 70%, #f6e2dc, transparent 70%), linear-gradient(160deg, #f7e7e2, #ecd2ca)",
+  ...KIDS_BG,
 };
 
 function Lifafa() {
@@ -527,6 +529,7 @@ function Surkh() {
 
 const ART: Record<PrintArtId, () => ReactNode> = {
   lifafa: Lifafa, gubbara: Gubbara, neelam: Neelam, pehli: Pehli, gulnaar: Gulnaar, teddy: TeddyArt, bhalu: Bhalu, saadgi: Saadgi, zaitoon: Zaitoon, surkh: Surkh,
+  ...KIDS_ART,
 };
 
 /** The whole illustrated background of a printed-card design. Fills its (positioned) parent. */
