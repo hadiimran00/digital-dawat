@@ -44,13 +44,14 @@ export function TemplateGallery({ limit, titleAs: Title = "h3" }: { limit?: numb
               type="search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search: emerald, mehndi, minimal…"
+              placeholder="Search: gold, nikkah, floral…"
               className="field pl-10"
             />
           </label>
           {/* phones: one row you swipe sideways, so the designs start near the top */}
           <div role="group" aria-label="Filter by category" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
-            {[{ id: "all" as const, label: "All" }, ...CATEGORIES].map((c) => (
+            {/* only occasions that have designs: an empty filter would be a dead end */}
+            {[{ id: "all" as const, label: "All" }, ...CATEGORIES.filter((x) => TEMPLATES.some((t) => t.category === x.id))].map((c) => (
               <button
                 key={c.id}
                 type="button"
@@ -78,7 +79,7 @@ export function TemplateGallery({ limit, titleAs: Title = "h3" }: { limit?: numb
           <p className="font-semibold">No designs match{q ? ` “${q}”` : ""}{cat !== "all" ? ` in ${CATEGORIES.find((c) => c.id === cat)?.label}` : ""}.</p>
           <p className="mt-1 text-sm text-foreground/70">Try an event or a colour:</p>
           <div className="mt-4 flex flex-wrap justify-center gap-2">
-            {["Walima", "Nikkah", "Mehndi", "Gold", "Emerald"].map((w) => (
+            {["Nikkah", "Birthday", "Gold", "Floral", "Envelope"].map((w) => (
               <button key={w} type="button" onClick={() => { setCat("all"); setQ(w); }} className="press min-h-11 rounded-full border border-line px-4 text-sm font-medium hover:border-gold">{w}</button>
             ))}
             <button type="button" onClick={clear} className="btn btn-primary">Show all designs</button>

@@ -39,7 +39,7 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  ["Pick a design", `${TEMPLATES.length} designs for nikkah, mehndi, baraat, walima and more. Every page shows the price.`],
+  ["Pick a design", `${TEMPLATES.length} designs for the full wedding week, Nikkah, engagements, birthdays and Aqiqah. Every page shows the price.`],
   ["Add your details", "Names, events, venues, dress codes and your photos. The preview updates as you type."],
   ["Pay by bank transfer", "Upload the receipt. Your invitation goes live within 48 hours, or you get your money back."],
   ["Send it to your guests", "Add your guest list, then send each person their own link on WhatsApp with one tap."],
@@ -59,7 +59,7 @@ const FAQ = [
   ["What if something is wrong after I pay?", "Message us and we correct names, dates, venues and spelling for free. If we can't put it right, you get a full refund. The pricing and refunds page has the details."],
   ["Some guests are only invited to the Walima. Can I do that?", "Yes. In your guest list, pick the events for each guest. Their personal link shows only those events, and they can only reply to those."],
   ...(supportWhatsapp ? [["I live outside Pakistan. Can I still order?", "Yes. Your guests can open the invitation from anywhere. To pay from abroad, message us on WhatsApp and we'll arrange a way that works for you."]] : []),
-  ["Is it only for weddings?", "No. There are designs for Nikkah, Mehndi, Baraat, Walima, Dholki, engagements, Eid, birthdays and baby showers, each with its own price."],
+  ["Is it only for weddings?", "No. There are designs for Nikkah, engagements, birthdays and Aqiqah, each with its own price. The full wedding designs cover every event from Mehndi to Walima."],
   ["Can I use Urdu?", "Yes. Switch the card to Urdu and the layout turns right to left. You can also type your own wording in either language."],
   ["Why is there no video button on my phone?", "Video export needs a recent browser that can encode MP4. Your invitation link works on any phone either way."],
 ];

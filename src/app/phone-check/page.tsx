@@ -54,7 +54,7 @@ export default function PhoneCheck() {
   async function runVideo(style: "rise" | "envelope" | "scratch" | "sparkle") {
     setBusy(style);
     setVideoUrl(null);
-    const t = getTemplate("zamurd-nikkah")!;
+    const t = getTemplate("replay-wedding")!;
     const start = performance.now();
     try {
       const { renderInviteVideo } = await import("@/lib/videoExport");
