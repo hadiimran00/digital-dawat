@@ -19,6 +19,7 @@ import {
   BISMILLAH, downloadIcs, eventsDateText, formatEventDate, formatEventTime, mapLink, type InviteContent, type InviteEvent,
 } from "@/lib/content";
 import { FlowInvite } from "./FlowInvite";
+import { Firdaus } from "./Firdaus";
 import { burst, type TapFx } from "@/lib/tapFx";
 import { ArtHero, AURORA_TEXT, GOLD, InviteCard, TAPE_GLASS } from "./InviteCard";
 import { Families } from "./Families";
@@ -693,7 +694,7 @@ export function InviteExperience({
   useEffect(() => {
     if (!opened) return;
     // Kahani's opening runs about 1.5s; the printed and classic cards each have their own (OPENING_MS)
-    const id = setTimeout(() => setGone(true), template.flow ? 2600 : videoGate ? 5000 : gated ? 1500 : concept === "editorial" ? 1600 : modern ? 1300 : OPENING_MS[opening]);
+    const id = setTimeout(() => setGone(true), template.flow === "firdaus" ? 2500 : template.flow ? 2600 : videoGate ? 5000 : gated ? 1500 : concept === "editorial" ? 1600 : modern ? 1300 : OPENING_MS[opening]);
     return () => clearTimeout(id);
   }, [opened, gated, videoGate, concept, modern, opening, template.flow]);
 
@@ -994,12 +995,14 @@ export function InviteExperience({
     </div>
   );
 
-  if (template.flow) return (
-    <FlowInvite skin={template.flow} content={content} ordered={ordered} allEvents={fullContent.events} names={names} hello={hello}
-      guest={guest} seats={seats} opened={opened} gone={gone} onOpen={open} scroller={scroller} onScroll={onScroll}
-      rsvp={{ inviteId, demo: demo || preview, showNote: demo, guestId, events: rsvpEvents }}
-      song={template.music ? { node: <audio ref={song} src={template.music.src} loop preload="none" />, off: songOff, toggle: toggleSong } : undefined} />
-  );
+  if (template.flow) {
+    const flowProps = {
+      content, ordered, allEvents: fullContent.events, names, hello, guest, seats, opened, gone, onOpen: open, scroller, onScroll,
+      rsvp: { inviteId, demo: demo || preview, showNote: demo, guestId, events: rsvpEvents },
+      song: template.music ? { node: <audio ref={song} src={template.music.src} loop preload="none" />, off: songOff, toggle: toggleSong } : undefined,
+    };
+    return template.flow === "firdaus" ? <Firdaus {...flowProps} /> : <FlowInvite skin={template.flow} {...flowProps} />;
+  }
 
   return (
     // printed cards: the invitation waits on a dark "table" until its card has opened (otherwise the doors, fold and

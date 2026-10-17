@@ -139,3 +139,8 @@ Layout, sections and opening modelled on Webgency Invitations' "The Sacred Garde
 Nothing was downloaded from those pages: every drawing (envelopes, wax seals, rose arch, swans, mosque and palace
 sketches, chandelier, damask, torn edges) is our own vector artwork in `src/components/invite/FlowArt.tsx`. On
 2026-10-17 the site owner stated they will provide the licence from Webgency. No music yet; the owner will supply the songs.
+## Firdaus (2026-10-18)
+
+Layout, sections and opening modelled on Webgency's template 5 (https://webgency.tilda.ws/template5). Nothing was downloaded:
+the courtyard, fountain, doves, roses, flower seal and chateau sketch are our own vector art in `src/components/invite/FirdausArt.tsx`.
+The site owner stated they will provide the licence. No music yet; the owner will supply it.

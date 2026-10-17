@@ -117,7 +117,7 @@ export interface Template {
    * fades in as the guest scrolls. "hadiqa" = a rose garden arch with swans; "ambar" = ivory damask, a gold
    * Bismillah seal and a Moorish arch.
    */
-  flow?: "hadiqa" | "ambar";
+  flow?: "hadiqa" | "ambar" | "firdaus"; // "firdaus" = a painted chateau courtyard, wine and ivory (Firdaus.tsx)
   /** "garden": the Bismillah as calligraphy artwork (transparent image) instead of typeset text */
   bismillahArt?: string;
   /** "embossed": a short video of the closing doors opening, played when the guest taps open (the `gate` image is its first frame) */
@@ -147,8 +147,8 @@ export interface Template {
   };
 }
 
-export const TEMPLATES: Template[] = [
-  // ---- Original designs, round 2 --------------------------------------------------------
+export const TEMPLATES: Template[] = [
+  // ---- Original designs, round 2 --------------------------------------------------------
   {
     id: "replay-wedding",
     signature: 1,
@@ -170,7 +170,7 @@ export const TEMPLATES: Template[] = [
     price: 4999,
     popular: true,
     theme: { bg: "#140C08", bg2: "#2A160C", ink: "#F6E7C8", accent: "#FF9A3C", muted: "#D9C29A", ornament: "bars", headingFont: "script" },
-  },
+  },
   // ---- Scene templates (royal / ivory) built from Ceremonia references. Images and songs: see CREDITS.md. ----
   {
     id: "darbar-wedding",
@@ -498,10 +498,23 @@ export const TEMPLATES: Template[] = [
     flow: "ambar",
     name: "Ambar",
     category: "nikkah",
-    tagline: "Ivory damask sealed with a gold Bismillah, a Moorish arch, a colour palette and a crystal chandelier.",
+    tagline: "Ivory damask sealed with a gold Bismillah, a Moorish arch, a palace gate and a crystal chandelier.",
     tags: ["nikkah", "ivory", "gold", "olive", "damask", "bismillah", "wax seal", "envelope", "arch", "chandelier", "timeline", "elegant", "minimal"],
     price: 3999,
     theme: { bg: "#F7EEDF", bg2: "#F1E2CB", ink: "#5A4630", accent: "#B48A4A", muted: "#80694F", ornament: "none", headingFont: "script" },
+  },
+  // after Webgency's template 5 (webgency.tilda.ws/template5), redrawn as our own art (FirdausArt.tsx); licence from the owner
+  {
+    id: "firdaus-wedding",
+    signature: 11,
+    motion: "rise",
+    flow: "firdaus",
+    name: "Firdaus",
+    category: "wedding",
+    tagline: "A gold flower seal opens on a painted chateau courtyard: a fountain, doves and roses, then wine and ivory pages.",
+    tags: ["wedding", "burgundy", "wine", "maroon", "ivory", "roses", "fountain", "doves", "palace", "wax seal", "envelope", "timeline", "elegant"],
+    price: 3999,
+    theme: { bg: "#6A0E22", bg2: "#FBF7F2", ink: "#3D2A2A", accent: "#6A0E22", muted: "#7A5A5A", ornament: "none", headingFont: "script" },
   },
 ];
 
