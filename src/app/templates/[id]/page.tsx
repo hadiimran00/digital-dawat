@@ -9,6 +9,8 @@ import { InviteExperience } from "@/components/invite/InviteExperience";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { JsonLd } from "@/components/JsonLd";
 import { SupportLink } from "@/components/SupportLink";
+import { DoneForYou } from "@/components/DoneForYou";
+import { LivePrice, Unavailable } from "@/components/TemplateLive";
 import { MAX_GUESTS } from "@/lib/guests";
 import { supportWhatsapp } from "@/lib/config";
 
@@ -126,14 +128,17 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
           <p className="mt-3 text-lg text-foreground/70">{t.tagline}</p>
           {/* price, with what it covers and why it's safe to start, then the action right under it */}
           <div className="mt-6 rounded-2xl border border-line bg-card p-5">
-            <p className="flex flex-wrap items-baseline gap-x-3"><span className="text-4xl font-bold tabular-nums">{formatPKR(t.price)}</span><span className="text-sm text-foreground/70">one price for your whole guest list</span></p>
+            <p className="flex flex-wrap items-baseline gap-x-3"><span className="text-4xl font-bold tabular-nums"><LivePrice template={t} /></span><span className="text-sm text-foreground/70">one price for your whole guest list</span></p>
             <ul className="mt-3 space-y-1.5 text-sm">
               <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-gold-deep" aria-hidden />Build and preview your own invitation for free. You pay only when you&apos;re happy with it.</li>
-              <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-gold-deep" aria-hidden />Up to {MAX_GUESTS.toLocaleString("en-PK")} guests, with no per-guest fee. For a 300-guest wedding that&apos;s about {formatPKR(Math.round(t.price / 300))} a guest.</li>
+              <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-gold-deep" aria-hidden />Up to {MAX_GUESTS.toLocaleString("en-PK")} guests, with no per-guest fee. For a 300-guest wedding that&apos;s about <LivePrice template={t} per={300} /> a guest.</li>
               <li className="flex gap-2"><Check className="mt-0.5 size-4 shrink-0 text-gold-deep" aria-hidden />Pay by online transfer. Your invitation goes live once we confirm it.</li>
             </ul>
+            <Unavailable template={t}>
             <Link href={cta} prefetch={false} className="btn btn-primary mt-5 hidden w-full md:inline-flex">Customise {t.name}</Link>
             <p className="mt-2 hidden text-center text-xs text-foreground/70 md:block">Free to try. You only sign in when you&apos;re ready to order.</p>
+            <DoneForYou template={t} className="mt-2" />
+            </Unavailable>
           </div>
 
           <h2 className="mt-8 font-display text-2xl font-bold">About this design</h2>
@@ -155,7 +160,7 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
               </div>
             ))}
           </div>
-          <Link href={cta} prefetch={false} className="btn btn-primary mt-8 hidden md:inline-flex">Customise {t.name}</Link>
+          <Unavailable template={t} quiet><Link href={cta} prefetch={false} className="btn btn-primary mt-8 hidden md:inline-flex">Customise {t.name}</Link></Unavailable>
           {supportWhatsapp && <p className="mt-4 text-sm text-foreground/70">Questions about {t.name}? <SupportLink topic={`I have a question about the ${t.name} template`} className="text-brand" /></p>}
 
           {related.length > 0 && (
@@ -168,7 +173,7 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
                       {/* eslint-disable-next-line @next/next/no-img-element -- static export */}
                       <img src={`/thumbs/${r.id}.webp`} alt="" width={360} height={640} loading="lazy" className="w-full rounded-xl border border-line transition-[translate] duration-200 ease-out [@media(hover:hover)]:group-hover:-translate-y-0.5" style={{ background: r.theme.bg }} />
                       <span className="mt-2 block text-sm font-semibold">{r.name}</span>
-                      <span className="block text-xs text-foreground/70">{categoryLabel(r.category)} · {formatPKR(r.price)}</span>
+                      <span className="block text-xs text-foreground/70">{categoryLabel(r.category)} · <LivePrice template={r} /></span>
                     </Link>
                   </li>
                 ))}
@@ -185,9 +190,9 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
         </Link>
         <div className="mr-auto">
           <p className="font-semibold leading-tight">{t.name}</p>
-          <p className="text-sm text-foreground/70">{formatPKR(t.price)} flat</p>
+          <p className="text-sm text-foreground/70"><LivePrice template={t} /> flat</p>
         </div>
-        <Link href={cta} prefetch={false} className="btn btn-primary">Customise</Link>
+        <Unavailable template={t} quiet><Link href={cta} prefetch={false} className="btn btn-primary">Customise</Link></Unavailable>
       </div>
     </div>
   );

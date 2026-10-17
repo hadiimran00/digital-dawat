@@ -87,7 +87,7 @@ for (const id of ids) {
       <div style="font:600 24px var(--nf-sans);letter-spacing:.2em;text-transform:uppercase;color:${accent}">${category}</div>
       <div style="font:700 96px/1.02 var(--nf-display),Georgia,serif;margin:18px 0 22px">${name}</div>
       <div style="font:500 30px/1.35 var(--nf-sans);max-width:560px;opacity:.9">Invitation template. Tap the live demo, then add your names and events.</div>
-      <div style="margin-top:34px;font:700 28px var(--nf-sans);color:${accent}">Digital Dawat</div></div>
+      <div style="margin-top:34px;font:700 28px var(--nf-sans);color:${accent}">Kabootar Post</div></div>
       <div style="width:560px;height:630px;position:relative;flex:none"><div data-card style="position:absolute;left:150px;top:30px"></div></div>`,
   });
   writeFileSync(`public/og/${id}.jpg`, og);

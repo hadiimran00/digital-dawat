@@ -10,7 +10,7 @@ const TOPICS = [
   { label: "Help choosing a design", topic: "I need help choosing an invitation design" },
   { label: "A question about payment", topic: "I have a question about payment" },
   { label: "I'm paying from outside Pakistan", topic: "I'm outside Pakistan and want to pay for an invitation" },
-  { label: "Something else", topic: "I have a question about Digital Dawat" },
+  { label: "Something else", topic: "I have a question about Kabootar Post" },
 ];
 
 /**

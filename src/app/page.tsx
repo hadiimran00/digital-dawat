@@ -8,6 +8,7 @@ import { InviteCard } from "@/components/invite/InviteCard";
 import { HeroDemo } from "@/components/HeroDemo";
 import { SupportLink } from "@/components/SupportLink";
 import { supportWhatsapp } from "@/lib/config";
+import { PigeonMark } from "@/components/Logo";
 import { SIGNATURE, TEMPLATES, formatPKR } from "@/lib/templates";
 import { defaultContent } from "@/lib/content";
 
@@ -58,6 +59,9 @@ const FAQ = [
   ["How do I pay?", "By online bank transfer to the account shown at checkout. Upload a screenshot of the receipt and we publish your invitation after we confirm the payment."],
   ["What if something is wrong after I pay?", "Message us and we correct names, dates, venues and spelling for free. If we can't put it right, you get a full refund. The pricing and refunds page has the details."],
   ["Some guests are only invited to the Walima. Can I do that?", "Yes. In your guest list, pick the events for each guest. Their personal link shows only those events, and they can only reply to those."],
+  ...(supportWhatsapp ? [
+    ["Can I get a design of my own choice?", "Yes. We design the card the way you want it, with your colours, fonts, photos or a look you've seen. On any design page, tap “A design of your own choice” to see the price and tell us on WhatsApp."],
+  ] : []),
   ...(supportWhatsapp ? [["I live outside Pakistan. Can I still order?", "Yes. Your guests can open the invitation from anywhere. To pay from abroad, message us on WhatsApp and we'll arrange a way that works for you."]] : []),
   ["Is it only for weddings?", "No. There are designs for Nikkah, engagements, birthdays and Aqiqah, each with its own price. The full wedding designs cover every event from Mehndi to Walima."],
   ["Can I use Urdu?", "Yes. Switch the card to Urdu and the layout turns right to left. You can also type your own wording in either language."],
@@ -131,6 +135,23 @@ export default function Home() {
               </li>
             ))}
           </ol>
+        </div>
+      </section>
+
+      {/* the name's story: how a dawat used to travel, and how it travels now */}
+      <section aria-labelledby="name-story" className="mx-auto grid max-w-6xl items-center gap-8 px-4 pt-16 md:grid-cols-[auto_1fr]">
+        <PigeonMark className="mx-auto size-28 md:size-36" />
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-gold-deep">Why Kabootar Post</p>
+          <h2 id="name-story" className="font-display text-4xl font-bold text-brand">The old way of inviting, delivered the new way</h2>
+          <p className="mt-3 max-w-3xl text-foreground/80 [text-wrap:pretty]">
+            Before WhatsApp, a dawat travelled by hand. A qasid knocked on the door, a kabootar carried the chitthi, and relatives went
+            from house to house with the card and a box of mithai. Every family was invited by name.
+          </p>
+          <p className="mt-3 max-w-3xl text-foreground/80 [text-wrap:pretty]">
+            We kept that care and changed the delivery. Each guest still gets their own invitation with their name on it, for only the
+            events they&apos;re invited to, and it reaches them on WhatsApp in one tap.
+          </p>
         </div>
       </section>
 

@@ -338,7 +338,7 @@ export function FlowInvite({ skin, content, ordered, names, hello, guest, seats,
         </figure>
       )}
       {skin === "hadiqa" && !photo && <RoseCluster className="mx-auto mt-6 w-48" tone="peach" />}
-      <p className="relative mt-10 text-xs" style={{ color: S.goldText }}>Made with Digital Dawat</p>
+      <p className="relative mt-10 text-xs" style={{ color: S.goldText }}>Delivered by Kabootar Post</p>
     </section>
   );
 

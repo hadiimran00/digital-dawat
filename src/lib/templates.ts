@@ -72,6 +72,10 @@ export interface PrintSpec {
   fonts?: "kids";
   /** the opening screen's words start this far down (% of the screen) instead of the middle: clear of a character's face */
   coverAt?: number;
+  /** where the following screens' panels sit: top (default) or bottom, so they clear the character's face */
+  panelsAt?: "top" | "bottom";
+  /** the picture in a polaroid event card until the customer adds a photo (the kids' characters) */
+  polaroid?: string;
   /** the shape of the panels on the following screens */
   panel?: "rounded" | "arch" | "frame" | "ticket" | "cloud" | "line" | "sticker" | "bubble";
   /** the countdown: plain cells, 3D balloons, flip-clock tiles, progress rings or postage stamps */
@@ -147,8 +151,8 @@ export interface Template {
   };
 }
 
-export const TEMPLATES: Template[] = [
-  // ---- Original designs, round 2 --------------------------------------------------------
+export const TEMPLATES: Template[] = [
+  // ---- Original designs, round 2 --------------------------------------------------------
   {
     id: "replay-wedding",
     signature: 1,
@@ -460,7 +464,7 @@ export const TEMPLATES: Template[] = [
     tags: ["birthday", "kids", "boy", "girl", "3d", "cartoon", "funky", "colourful", "bright", "balloons", "confetti", "bunting", "animated", "fun"],
     price: 1499,
     music: { src: "/audio/birthday-celebration.m4a", title: "Happy Birthday (celebration)" },
-    print: { art: "khilona", ground: "#5fd0ea", fonts: "kids", coverAt: 15, countdown: "balloons", message: "bubble", eventStyle: "polaroid", date: "chips", namesFirst: true, titleDeco: "outline", panel: "sticker", box: { top: 9, bottom: 37, x: 8, bottomW: 70 }, title: "#5b2bb5", caps: "#163a5c", body: "#1d3350", number: "3d", sampleAge: "5", petals: ["#ff4d8d", "#ffd23f", "#7b5cff", "#43d17a"], tap: "balloons" },
+    print: { art: "khilona", ground: "#5fd0ea", fonts: "kids", coverAt: 15, panelsAt: "top", polaroid: "/art/kids/khilona-boy.webp", countdown: "balloons", message: "bubble", eventStyle: "polaroid", date: "chips", namesFirst: true, titleDeco: "outline", panel: "sticker", box: { top: 9, bottom: 37, x: 8, bottomW: 70 }, title: "#5b2bb5", caps: "#163a5c", body: "#1d3350", number: "3d", sampleAge: "5", petals: ["#ff4d8d", "#ffd23f", "#7b5cff", "#43d17a"], tap: "balloons" },
     theme: { bg: "#c9f3e6", bg2: "#eafaf6", ink: "#1d3350", accent: "#7b5cff", muted: "#46607a", ornament: "none", headingFont: "script" },
   },
   {
@@ -474,11 +478,11 @@ export const TEMPLATES: Template[] = [
     tags: ["birthday", "kids", "girl", "princess", "3d", "cartoon", "pink", "hearts", "cake", "candle", "animated", "cute"],
     price: 1499,
     music: { src: "/audio/birthday-musicbox.m4a", title: "Happy Birthday (music box)" },
-    print: { art: "pari", ground: "#ffc6d8", fonts: "kids", coverAt: 50, countdown: "rings", message: "bubble", eventStyle: "polaroid", date: "stamp", panel: "rounded", box: { top: 34, topW: 64, bottom: 4, x: 8 }, title: "#c2185b", caps: "#7a2e4a", body: "#5e2a3e", number: "3d", sampleAge: "3", petals: ["#ff7aa8", "#ffb3cd", "#f5d08a"], tap: "hearts" },
+    print: { art: "pari", ground: "#ffc6d8", fonts: "kids", coverAt: 50, panelsAt: "bottom", polaroid: "/art/kids/pari-scene.webp", countdown: "rings", message: "bubble", eventStyle: "polaroid", date: "stamp", panel: "rounded", box: { top: 34, topW: 64, bottom: 4, x: 8 }, title: "#c2185b", caps: "#7a2e4a", body: "#5e2a3e", number: "3d", sampleAge: "3", petals: ["#ff7aa8", "#ffb3cd", "#f5d08a"], tap: "hearts" },
     theme: { bg: "#ffd6e3", bg2: "#fff3f7", ink: "#5e2a3e", accent: "#d63c78", muted: "#8a4f66", ornament: "none", headingFont: "script" },
   },
   // Flowing-page designs after Webgency's "The Sacred Garden" and "Blossom Oud", redrawn as our own vector artwork
-  // (FlowArt.tsx); the owner is arranging the licence (see CREDITS.md). Their songs come from the owner later.
+  // (FlowArt.tsx); the owner holds the licence (see CREDITS.md). Their songs come from the owner later.
   {
     id: "hadiqa-wedding",
     signature: 9,
@@ -503,7 +507,7 @@ export const TEMPLATES: Template[] = [
     price: 3999,
     theme: { bg: "#F7EEDF", bg2: "#F1E2CB", ink: "#5A4630", accent: "#B48A4A", muted: "#80694F", ornament: "none", headingFont: "script" },
   },
-  // after Webgency's template 5 (webgency.tilda.ws/template5), redrawn as our own art (FirdausArt.tsx); licence from the owner
+  // after Webgency's template 5 (webgency.tilda.ws/template5), redrawn as our own art (FirdausArt.tsx); the owner holds the licence (see CREDITS.md)
   {
     id: "firdaus-wedding",
     signature: 11,

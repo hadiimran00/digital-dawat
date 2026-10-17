@@ -14,6 +14,9 @@ import { VideoExport } from "@/components/VideoExport";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { PhotoField } from "@/components/PhotoField";
 import { SupportLink } from "@/components/SupportLink";
+import { CUSTOM_DESIGN_PRICE } from "@/components/DoneForYou";
+import { Unavailable } from "@/components/TemplateLive";
+import { useCatalog, useSetting } from "@/lib/catalog";
 import { supportWhatsapp } from "@/lib/config";
 
 const draftKey = (id: string) => `dawat:draft:v2:${id}`;
@@ -49,6 +52,9 @@ export function Editor() {
   const router = useRouter();
   const id = useSearchParams().get("t") ?? "";
   const template = getTemplate(id);
+  /** prices and which designs are switched on, from the database */
+  const live = useCatalog();
+  const customPrice = Number(useSetting("custom_design_price", String(CUSTOM_DESIGN_PRICE))) || 0;
   const [content, setContent] = useState<InviteContent | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -101,12 +107,15 @@ export function Editor() {
       <div className="mx-auto max-w-xl px-4 py-16 text-center">
         <p>Choose a template to start.</p>
         <ul className="mt-4 flex flex-wrap justify-center gap-2">
-          {TEMPLATES.map((t) => (
+          {TEMPLATES.filter(live.visible).map((t) => (
             <li key={t.id}><a className="btn btn-ghost" href={`/create?t=${t.id}`}>{t.name}</a></li>
           ))}
         </ul>
       </div>
     );
+  }
+  if (!live.visible(template)) {
+    return <div className="mx-auto max-w-xl px-4 py-16"><Unavailable template={template}>{null}</Unavailable></div>;
   }
   if (!content) return <p className="p-8 text-center">Loading…</p>;
 
@@ -184,7 +193,7 @@ export function Editor() {
       if (e1) throw e1;
       const { data: ord, error: e2 } = await sb
         .from("orders")
-        .insert({ owner_id: user.id, invite_id: inv.id, amount_pkr: template.price })
+        .insert({ owner_id: user.id, invite_id: inv.id, amount_pkr: live.price(template) })
         .select("id")
         .single();
       if (e2) throw e2;
@@ -224,6 +233,12 @@ export function Editor() {
         <div>
           <h1 className="font-display text-4xl font-bold text-brand">Customise {template.name}</h1>
           <p className="text-sm text-foreground/70">Your changes save automatically on this device.</p>
+          {supportWhatsapp && customPrice > 0 && (
+            <p className="mt-1 text-sm text-foreground/70">
+              Want a design of your own choice? We&apos;ll design your card for {formatPKR(customPrice)} in total.{" "}
+              <SupportLink topic={`I'd like an invitation card designed to my own choice (${formatPKR(customPrice)}). I was looking at the ${template.name} design`} className="text-brand">WhatsApp us</SupportLink>
+            </p>
+          )}
         </div>
 
         <fieldset data-preview="cover" className="grid gap-4 sm:grid-cols-2">
@@ -451,7 +466,7 @@ export function Editor() {
         </fieldset>
 
         <div className="rounded-2xl border border-line bg-card p-5">
-          <p className="font-semibold">{formatPKR(template.price)} <span className="font-normal text-foreground/70">· flat price, includes web invite, video and RSVP</span></p>
+          <p className="font-semibold">{formatPKR(live.price(template))} <span className="font-normal text-foreground/70">· flat price, includes web invite, video and RSVP</span></p>
           <p className="mt-1 text-sm text-foreground/70">You pay by online bank transfer after reviewing, then upload your receipt. Your invite goes live once we confirm it.</p>
           {supportWhatsapp && <p className="mt-2 text-sm text-foreground/70">Need help? <SupportLink topic={`I have a question about the ${template.name} invitation`} className="text-brand" /></p>}
           <div className="mt-4 flex flex-wrap gap-2">
@@ -489,7 +504,7 @@ export function Editor() {
 
       {/* phones: price, preview and continue always in reach */}
       <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-2 border-t border-line bg-background/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur lg:hidden">
-        <p className="mr-auto text-sm font-semibold">{formatPKR(template.price)}</p>
+        <p className="mr-auto text-sm font-semibold">{formatPKR(live.price(template))}</p>
         <button type="button" className="btn btn-ghost" onClick={() => setPreviewing(true)}><Eye className="size-4" aria-hidden /> Preview</button>
         <button type="submit" form="editor-form" className="btn btn-primary" disabled={busy}>{busy ? "Saving…" : "Continue"}</button>
       </div>

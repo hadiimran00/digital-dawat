@@ -251,7 +251,7 @@ export function Firdaus({ content, ordered, names, hello, guest, seats, opened, 
       ) : (
         <RoseBank className="relative mt-8 block w-full" />
       )}
-      <p className="pb-[calc(1.5rem+var(--frame-bottom,0px))] pt-4 text-xs">Made with Digital Dawat</p>
+      <p className="pb-[calc(1.5rem+var(--frame-bottom,0px))] pt-4 text-xs">Delivered by Kabootar Post</p>
     </section>
   );
 

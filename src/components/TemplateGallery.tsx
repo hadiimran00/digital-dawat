@@ -5,12 +5,17 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { CATEGORIES, TEMPLATES, formatPKR, searchTemplates, categoryLabel, type CategoryId } from "@/lib/templates";
 import { HoverPreview } from "@/components/HoverPreview";
+import { useCatalog } from "@/lib/catalog";
 
 /** `titleAs` keeps the heading outline valid: h2 when the page has only an h1 above, h3 under a section h2. */
 export function TemplateGallery({ limit, titleAs: Title = "h3" }: { limit?: number; titleAs?: "h2" | "h3" }) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<CategoryId | "all">("all");
-  const results = useMemo(() => searchTemplates(q, cat), [q, cat]);
+  // designs switched off in the database (template_prices.visible = 'N') are left out
+  const live = useCatalog();
+  const all = TEMPLATES.filter(live.visible);
+  const found = useMemo(() => searchTemplates(q, cat), [q, cat]);
+  const results = found.filter(live.visible);
   const shown = limit ? results.slice(0, limit) : results;
 
   // the full gallery keeps its search and filter in the link (?c=nikkah&q=gold), so it can be shared and Back works
@@ -51,7 +56,7 @@ export function TemplateGallery({ limit, titleAs: Title = "h3" }: { limit?: numb
           {/* phones: one row you swipe sideways, so the designs start near the top */}
           <div role="group" aria-label="Filter by category" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden">
             {/* only occasions that have designs: an empty filter would be a dead end */}
-            {[{ id: "all" as const, label: "All" }, ...CATEGORIES.filter((x) => TEMPLATES.some((t) => t.category === x.id))].map((c) => (
+            {[{ id: "all" as const, label: "All" }, ...CATEGORIES.filter((x) => all.some((t) => t.category === x.id))].map((c) => (
               <button
                 key={c.id}
                 type="button"
@@ -70,7 +75,7 @@ export function TemplateGallery({ limit, titleAs: Title = "h3" }: { limit?: numb
 
       {!limit && (
         <p aria-live="polite" className="mb-4 text-sm text-foreground/70">
-          {shown.length === TEMPLATES.length ? `${shown.length} designs` : `${shown.length} of ${TEMPLATES.length} designs`}
+          {shown.length === all.length ? `${shown.length} designs` : `${shown.length} of ${all.length} designs`}
           {(q || cat !== "all") && shown.length > 0 && <button type="button" onClick={clear} className="ml-3 min-h-11 font-semibold text-brand underline underline-offset-4">Show all</button>}
         </p>
       )}
@@ -109,16 +114,16 @@ export function TemplateGallery({ limit, titleAs: Title = "h3" }: { limit?: numb
                     <Title className="font-semibold">{t.name}</Title>
                     <p className="text-sm text-foreground/70">{categoryLabel(t.category)}</p>
                   </div>
-                  <p className="whitespace-nowrap text-sm font-semibold text-brand">{formatPKR(t.price)}</p>
+                  <p className="whitespace-nowrap text-sm font-semibold text-brand">{formatPKR(live.price(t))}</p>
                 </div>
               </Link>
             </li>
           ))}
         </ul>
       )}
-      {limit && TEMPLATES.length > limit && (
+      {limit && all.length > limit && (
         <div className="mt-8 text-center">
-          <Link href="/templates" className="btn btn-ghost">Browse all {TEMPLATES.length} templates</Link>
+          <Link href="/templates" className="btn btn-ghost">Browse all {all.length} templates</Link>
         </div>
       )}
     </div>

@@ -296,20 +296,29 @@ const PRINT_PANEL: Record<NonNullable<NonNullable<Template["print"]>["panel"]>, 
   bubble: { panel: "rounded-[30px] border-2 border-(--p-line) bg-(--p-panel) text-(--p-ink) shadow-[0_0_38px_var(--p-glow)] backdrop-blur-md" },
 };
 
+/**
+ * The kids' designs: chunky toy-like "clay" panels (thick white edge, a solid coloured base shadow, extra-round
+ * corners) and fat rounded buttons, instead of the wedding looks' fine lines and spaced capitals.
+ */
+const KIDS_PANEL = "rounded-[28px] border-[3px] border-white/90 bg-(--p-panel) text-(--p-ink) shadow-[0_6px_0_var(--p-accent),0_18px_34px_rgba(0,0,0,0.18)]";
+const KIDS_BUTTON = "press inline-flex min-h-12 items-center gap-1.5 rounded-full px-6 text-[15px] font-extrabold shadow-[0_4px_0_rgba(0,0,0,0.22)] active:translate-y-[2px] active:shadow-[0_2px_0_rgba(0,0,0,0.22)] [font-family:var(--nf-round)]";
+const KIDS_GHOST = "press inline-flex min-h-12 items-center gap-1.5 rounded-full border-[3px] border-white bg-(--p-panel) px-5 text-[15px] font-extrabold text-(--p-ink) shadow-[0_4px_0_var(--p-accent)] [font-family:var(--nf-round)]";
+
 const PRINT_LOOK = (dark: boolean, shape: keyof typeof PRINT_PANEL = "rounded", kids = false): Look => ({
   dark,
-  panel: PRINT_PANEL[shape].panel,
-  panelStyle: PRINT_PANEL[shape].style,
+  panel: kids ? KIDS_PANEL : PRINT_PANEL[shape].panel,
+  panelStyle: kids ? undefined : PRINT_PANEL[shape].style,
   ink: "text-(--p-ink)", muted: "text-(--p-ink)/75", cell: "rounded-xl border-(--p-line) bg-(--p-panel)",
-  title: "text-center text-[12px] font-semibold uppercase tracking-[0.3em] text-(--p-accent) [text-wrap:balance]", titleStyle: { fontFamily: kids ? ROUND : CAPS, fontWeight: kids ? 800 : undefined },
+  title: kids ? "text-center text-[22px] font-bold leading-tight text-(--p-accent) [text-wrap:balance]" : "text-center text-[12px] font-semibold uppercase tracking-[0.3em] text-(--p-accent) [text-wrap:balance]",
+  titleStyle: { fontFamily: kids ? FUN : CAPS, fontWeight: kids ? 700 : undefined },
   // the kids' designs speak in rounded, friendly type; the rest in the wedding script
   names: kids ? { fontFamily: FUN, fontWeight: 700, color: "var(--p-title)" } : { fontFamily: "var(--nf-script), cursive", fontWeight: 400, color: "var(--p-title)" },
   greet: kids ? { fontFamily: FUN, fontWeight: 700, color: "var(--p-title)" } : { fontFamily: "var(--nf-script), cursive", fontWeight: 400, color: "var(--p-title)" },
-  solid: "press inline-flex min-h-11 items-center gap-1.5 rounded-full px-5 text-[11px] font-semibold uppercase tracking-[0.2em] shadow-sm",
-  solidStyle: () => ({ background: "var(--p-accent)", color: "var(--p-on-accent)", fontFamily: CAPS }),
-  ghost: "press inline-flex min-h-11 items-center gap-1.5 rounded-full border border-(--p-line) bg-(--p-panel) px-5 text-[11px] font-semibold uppercase tracking-[0.2em] text-(--p-ink) [font-family:var(--nf-caps)]",
-  chip: "press inline-flex min-h-11 items-center rounded-full border border-(--p-line) bg-(--p-panel) px-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-(--p-ink) [font-family:var(--nf-caps)]",
-  label: "text-[11px] font-semibold uppercase tracking-[0.25em] text-(--p-accent) [font-family:var(--nf-caps)]",
+  solid: kids ? KIDS_BUTTON : "press inline-flex min-h-11 items-center gap-1.5 rounded-full px-5 text-[11px] font-semibold uppercase tracking-[0.2em] shadow-sm",
+  solidStyle: () => ({ background: "var(--p-accent)", color: "var(--p-on-accent)", fontFamily: kids ? ROUND : CAPS }),
+  ghost: kids ? KIDS_GHOST : "press inline-flex min-h-11 items-center gap-1.5 rounded-full border border-(--p-line) bg-(--p-panel) px-5 text-[11px] font-semibold uppercase tracking-[0.2em] text-(--p-ink) [font-family:var(--nf-caps)]",
+  chip: kids ? KIDS_GHOST : "press inline-flex min-h-11 items-center rounded-full border border-(--p-line) bg-(--p-panel) px-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-(--p-ink) [font-family:var(--nf-caps)]",
+  label: kids ? "text-[14px] font-extrabold text-(--p-accent) [font-family:var(--nf-round)]" : "text-[11px] font-semibold uppercase tracking-[0.25em] text-(--p-accent) [font-family:var(--nf-caps)]",
   align: "start", scrim: ["rgba(0,0,0,0)", "rgba(0,0,0,0)"],
   pill: "rounded-full bg-(--p-panel) px-4 text-[11px] text-(--p-ink) shadow-md",
   prose: kids ? "text-[16px] font-semibold leading-relaxed text-(--p-ink)/90 [font-family:var(--nf-round)]" : "font-display text-[17px] italic leading-relaxed text-(--p-ink)/90",
@@ -613,7 +622,8 @@ export function InviteExperience({
   const scenic = !!concept; // full-screen photo scenes, one section per screen
   const tape = concept === "tape";
   const print = concept === "print" ? template.print : undefined;
-  const look = print ? PRINT_LOOK(!!print.dark, print.panel, print.fonts === "kids") : LOOKS[(concept === "print" ? undefined : concept) ?? "tape"];
+  // panelsAt: the screens' panels sit at the top (the default) or the bottom, clear of a character's face
+  const look = print ? { ...PRINT_LOOK(!!print.dark, print.panel, print.fonts === "kids"), align: print.panelsAt === "bottom" ? "end" as const : "start" as const } : LOOKS[(concept === "print" ? undefined : concept) ?? "tape"];
   /** non-couple occasions (birthdays, aqiqah) get their own wording where the wedding looks speak of a couple */
   const coupleCat = !["birthday", "aqiqah", "baby-shower", "eid"].includes(template.category);
   const gated = concept === "royal" || concept === "ivory"; // doors or curtains instead of the sliding cover
@@ -655,7 +665,8 @@ export function InviteExperience({
     : concept === "aurora" ? { backgroundImage: "linear-gradient(135deg, #FFD1E8, #C9B8FF)", color: "#0B0B16" }
     : print ? { background: "var(--p-accent)", color: "var(--p-on-accent)" }
     : { backgroundImage: GOLD, color: "#3a0c12" };
-  const scratchKind: "static" | "foil" | null = tape ? "static" : concept === "editorial" || concept === "aurora" || concept === "embossed" || concept === "garden" ? null : scenic || template.motion === "scratch" ? "foil" : null;
+  // (the gold scratch-off is a grown-up wedding touch: not on the kids' designs)
+  const scratchKind: "static" | "foil" | null = tape ? "static" : print?.fonts === "kids" ? null : concept === "editorial" || concept === "aurora" || concept === "embossed" || concept === "garden" ? null : scenic || template.motion === "scratch" ? "foil" : null;
   const fx: TapFx = print ? print.tap : tape ? "flash" : concept === "royal" ? "sparkles" : concept === "ivory" ? "petals" : template.motion === "sparkle" ? "sparkles" : "petals";
   const fxCaption = ur
     ? "کچھ دیکھنے کے لیے ٹیپ کریں"
@@ -968,7 +979,7 @@ export function InviteExperience({
           <p className="text-[2.8rem] leading-[1.05]" style={{ ...look.names, color: "inherit" }}>{ur ? content.closing || "آپ کی آمد کے منتظر" : "See you at the party!"}</p>
           <p className="mt-3 text-xl font-bold" style={{ fontFamily: kidsType ? FUN : "var(--nf-display), serif" }}>{names}</p>
           <button type="button" className={`${look.solid} mt-6`} style={look.solidStyle(t.accent, t.bg)} onClick={() => setStoryRun((n) => n + 1)}>{ur ? "دوبارہ دیکھیں" : "Watch again"}</button>
-          <p className="mt-6 text-xs opacity-80">Made with Digital Dawat</p>
+          <p className="mt-6 text-xs opacity-80">Delivered by Kabootar Post</p>
         </div>
       ),
     },
@@ -1008,7 +1019,9 @@ export function InviteExperience({
     // printed cards: the invitation waits on a dark "table" until its card has opened (otherwise the doors, fold and
     // curtain would part onto the very same artwork and the opening would be invisible)
     <div className="relative h-full w-full overflow-hidden bg-background" dir={ur ? "rtl" : "ltr"} lang={ur ? "ur" : "en"} onPointerDown={onTap}
-      data-reveal={print ? (opened ? "in" : "wait") : undefined}
+      data-reveal={print ? (opened ? "in" : "wait") : undefined} data-kids={kidsType ? "" : undefined}
+      // print.panelsAt: the screens' panels sit low (the character's face is at the top) or high (the character stands at the bottom)
+      data-keep={print?.panelsAt === "bottom" ? "top" : print?.panelsAt === "top" ? "bottom" : undefined}
       style={print ? { ...printVars(template), background: "#2a2522", ["--reveal-delay" as string]: `${REVEAL_MS[opening]}ms` } : undefined}>
       {scenic && <SceneBackdrop scene={scene} t={t} photo={concept === "embossed" ? template.backdrop?.src : backdrop} photos={scenePhotos} active={bgPhoto} look={look} tape={tape} print={print} />}
 
@@ -1274,12 +1287,19 @@ export function InviteExperience({
                 {concept === "royal" && <Finial />}{print?.eventStyle !== "polaroid" && <PanelFrame look={look} />}
                 {print?.eventStyle === "polaroid" && (
                   <div className="relative mb-3 grid aspect-[4/3] place-items-center overflow-hidden" style={{ background: eventScene(e) || content.couplePhoto ? undefined : "radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--p-accent) 35%, white), var(--p-accent))" }}>
-                    {(eventScene(e) || content.couplePhoto) && (
+                    {(eventScene(e) || content.couplePhoto || print.polaroid) && (
+                      // the customer's photo, else the design's own picture (the kids' characters)
                       // eslint-disable-next-line @next/next/no-img-element -- static export, photo comes from our storage
-                      <img src={eventScene(e) || content.couplePhoto} alt="" className="absolute inset-0 h-full w-full object-cover" />
+                      <img src={eventScene(e) || content.couplePhoto || print.polaroid} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: content.couplePhoto ? undefined : "50% 30%" }} />
                     )}
-                    <p className={`relative px-4 leading-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,.35)] [text-wrap:balance] ${e.title.length > 12 ? "text-4xl" : "text-5xl"}`} style={{ fontFamily: ur ? font : coverNames, fontWeight: kidsType ? 700 : undefined }}>{e.title}</p>
+                    {/* over a photo the event's name reads as a caption on the picture; over the design's own character it would hide a face, so it goes underneath */}
+                    {(eventScene(e) || content.couplePhoto || !print.polaroid) && (
+                      <p className={`relative px-4 leading-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,.35)] [text-wrap:balance] ${e.title.length > 12 ? "text-4xl" : "text-5xl"}`} style={{ fontFamily: ur ? font : coverNames, fontWeight: kidsType ? 700 : undefined }}>{e.title}</p>
+                    )}
                   </div>
+                )}
+                {print?.eventStyle === "polaroid" && print.polaroid && !eventScene(e) && !content.couplePhoto && (
+                  <p aria-hidden className="mb-1 text-3xl leading-tight [text-wrap:balance]" style={{ fontFamily: ur ? font : coverNames, fontWeight: kidsType ? 700 : undefined, color: "var(--p-title)" }}>{e.title}</p>
                 )}
                 {print?.eventStyle === "ticket" && (
                   <p className="mx-auto mb-2 w-fit rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.3em]" style={{ fontFamily: CAPS, background: "var(--p-accent)", color: "var(--p-on-accent)" }}>
@@ -1481,7 +1501,7 @@ export function InviteExperience({
           </Screen>
           <p className={`pb-[calc(5rem+var(--frame-bottom,0px))] text-center text-xs ${print ? "" : onPaper ? look.muted : look.dark ? "text-white/70" : "text-white [text-shadow:0_1px_4px_rgba(0,0,0,.6)]"}`}>
             {/* the printed cards' artwork can be dark or busy at the very bottom: the credit sits on a small panel */}
-            {print ? <span className="rounded-full bg-(--p-panel) px-3 py-1 text-(--p-ink)">Made with Digital Dawat</span> : "Made with Digital Dawat"}
+            {print ? <span className="rounded-full bg-(--p-panel) px-3 py-1 text-(--p-ink)">Delivered by Kabootar Post</span> : "Delivered by Kabootar Post"}
           </p>
         </div>
         ) : (
@@ -1601,7 +1621,7 @@ export function InviteExperience({
           {content.closing && !tape && (
             <p className="py-6 text-center font-display text-2xl" style={{ fontFamily: font }}>{content.closing}<br /><span className="text-lg text-gold-deep">{names}</span></p>
           )}
-          <p className={`pb-16 text-center text-xs ${muted}`}>Made with Digital Dawat</p>
+          <p className={`pb-16 text-center text-xs ${muted}`}>Delivered by Kabootar Post</p>
         </div>
         )}
       </div>

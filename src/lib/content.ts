@@ -165,9 +165,9 @@ export function buildIcs(ev: InviteEvent, hosts: string): string {
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Digital Dawat//Invitation//EN",
+    "PRODID:-//Kabootar Post//Invitation//EN",
     "BEGIN:VEVENT",
-    `UID:${crypto.randomUUID()}@digitaldawat`,
+    `UID:${crypto.randomUUID()}@kabootarpost.com`,
     `DTSTAMP:${stamp}`,
     `DTSTART:${start}`,
     `DTEND:${endStr}`,

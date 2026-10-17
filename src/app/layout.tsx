@@ -23,14 +23,14 @@ const round = Nunito({ variable: "--nf-round", subsets: ["latin"], weight: ["600
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: "Digital Dawat | Wedding invitations for WhatsApp", template: "%s | Digital Dawat" },
+  title: { default: "Kabootar Post | Wedding invitations for WhatsApp", template: "%s | Kabootar Post" },
   description:
     "Nikkah, mehndi, baraat and walima invitations in one WhatsApp link. Personal links for each guest, RSVPs per event, music and video. Flat PKR price, preview before you pay.",
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
     locale: "en_PK",
-    images: [{ url: "/og/default.jpg", width: 1200, height: 630, alt: "Digital Dawat wedding invitation templates" }],
+    images: [{ url: "/og/default.jpg", width: 1200, height: 630, alt: "Kabootar Post wedding invitation templates" }],
   },
   twitter: { card: "summary_large_image" },
 };

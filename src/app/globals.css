@@ -637,3 +637,26 @@ summary,
   .fd-water path, .fd-mist, .fd-dove, .fd-wing, .fd-petal { animation: none; }
   .fd-petal { display: none; }
 }
+/* The kids' designs (print.fonts = "kids"): every wedding typeface inside the invitation becomes the rounded kids' type,
+   so nothing (titles, the reply form, labels, the closing) slips back into a thin serif or a script. Fredoka has no
+   italic, so no slanted fake italics either. */
+[data-kids] {
+  --nf-display: var(--nf-round);
+  --nf-caps: var(--nf-round);
+  --nf-script: var(--nf-fun);
+}
+[data-kids] .italic { font-style: normal; }
+[data-kids] .field { border-radius: 16px; border-width: 2px; }
+[data-kids] form .btn { min-height: 48px; font-weight: 800; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.22); }
+/* Kids' designs whose character must stay in view (print.panelsAt): every screen after the opening rests its panel
+   below a face at the top (keep top clear) or above a character standing at the bottom (keep bottom clear). */
+[data-keep="top"] [data-section][data-scene]:not([data-scene="0"]) {
+  padding-top: 40cqh !important;
+  padding-bottom: calc(5.5rem + var(--frame-bottom, 0px)) !important;
+  scroll-snap-align: end;
+}
+[data-keep="bottom"] [data-section][data-scene]:not([data-scene="0"]) {
+  padding-top: calc(4.5rem + var(--frame-top, 0px)) !important;
+  padding-bottom: 44cqh !important;
+  scroll-snap-align: start;
+}
