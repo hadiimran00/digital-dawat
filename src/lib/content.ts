@@ -120,6 +120,7 @@ export function defaultContent(category: CategoryId, language: "en" | "ur" = "en
     contactPhone: "",
     coverPhoto: "",
     couplePhoto: "",
+    music: "",
   };
 }
 

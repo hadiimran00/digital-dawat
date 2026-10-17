@@ -5,6 +5,7 @@ import { Download } from "lucide-react";
 import type { Template } from "@/lib/templates";
 import type { InviteContent } from "@/lib/content";
 import { VIDEO_STYLES, canExportMp4, renderInviteVideo, type VideoStyle } from "@/lib/videoExport";
+import { musicOf } from "@/lib/music";
 
 export function VideoExport({ template, content }: { template: Template; content: InviteContent }) {
   const [supported, setSupported] = useState<boolean | null>(null);
@@ -62,9 +63,9 @@ export function VideoExport({ template, content }: { template: Template; content
       {url && (
         <div className="mt-3 space-y-2">
           <video src={url} controls playsInline className="mx-auto w-full max-w-[300px] rounded-xl" />
-          {template.music && (
+          {musicOf(template, content) && (
             <p className="text-xs text-foreground/70">
-              {withMusic ? "Includes the template's music." : "This browser could not add the music, so the video is silent. Try Chrome or Edge on a computer."}
+              {withMusic ? (content.music && content.music !== "off" ? "Includes your song." : "Includes the design's music.") : "This browser could not add the music, so the video is silent. Try Chrome or Edge on a computer."}
             </p>
           )}
           <a href={url} download={`invitation-${template.id}.mp4`} className="btn btn-primary w-full">

@@ -13,6 +13,7 @@ import { InviteExperience } from "@/components/invite/InviteExperience";
 import { VideoExport } from "@/components/VideoExport";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { PhotoField } from "@/components/PhotoField";
+import { MusicField } from "@/components/MusicField";
 import { SupportLink } from "@/components/SupportLink";
 import { CUSTOM_DESIGN_PRICE } from "@/components/DoneForYou";
 import { Unavailable } from "@/components/TemplateLive";
@@ -299,6 +300,17 @@ export function Editor() {
               hint={forOne ? "A portrait of the birthday star or your little one, shown on its own screen." : "A portrait of the two of you (or the host)."}
               value={content.couplePhoto} fallback={template.sample?.couple} onChange={(url) => set({ couplePhoto: url })} /></div>
             {err("couplePhoto")}
+          </div>
+        </section>
+
+        <section className="space-y-4" aria-label="Music">
+          <h2 className="font-display text-2xl font-bold">Music <span className="text-base font-normal text-foreground/70">(optional)</span></h2>
+          <p className="text-sm text-foreground/70">
+            {template.music ? "This design comes with its own song. Keep it, upload your own, or turn the music off." : "Add a song that plays when guests open the invitation, or keep it quiet."}
+          </p>
+          <div className="rounded-2xl border border-line bg-card p-4">
+            <MusicField template={template} value={content.music ?? ""} next={here} onChange={(v) => set({ music: v })} />
+            {err("music")}
           </div>
         </section>
 

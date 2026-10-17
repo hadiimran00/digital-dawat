@@ -19,6 +19,7 @@ import {
   BISMILLAH, downloadIcs, eventsDateText, formatEventDate, formatEventTime, mapLink, type InviteContent, type InviteEvent,
 } from "@/lib/content";
 import { FlowInvite } from "./FlowInvite";
+import { musicOf } from "@/lib/music";
 import { Firdaus } from "./Firdaus";
 import { burst, type TapFx } from "@/lib/tapFx";
 import { ArtHero, AURORA_TEXT, GOLD, InviteCard, TAPE_GLASS } from "./InviteCard";
@@ -631,6 +632,8 @@ export function InviteExperience({
   const videoGate = concept === "embossed" || concept === "garden"; // doors / a pearl curtain that open in a short video
   /** how the "Tap to open" cover leaves, for the designs that use it (printed cards and the classic cards) */
   const opening = openingOf(template);
+  /** the design's song, the family's own, or none (content.music) */
+  const music = musicOf(template, fullContent);
   /** stories mode: full-screen pages, one at a time (Stories.tsx), instead of one long scroll */
   const stories = template.mode === "stories" && !!template.print;
   const [storyRun, setStoryRun] = useState(0);
@@ -1010,7 +1013,7 @@ export function InviteExperience({
     const flowProps = {
       content, ordered, allEvents: fullContent.events, names, hello, guest, seats, opened, gone, onOpen: open, scroller, onScroll,
       rsvp: { inviteId, demo: demo || preview, showNote: demo, guestId, events: rsvpEvents },
-      song: template.music ? { node: <audio ref={song} src={template.music.src} loop preload="none" />, off: songOff, toggle: toggleSong } : undefined,
+      song: music ? { node: <audio ref={song} src={music.src} loop preload="none" />, off: songOff, toggle: toggleSong } : undefined,
     };
     return template.flow === "firdaus" ? <Firdaus {...flowProps} /> : <FlowInvite skin={template.flow} {...flowProps} />;
   }
@@ -1661,9 +1664,9 @@ export function InviteExperience({
         </button>
       )}
 
-      {template.music && (
+      {music && (
         <>
-          <audio ref={song} src={template.music.src} loop preload="none" />
+          <audio ref={song} src={music.src} loop preload="none" />
           {opened && (
             <button type="button" onClick={toggleSong} aria-pressed={!songOff} aria-label={songOff ? "Play music" : "Mute music"}
               className="press absolute bottom-[calc(3.5rem+var(--frame-bottom,0px))] left-4 z-30 grid size-11 place-items-center rounded-full border border-white/30 bg-black/60 text-white backdrop-blur">

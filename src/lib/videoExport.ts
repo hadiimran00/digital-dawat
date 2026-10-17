@@ -4,6 +4,7 @@ import {
   AudioBufferSource, BufferTarget, CanvasSource, Mp4OutputFormat, Output, QUALITY_HIGH, canEncodeAudio, canEncodeVideo, type AudioCodec,
 } from "mediabunny";
 import type { Template, VideoStyle } from "./templates";
+import { musicOf } from "./music";
 import { BISMILLAH, eventsDateText, eventsTitle, formatEventTime, type InviteContent } from "./content";
 import { Ornament, isTallOrnament } from "@/components/invite/Ornament";
 
@@ -582,9 +583,10 @@ export async function renderInviteVideo(
   output.addVideoTrack(source, { frameRate: FPS });
 
   let audio: { src: AudioBufferSource; buf: AudioBuffer } | null = null;
-  if (template.music) {
+  const song = musicOf(template, content); // the design's song, the family's own, or none
+  if (song) {
     const codec = await pickAudioCodec();
-    const buf = codec ? await renderMusic(template.music.src, seconds).catch(() => null) : null;
+    const buf = codec ? await renderMusic(song.src, seconds).catch(() => null) : null;
     if (codec && buf) {
       audio = { src: new AudioBufferSource({ codec, bitrate: 128_000 }), buf };
       output.addAudioTrack(audio.src);

@@ -3,6 +3,7 @@ import { z } from "zod";
 // No eval-based fast path: the site's Content-Security-Policy does not allow evaluating strings as code.
 z.config({ jitless: true });
 import { isOurPhoto } from "./photos";
+import { isOurSong } from "./music";
 
 /** A customer photo: empty, or a URL in our own storage bucket. */
 const Photo = z.string().trim().max(400).refine((v) => v === "" || isOurPhoto(v), "Please upload the photo again").default("");
@@ -73,6 +74,8 @@ export const ContentSchema = z.object({
   contactPhone: z.string().trim().max(20),
   coverPhoto: Photo,
   couplePhoto: Photo,
+  /** "" = the design's own song, "off" = no music, or the customer's own song (a URL in our bucket, see music.ts) */
+  music: z.string().trim().max(400).refine((v) => v === "" || v === "off" || isOurSong(v), "Please upload the song again").default(""),
 });
 
 export type InviteContent = z.infer<typeof ContentSchema>;

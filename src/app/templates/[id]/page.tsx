@@ -58,7 +58,7 @@ export default async function TemplatePage({ params }: PageProps<"/templates/[id
     ["The invitation", [
       "Tap to open, with a countdown, venues, maps and add-to-calendar",
       ...(t.concept === "print" ? ["The card's artwork stays behind every screen"] : t.concept ? ["A full-screen scene for every event"] : []),
-      ...(t.music ? ["Background music guests can turn on or off"] : []),
+      t.music ? "Its own song, or upload yours. Guests can turn it off." : "Add your own song, or keep it quiet",
       t.concept === "print"
         ? t.print?.photo ? "Your own photo in the frame on the card, plus a portrait screen" : "Add a portrait photo of your own"
         : ["aurora", "monogram", "embossed", "garden"].includes(t.concept ?? "") ? "Add a portrait photo of the two of you"
