@@ -66,6 +66,10 @@ export interface PrintSpec {
   titleDeco?: "ribbon" | "outline";
   /** the names before the title ("Zain / Birthday Party") */
   namesFirst?: boolean;
+  /** the colour the words sit on: the card's text colours are adjusted until they read against it (PrintText) */
+  ground?: string;
+  /** "kids": rounded, friendly type (Fredoka and Nunito) instead of the wedding script and engraved capitals */
+  fonts?: "kids";
   /** the opening screen's words start this far down (% of the screen) instead of the middle: clear of a character's face */
   coverAt?: number;
   /** the shape of the panels on the following screens */
@@ -102,10 +106,18 @@ export interface Template {
    * Modern looks: "editorial" = a magazine feature on paper, "aurora" = moving light behind glass, "monogram" = initials drawn in gold.
    */
   concept?: "tape" | "royal" | "ivory" | "editorial" | "aurora" | "monogram" | "embossed" | "garden" | "print";
+  /** How guests move through the invitation: scroll (the default) or "stories" (full-screen pages, tap to go on) */
+  mode?: "stories";
   /** How the "Tap to open" cover leaves (see globals.css .open-*). Unset: from `motion` (see openingOf). */
   opening?: Opening;
   /** "print": a printed-card design (illustrated artwork from PrintArt.tsx, the words laid out like the card) */
   print?: PrintSpec;
+  /**
+   * A flowing single page (FlowInvite.tsx): an envelope that opens, then one long illustrated page where each part
+   * fades in as the guest scrolls. "hadiqa" = a rose garden arch with swans; "ambar" = ivory damask, a gold
+   * Bismillah seal and a Moorish arch.
+   */
+  flow?: "hadiqa" | "ambar";
   /** "garden": the Bismillah as calligraphy artwork (transparent image) instead of typeset text */
   bismillahArt?: string;
   /** "embossed": a short video of the closing doors opening, played when the guest taps open (the `gate` image is its first frame) */
@@ -526,7 +538,7 @@ export const TEMPLATES: Template[] = [
     price: 1499,
     // our own arrangement of the public-domain melody (see CREDITS.md)
     music: { src: "/audio/birthday-piano.m4a", title: "Happy Birthday (piano waltz)" },
-    print: { art: "lifafa", countdown: "stamps", message: "letter", eventStyle: "ticket", date: "list", panel: "frame", box: { top: 5, bottom: 30, x: 15 }, title: "#5B3A2E", caps: "#4A3A2E", body: "#5B4A3E", titleFont: "serif", petals: ["#8a2637", "#c9a24a", "#efe6d6"], tap: "glitter" },
+    print: { art: "lifafa", ground: "#efe6d6", countdown: "stamps", message: "letter", eventStyle: "ticket", date: "list", panel: "frame", box: { top: 5, bottom: 30, x: 15 }, title: "#5B3A2E", caps: "#4A3A2E", body: "#5B4A3E", titleFont: "serif", petals: ["#8a2637", "#c9a24a", "#efe6d6"], tap: "glitter" },
     theme: { bg: "#5A1420", bg2: "#3E0C15", ink: "#4A3A2E", accent: "#B08A3E", muted: "#7A6656", ornament: "none", headingFont: "script" },
   },
   {
@@ -541,7 +553,7 @@ export const TEMPLATES: Template[] = [
     price: 1499,
     // our own arrangement of the public-domain melody (see CREDITS.md)
     music: { src: "/audio/birthday-musicbox.m4a", title: "Happy Birthday (music box)" },
-    print: { art: "gubbara", countdown: "balloons", message: "bubble", eventStyle: "card", date: "icons", titleDeco: "ribbon", panel: "arch", box: { top: 15, bottom: 13, x: 19 }, title: "#D2697E", caps: "#8A5A62", body: "#7A4A52", petals: ["#f2a7b8", "#e7c983", "#fbd6de"], tap: "balloons" },
+    print: { art: "gubbara", ground: "#f4d0d8", countdown: "balloons", message: "bubble", eventStyle: "card", date: "icons", titleDeco: "ribbon", panel: "arch", box: { top: 15, bottom: 13, x: 19 }, title: "#D2697E", caps: "#8A5A62", body: "#7A4A52", petals: ["#f2a7b8", "#e7c983", "#fbd6de"], tap: "balloons" },
     theme: { bg: "#FBE3E6", bg2: "#F7D3D9", ink: "#7A4A52", accent: "#D2697E", muted: "#9A6E75", ornament: "none", headingFont: "script" },
   },
   {
@@ -556,7 +568,7 @@ export const TEMPLATES: Template[] = [
     price: 1499,
     // our own arrangement of the public-domain melody (see CREDITS.md)
     music: { src: "/audio/birthday-piano.m4a", title: "Happy Birthday (piano waltz)" },
-    print: { art: "neelam", countdown: "rings", message: "letter", eventStyle: "card", date: "bars", panel: "frame", box: { top: 15, bottom: 15, x: 17 }, title: "#1B1B1B", caps: "#1F2A44", body: "#2C2C2C", petals: ["#24345a", "#3f5384", "#8fa2c9"], tap: "stars" },
+    print: { art: "neelam", ground: "#ffffff", countdown: "rings", message: "letter", eventStyle: "card", date: "bars", panel: "frame", box: { top: 15, bottom: 15, x: 17 }, title: "#1B1B1B", caps: "#1F2A44", body: "#2C2C2C", petals: ["#24345a", "#3f5384", "#8fa2c9"], tap: "stars" },
     theme: { bg: "#FFFFFF", bg2: "#F4F6FA", ink: "#1F2A44", accent: "#2F4170", muted: "#5A6378", ornament: "none", headingFont: "script" },
   },
   {
@@ -571,7 +583,7 @@ export const TEMPLATES: Template[] = [
     price: 1499,
     // our own arrangement of the public-domain melody (see CREDITS.md)
     music: { src: "/audio/birthday-musicbox.m4a", title: "Happy Birthday (music box)" },
-    print: { art: "pehli", countdown: "balloons", message: "bubble", eventStyle: "polaroid", date: "columns", titleDeco: "ribbon", panel: "rounded", number: "gold", sampleAge: "1", box: { top: 6, bottom: 6, x: 9 }, title: "#D86F86", caps: "#A3707A", body: "#7A5A60", photo: "circle", petals: ["#f4a9ba", "#e9c97c", "#fde3e9"], tap: "confetti" },
+    print: { art: "pehli", ground: "#f9e0d6", countdown: "balloons", message: "bubble", eventStyle: "polaroid", date: "columns", titleDeco: "ribbon", panel: "rounded", number: "gold", sampleAge: "1", box: { top: 6, bottom: 6, x: 9 }, title: "#D86F86", caps: "#A3707A", body: "#7A5A60", photo: "circle", petals: ["#f4a9ba", "#e9c97c", "#fde3e9"], tap: "confetti" },
     theme: { bg: "#FFF6EE", bg2: "#FDEBE4", ink: "#7A5A60", accent: "#D86F86", muted: "#A3707A", ornament: "none", headingFont: "script" },
   },
   {
@@ -584,7 +596,7 @@ export const TEMPLATES: Template[] = [
     tagline: "Pink watercolour blossoms, a butterfly and a little pram around a fine arch, with Bismillah.",
     tags: ["aqiqah", "aqeeqah", "baby", "girl", "pink", "floral", "pram", "butterfly", "arch", "bismillah"],
     price: 1999,
-    print: { art: "gulnaar", countdown: "rings", message: "letter", eventStyle: "polaroid", date: "badge", panel: "arch", box: { top: 15, bottom: 17, x: 17 }, title: "#B8607A", caps: "#8A5F6C", body: "#6E5560", petals: ["#e9a6bc", "#f8dbe5", "#c46f8d"], tap: "petals" },
+    print: { art: "gulnaar", ground: "#f3d8e2", countdown: "rings", message: "letter", eventStyle: "polaroid", date: "badge", panel: "arch", box: { top: 15, bottom: 17, x: 17 }, title: "#B8607A", caps: "#8A5F6C", body: "#6E5560", petals: ["#e9a6bc", "#f8dbe5", "#c46f8d"], tap: "petals" },
     theme: { bg: "#FFFFFF", bg2: "#FBF1F4", ink: "#6E5560", accent: "#C77A92", muted: "#8A6F79", ornament: "none", headingFont: "script" },
   },
   {
@@ -597,7 +609,7 @@ export const TEMPLATES: Template[] = [
     tagline: "Bismillah in calligraphy on warm linen, with taupe balloons and teddy bears.",
     tags: ["aqiqah", "aqeeqah", "baby", "neutral", "beige", "taupe", "balloons", "teddy", "bismillah", "boy", "girl"],
     price: 1999,
-    print: { art: "teddy", countdown: "cells", message: "bubble", eventStyle: "polaroid", date: "stamp", panel: "cloud", box: { top: 12, bottom: 17, x: 13 }, title: "#6B5444", caps: "#6B5A4C", body: "#5C4B3E", petals: ["#bfa68c", "#efe7dc", "#8f7360"], tap: "bubbles" },
+    print: { art: "teddy", ground: "#e7e0d5", countdown: "cells", message: "bubble", eventStyle: "polaroid", date: "stamp", panel: "cloud", box: { top: 12, bottom: 17, x: 13 }, title: "#6B5444", caps: "#6B5A4C", body: "#5C4B3E", petals: ["#bfa68c", "#efe7dc", "#8f7360"], tap: "bubbles" },
     theme: { bg: "#E8E1D6", bg2: "#DED5C7", ink: "#5C4B3E", accent: "#9C8268", muted: "#7E6D5E", ornament: "none", headingFont: "script" },
   },
   {
@@ -610,7 +622,7 @@ export const TEMPLATES: Template[] = [
     tagline: "A teddy floats in on balloons above a soft taupe arch, with hot-air balloons either side.",
     tags: ["aqiqah", "aqeeqah", "baby", "boy", "neutral", "taupe", "teddy", "balloons", "hot air balloon", "arch"],
     price: 1999,
-    print: { art: "bhalu", countdown: "balloons", message: "card", eventStyle: "ticket", date: "list", panel: "arch", box: { top: 24, bottom: 9, x: 18, topW: 54 }, title: "#5E4636", caps: "#5E4A3C", body: "#4E3E33", titleFont: "serif", petals: ["#c9ab8f", "#e9dccb", "#b59378"], tap: "balloons" },
+    print: { art: "bhalu", ground: "#d9c3b3", countdown: "balloons", message: "card", eventStyle: "ticket", date: "list", panel: "arch", box: { top: 24, bottom: 9, x: 18, topW: 54 }, title: "#5E4636", caps: "#5E4A3C", body: "#4E3E33", titleFont: "serif", petals: ["#c9ab8f", "#e9dccb", "#b59378"], tap: "balloons" },
     theme: { bg: "#F7F1EA", bg2: "#D9C3B3", ink: "#4E3E33", accent: "#8C6A55", muted: "#6E5A4C", ornament: "none", headingFont: "serif" },
   },
   {
@@ -623,7 +635,7 @@ export const TEMPLATES: Template[] = [
     tagline: "White and sage florals on a clean white card, with Bismillah in calligraphy.",
     tags: ["engagement", "mangni", "minimal", "white", "sage", "green", "floral", "bismillah", "elegant"],
     price: 2499,
-    print: { art: "saadgi", countdown: "cells", message: "letter", eventStyle: "card", date: "bars", panel: "line", box: { top: 12, bottom: 17, x: 14 }, title: "#4A4A4A", caps: "#5A5A5A", body: "#4A4A4A", petals: ["#ffffff", "#a9b89b", "#e4dccd"], tap: "petals" },
+    print: { art: "saadgi", ground: "#f7f8f3", countdown: "cells", message: "letter", eventStyle: "card", date: "bars", panel: "line", box: { top: 12, bottom: 17, x: 14 }, title: "#4A4A4A", caps: "#5A5A5A", body: "#4A4A4A", petals: ["#ffffff", "#a9b89b", "#e4dccd"], tap: "petals" },
     theme: { bg: "#FFFFFF", bg2: "#F6F7F3", ink: "#4A4A4A", accent: "#7D8F74", muted: "#6E6E6E", ornament: "none", headingFont: "script" },
   },
   {
@@ -636,7 +648,7 @@ export const TEMPLATES: Template[] = [
     tagline: "An olive-green arch with ivory lettering and white blossoms over the top.",
     tags: ["engagement", "mangni", "olive", "green", "ivory", "arch", "floral", "rings", "bismillah"],
     price: 2499,
-    print: { art: "zaitoon", countdown: "flip", message: "letter", eventStyle: "ticket", date: "badge", panel: "arch", box: { top: 12, bottom: 8, x: 15 }, title: "#F3EBD8", caps: "#EFE6D0", body: "#E9DFC8", dark: true, petals: ["#f6f1e6", "#a8ad86", "#d9c58e"], tap: "petals" },
+    print: { art: "zaitoon", ground: "#7d7a50", countdown: "flip", message: "letter", eventStyle: "ticket", date: "badge", panel: "arch", box: { top: 12, bottom: 8, x: 15 }, title: "#F3EBD8", caps: "#EFE6D0", body: "#E9DFC8", dark: true, petals: ["#f6f1e6", "#a8ad86", "#d9c58e"], tap: "petals" },
     theme: { bg: "#5C5A2E", bg2: "#4A4824", ink: "#F3EBD8", accent: "#D9C58E", muted: "#D8CDB0", ornament: "none", headingFont: "script" },
   },
   {
@@ -649,13 +661,14 @@ export const TEMPLATES: Template[] = [
     tagline: "Deep red roses on blush satin, with the bride and groom in silhouette.",
     tags: ["nikkah", "red", "roses", "blush", "maroon", "couple", "bismillah", "romantic", "floral"],
     price: 2999,
-    print: { art: "surkh", countdown: "stamps", message: "letter", eventStyle: "ticket", date: "columns", panel: "ticket", box: { top: 8, bottom: 20, x: 12, bottomW: 47 }, title: "#6E1622", caps: "#5A2A2E", body: "#4E2A2E", petals: ["#a3192c", "#d2404f", "#5e0b16"], tap: "hearts" },
+    print: { art: "surkh", ground: "#f1dcd5", countdown: "stamps", message: "letter", eventStyle: "ticket", date: "columns", panel: "ticket", box: { top: 8, bottom: 20, x: 12, bottomW: 47 }, title: "#6E1622", caps: "#5A2A2E", body: "#4E2A2E", petals: ["#a3192c", "#d2404f", "#5e0b16"], tap: "hearts" },
     theme: { bg: "#F7E7E2", bg2: "#F0D9D2", ink: "#4E2A2E", accent: "#8E1B2A", muted: "#7A5257", ornament: "none", headingFont: "script" },
   },
   // Kids' party designs: soft 3D toy artwork in code (KidsArt.tsx) that moves: balloons bob, candle flames flicker,
   // confetti falls, fireworks pop. The age the customer types shows as a big 3D number.
   {
     id: "jashn-birthday",
+    mode: "stories",
     opening: "curtain",
     motion: "sparkle",
     concept: "print",
@@ -665,7 +678,7 @@ export const TEMPLATES: Template[] = [
     tags: ["birthday", "kids", "boy", "girl", "3d", "cartoon", "party", "night", "fireworks", "balloons", "cake", "candles", "animated", "fun"],
     price: 1499,
     music: { src: "/audio/birthday-celebration.m4a", title: "Happy Birthday (celebration)" },
-    print: { art: "jashn", coverAt: 9, countdown: "flip", message: "bubble", eventStyle: "ticket", date: "chips", namesFirst: true, panel: "bubble", box: { top: 4, bottom: 38, x: 8, bottomW: 74 }, title: "#ffd36e", caps: "#efe6ff", body: "#e6dcff", dark: true, number: "3d", sampleAge: "5", petals: ["#ffd36e", "#5ec8ff", "#ff6fb0"], tap: "stars" },
+    print: { art: "jashn", ground: "#2a1b4f", fonts: "kids", coverAt: 9, countdown: "flip", message: "bubble", eventStyle: "ticket", date: "chips", namesFirst: true, panel: "bubble", box: { top: 4, bottom: 38, x: 8, bottomW: 74 }, title: "#ffd36e", caps: "#efe6ff", body: "#e6dcff", dark: true, number: "3d", sampleAge: "5", petals: ["#ffd36e", "#5ec8ff", "#ff6fb0"], tap: "stars" },
     theme: { bg: "#170f33", bg2: "#2a1b4f", ink: "#f3ecff", accent: "#ffd36e", muted: "#c9bce6", ornament: "none", headingFont: "script" },
   },
   {
@@ -679,7 +692,7 @@ export const TEMPLATES: Template[] = [
     tags: ["birthday", "kids", "boy", "girl", "3d", "cartoon", "funky", "colourful", "bright", "balloons", "confetti", "bunting", "animated", "fun"],
     price: 1499,
     music: { src: "/audio/birthday-celebration.m4a", title: "Happy Birthday (celebration)" },
-    print: { art: "khilona", coverAt: 15, countdown: "balloons", message: "bubble", eventStyle: "polaroid", date: "chips", namesFirst: true, titleDeco: "outline", panel: "sticker", box: { top: 9, bottom: 37, x: 8, bottomW: 70 }, title: "#5b2bb5", caps: "#163a5c", body: "#1d3350", number: "3d", sampleAge: "5", petals: ["#ff4d8d", "#ffd23f", "#7b5cff", "#43d17a"], tap: "balloons" },
+    print: { art: "khilona", ground: "#5fd0ea", fonts: "kids", coverAt: 15, countdown: "balloons", message: "bubble", eventStyle: "polaroid", date: "chips", namesFirst: true, titleDeco: "outline", panel: "sticker", box: { top: 9, bottom: 37, x: 8, bottomW: 70 }, title: "#5b2bb5", caps: "#163a5c", body: "#1d3350", number: "3d", sampleAge: "5", petals: ["#ff4d8d", "#ffd23f", "#7b5cff", "#43d17a"], tap: "balloons" },
     theme: { bg: "#c9f3e6", bg2: "#eafaf6", ink: "#1d3350", accent: "#7b5cff", muted: "#46607a", ornament: "none", headingFont: "script" },
   },
   {
@@ -693,8 +706,34 @@ export const TEMPLATES: Template[] = [
     tags: ["birthday", "kids", "girl", "princess", "3d", "cartoon", "pink", "hearts", "cake", "candle", "animated", "cute"],
     price: 1499,
     music: { src: "/audio/birthday-musicbox.m4a", title: "Happy Birthday (music box)" },
-    print: { art: "pari", coverAt: 50, countdown: "rings", message: "bubble", eventStyle: "polaroid", date: "stamp", panel: "rounded", box: { top: 34, topW: 64, bottom: 4, x: 8 }, title: "#c2185b", caps: "#7a2e4a", body: "#5e2a3e", number: "3d", sampleAge: "3", petals: ["#ff7aa8", "#ffb3cd", "#f5d08a"], tap: "hearts" },
+    print: { art: "pari", ground: "#ffc6d8", fonts: "kids", coverAt: 50, countdown: "rings", message: "bubble", eventStyle: "polaroid", date: "stamp", panel: "rounded", box: { top: 34, topW: 64, bottom: 4, x: 8 }, title: "#c2185b", caps: "#7a2e4a", body: "#5e2a3e", number: "3d", sampleAge: "3", petals: ["#ff7aa8", "#ffb3cd", "#f5d08a"], tap: "hearts" },
     theme: { bg: "#ffd6e3", bg2: "#fff3f7", ink: "#5e2a3e", accent: "#d63c78", muted: "#8a4f66", ornament: "none", headingFont: "script" },
+  },
+  // Flowing-page designs after Webgency's "The Sacred Garden" and "Blossom Oud", redrawn as our own vector artwork
+  // (FlowArt.tsx); the owner is arranging the licence (see CREDITS.md). Their songs come from the owner later.
+  {
+    id: "hadiqa-wedding",
+    signature: 9,
+    motion: "rise",
+    flow: "hadiqa",
+    name: "Hadiqa",
+    category: "wedding",
+    tagline: "An embossed envelope with your initials in wax opens on a rose garden arch, swans on the lake below.",
+    tags: ["wedding", "garden", "roses", "swans", "cream", "sage", "maroon", "wax seal", "envelope", "illustrated", "timeline", "elegant"],
+    price: 3999,
+    theme: { bg: "#FBF4E8", bg2: "#F3E8D6", ink: "#5B4A36", accent: "#A8834F", muted: "#7E6B55", ornament: "none", headingFont: "script" },
+  },
+  {
+    id: "ambar-nikkah",
+    signature: 10,
+    motion: "rise",
+    flow: "ambar",
+    name: "Ambar",
+    category: "nikkah",
+    tagline: "Ivory damask sealed with a gold Bismillah, a Moorish arch, a colour palette and a crystal chandelier.",
+    tags: ["nikkah", "ivory", "gold", "olive", "damask", "bismillah", "wax seal", "envelope", "arch", "chandelier", "timeline", "elegant", "minimal"],
+    price: 3999,
+    theme: { bg: "#F7EEDF", bg2: "#F1E2CB", ink: "#5A4630", accent: "#B48A4A", muted: "#80694F", ornament: "none", headingFont: "script" },
   },
 ];
 

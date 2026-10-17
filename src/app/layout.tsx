@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cinzel, Cormorant_Garamond, DM_Sans, Great_Vibes, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu } from "next/font/google";
+import { Cinzel, Cormorant_Garamond, DM_Sans, Fredoka, Great_Vibes, Noto_Naskh_Arabic, Noto_Nastaliq_Urdu, Nunito } from "next/font/google";
 import "./globals.css";
 import { SiteHeader, SiteFooter } from "@/components/Site";
 import { WhatsAppWidget } from "@/components/WhatsAppWidget";
@@ -15,6 +15,11 @@ const urdu = Noto_Nastaliq_Urdu({ variable: "--nf-urdu", subsets: ["arabic"], we
 
 // Bismillah: a light Arabic font (about 50 KiB) so pages do not download the 230 KiB Nastaliq font just for it.
 const naskh = Noto_Naskh_Arabic({ variable: "--nf-naskh", subsets: ["arabic"], weight: ["400"], preload: false, display: "swap" });
+
+// The kids' party designs: rounded, friendly type (Fredoka for titles and names, Nunito for the small print), loaded
+// only when one of those designs is on screen
+const fun = Fredoka({ variable: "--nf-fun", subsets: ["latin"], weight: ["500", "600", "700"], preload: false, display: "swap" });
+const round = Nunito({ variable: "--nf-round", subsets: ["latin"], weight: ["600", "700", "800"], preload: false, display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -41,7 +46,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${sans.variable} ${display.variable} ${script.variable} ${caps.variable} ${urdu.variable} ${naskh.variable} h-full antialiased`}>
+    <html lang="en" className={`${sans.variable} ${display.variable} ${script.variable} ${caps.variable} ${urdu.variable} ${naskh.variable} ${fun.variable} ${round.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-white focus:p-3">
           Skip to content

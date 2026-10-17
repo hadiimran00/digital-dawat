@@ -140,3 +140,11 @@ licences from all ten original designers. Keep those licences on file.
 | Saadgi (engagement) | https://www.pinterest.com/pin/19914423348354916/ | 1,858 |
 | Zaitoon (engagement) | https://www.pinterest.com/pin/242068548717909594/ | 1,587 |
 | Surkh (nikkah) | https://www.pinterest.com/pin/69805862969725117/ | 2,841 |
+
+## Hadiqa and Ambar (flowing-page designs, 2026-10-17)
+
+Layout, sections and opening modelled on Webgency Invitations' "The Sacred Garden"
+(https://webgencyinvitations.com/thesacredgarden) and "Blossom Oud" (https://webgencyinvitations.com/blossomoud).
+Nothing was downloaded from those pages: every drawing (envelopes, wax seals, rose arch, swans, mosque and palace
+sketches, chandelier, damask, torn edges) is our own vector artwork in `src/components/invite/FlowArt.tsx`. On
+2026-10-17 the site owner stated they will provide the licence from Webgency. No music yet; the owner will supply the songs.

@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarDays, CalendarPlus, ChevronDown, MapPin, Music, Phone, Shirt, VolumeX } from "lucide-react";
 import { openingOf, type Opening, type Template } from "@/lib/templates";
 import { Envelope, Halves } from "./Openings";
+import { Number3D } from "./KidsArt";
+import { Stories, type StoryPage } from "./Stories";
 
 /** how long each opening runs before the cover is removed (matches the transitions in globals.css) */
 const OPENING_MS: Record<Opening, number> = {
@@ -14,14 +16,15 @@ const REVEAL_MS: Record<Opening, number> = {
   envelope: 1900, doors: 1000, curtain: 700, split: 700, fold: 950, float: 500, bloom: 350, veil: 350, settle: 350, glide: 450,
 };
 import {
-  BISMILLAH, buildIcs, eventsDateText, formatEventDate, formatEventTime, type InviteContent, type InviteEvent,
+  BISMILLAH, downloadIcs, eventsDateText, formatEventDate, formatEventTime, mapLink, type InviteContent, type InviteEvent,
 } from "@/lib/content";
+import { FlowInvite } from "./FlowInvite";
 import { burst, type TapFx } from "@/lib/tapFx";
 import { ArtHero, AURORA_TEXT, GOLD, InviteCard, TAPE_GLASS } from "./InviteCard";
 import { Families } from "./Families";
 import { AuroraGlow, ModernCover, VideoGate } from "./ModernCover";
 import { PrintArt } from "./PrintArt";
-import { PrintText, onColor, printBox, readable } from "./PrintCard";
+import { FUN, PrintText, ROUND, onColor, printBox, readable } from "./PrintCard";
 import { Ornament, isTallOrnament } from "./Ornament";
 import { Rsvp } from "./Rsvp";
 import { ScratchReveal } from "./ScratchReveal";
@@ -128,21 +131,6 @@ function Countdown({
   );
 }
 
-/** The customer's map link, or a Google Maps search for the venue and address when they did not give one. */
-function mapLink(e: InviteEvent) {
-  if (e.mapUrl) return e.mapUrl;
-  const q = [e.venue, e.address].filter(Boolean).join(", ");
-  return q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}` : "";
-}
-
-function downloadIcs(ev: InviteEvent, hosts: string) {
-  const url = URL.createObjectURL(new Blob([buildIcs(ev, hosts)], { type: "text/calendar;charset=utf-8" }));
-  const a = Object.assign(document.createElement("a"), { href: url, download: `${ev.title.replace(/[^\w]+/g, "-").toLowerCase() || "event"}.ics` });
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
 
 const SCENES: { orn: "jharokha" | "rosette" | "jali" | "bars" | "floral" | "crescent"; deg: number }[] = [
   { orn: "jharokha", deg: 160 },
@@ -307,14 +295,15 @@ const PRINT_PANEL: Record<NonNullable<NonNullable<Template["print"]>["panel"]>, 
   bubble: { panel: "rounded-[30px] border-2 border-(--p-line) bg-(--p-panel) text-(--p-ink) shadow-[0_0_38px_var(--p-glow)] backdrop-blur-md" },
 };
 
-const PRINT_LOOK = (dark: boolean, shape: keyof typeof PRINT_PANEL = "rounded"): Look => ({
+const PRINT_LOOK = (dark: boolean, shape: keyof typeof PRINT_PANEL = "rounded", kids = false): Look => ({
   dark,
   panel: PRINT_PANEL[shape].panel,
   panelStyle: PRINT_PANEL[shape].style,
   ink: "text-(--p-ink)", muted: "text-(--p-ink)/75", cell: "rounded-xl border-(--p-line) bg-(--p-panel)",
-  title: "text-center text-[12px] font-semibold uppercase tracking-[0.3em] text-(--p-accent) [text-wrap:balance]", titleStyle: { fontFamily: CAPS },
-  names: { fontFamily: "var(--nf-script), cursive", fontWeight: 400, color: "var(--p-title)" },
-  greet: { fontFamily: "var(--nf-script), cursive", fontWeight: 400, color: "var(--p-title)" },
+  title: "text-center text-[12px] font-semibold uppercase tracking-[0.3em] text-(--p-accent) [text-wrap:balance]", titleStyle: { fontFamily: kids ? ROUND : CAPS, fontWeight: kids ? 800 : undefined },
+  // the kids' designs speak in rounded, friendly type; the rest in the wedding script
+  names: kids ? { fontFamily: FUN, fontWeight: 700, color: "var(--p-title)" } : { fontFamily: "var(--nf-script), cursive", fontWeight: 400, color: "var(--p-title)" },
+  greet: kids ? { fontFamily: FUN, fontWeight: 700, color: "var(--p-title)" } : { fontFamily: "var(--nf-script), cursive", fontWeight: 400, color: "var(--p-title)" },
   solid: "press inline-flex min-h-11 items-center gap-1.5 rounded-full px-5 text-[11px] font-semibold uppercase tracking-[0.2em] shadow-sm",
   solidStyle: () => ({ background: "var(--p-accent)", color: "var(--p-on-accent)", fontFamily: CAPS }),
   ghost: "press inline-flex min-h-11 items-center gap-1.5 rounded-full border border-(--p-line) bg-(--p-panel) px-5 text-[11px] font-semibold uppercase tracking-[0.2em] text-(--p-ink) [font-family:var(--nf-caps)]",
@@ -322,7 +311,7 @@ const PRINT_LOOK = (dark: boolean, shape: keyof typeof PRINT_PANEL = "rounded"):
   label: "text-[11px] font-semibold uppercase tracking-[0.25em] text-(--p-accent) [font-family:var(--nf-caps)]",
   align: "start", scrim: ["rgba(0,0,0,0)", "rgba(0,0,0,0)"],
   pill: "rounded-full bg-(--p-panel) px-4 text-[11px] text-(--p-ink) shadow-md",
-  prose: "font-display text-[17px] italic leading-relaxed text-(--p-ink)/90",
+  prose: kids ? "text-[16px] font-semibold leading-relaxed text-(--p-ink)/90 [font-family:var(--nf-round)]" : "font-display text-[17px] italic leading-relaxed text-(--p-ink)/90",
   frame: null, tagline: "", shine: "", stage: "print", ornate: false,
 });
 
@@ -623,7 +612,7 @@ export function InviteExperience({
   const scenic = !!concept; // full-screen photo scenes, one section per screen
   const tape = concept === "tape";
   const print = concept === "print" ? template.print : undefined;
-  const look = print ? PRINT_LOOK(!!print.dark, print.panel) :LOOKS[(concept === "print" ? undefined : concept) ?? "tape"];
+  const look = print ? PRINT_LOOK(!!print.dark, print.panel, print.fonts === "kids") : LOOKS[(concept === "print" ? undefined : concept) ?? "tape"];
   /** non-couple occasions (birthdays, aqiqah) get their own wording where the wedding looks speak of a couple */
   const coupleCat = !["birthday", "aqiqah", "baby-shower", "eid"].includes(template.category);
   const gated = concept === "royal" || concept === "ivory"; // doors or curtains instead of the sliding cover
@@ -631,6 +620,9 @@ export function InviteExperience({
   const videoGate = concept === "embossed" || concept === "garden"; // doors / a pearl curtain that open in a short video
   /** how the "Tap to open" cover leaves, for the designs that use it (printed cards and the classic cards) */
   const opening = openingOf(template);
+  /** stories mode: full-screen pages, one at a time (Stories.tsx), instead of one long scroll */
+  const stories = template.mode === "stories" && !!template.print;
+  const [storyRun, setStoryRun] = useState(0);
   /** light backgrounds (paper, the embossed arch): dark lettering, no photo shadows */
   const onPaper = look.stage === "paper" || look.stage === "frame" || look.stage === "print";
   const [opened, setOpened] = useState(startOpen);
@@ -701,9 +693,9 @@ export function InviteExperience({
   useEffect(() => {
     if (!opened) return;
     // Kahani's opening runs about 1.5s; the printed and classic cards each have their own (OPENING_MS)
-    const id = setTimeout(() => setGone(true), videoGate ? 5000 : gated ? 1500 : concept === "editorial" ? 1600 : modern ? 1300 : OPENING_MS[opening]);
+    const id = setTimeout(() => setGone(true), template.flow ? 2600 : videoGate ? 5000 : gated ? 1500 : concept === "editorial" ? 1600 : modern ? 1300 : OPENING_MS[opening]);
     return () => clearTimeout(id);
-  }, [opened, gated, videoGate, concept, modern, opening]);
+  }, [opened, gated, videoGate, concept, modern, opening, template.flow]);
 
   // autoplay: open after a beat (no music), then one screen at a time; at the end, close and start over
   useEffect(() => {
@@ -713,7 +705,7 @@ export function InviteExperience({
   }, [autoplay, opened]);
   useEffect(() => {
     const el = scroller.current;
-    if (!autoplay || !gone || !el) return;
+    if (!autoplay || !gone || !el || stories) return; // stories turn their own pages
     const id = setInterval(() => {
       if (el.scrollTop + el.clientHeight >= el.scrollHeight - 8) {
         el.scrollTo({ top: 0 });
@@ -723,18 +715,18 @@ export function InviteExperience({
       } else el.scrollTo({ top: el.scrollTop + el.clientHeight, behavior: "smooth" });
     }, 2200);
     return () => clearInterval(id);
-  }, [autoplay, gone]);
+  }, [autoplay, gone, stories]);
 
   useEffect(() => {
     const root = scroller.current;
     const el = focus && root?.querySelector<HTMLElement>(`[data-section="${focus}"]`);
-    if (!root || !el) return;
+    if (!root || !el || stories) return; // stories jump to the page themselves
     // offsetTop, not getBoundingClientRect: the editor shows this scaled down, and on-screen pixels would be scaled too
     let top = 0;
     for (let n: HTMLElement | null = el; n && n !== root; n = n.offsetParent as HTMLElement | null) top += n.offsetTop;
     // an instant jump: a smooth scroll gets pulled back by the screens' scroll snapping before it arrives
     root.scrollTo({ top: focus === "cover" ? 0 : top, behavior: "instant" });
-  }, [focus]);
+  }, [focus, stories]);
 
   // tape: timecode runs once the guest presses play
   useEffect(() => {
@@ -848,6 +840,139 @@ export function InviteExperience({
   const sceneAttr = (n: number) => (tape ? { "data-scene": n } : {});
   const stamp = new Date(`${ordered[0].date}T00:00:00`).toLocaleDateString("en-GB", { month: "short", day: "2-digit", year: "numeric" }).toUpperCase().replace(/(\w+) (\d+) (\d+)/, "$1 $2 $3");
 
+  // the printed cards' opening screen: the same readable colours and type as the card itself
+  const kidsType = print?.fonts === "kids";
+  const coverGround = print?.ground ?? (print?.dark ? "#1d1b16" : "#ffffff");
+  const coverTitle = print ? readable(print.title, coverGround) : t.accent;
+  const coverCaps = print ? readable(print.caps, coverGround) : t.ink;
+  const coverNames = kidsType ? FUN : "var(--nf-script), cursive";
+
+  /* ---------- stories mode: one full-screen page per part of the invitation, each laid out its own way ---------- */
+  const storyInk = print?.dark ? "text-white [text-shadow:0_2px_14px_rgba(0,0,0,.55)]" : "text-[#1d1b16] [text-shadow:0_1px_10px_rgba(255,255,255,.7)]";
+  const storyAge = print?.number ? (content.age || /(\d{1,3})/.exec(ordered[0]?.title ?? "")?.[1] || print.sampleAge) : undefined;
+  const pageTop = "pt-[calc(4.5rem+var(--frame-top,0px))]";
+  const pageBottom = "pb-[calc(5rem+var(--frame-bottom,0px))]";
+  const panelCls = `story-block relative ${look.panel}`;
+  const storyPages: StoryPage[] = !stories || !print ? [] : [
+    {
+      key: "cover", section: "cover", label: ur ? "دعوت نامہ" : "The invitation",
+      node: (
+        <div className="absolute inset-0" style={{ containerType: "inline-size" }}>
+          <PrintText template={template} content={content} className="absolute" style={printBox(print, "calc(var(--frame-top, 0px) + 2.5rem)", "calc(var(--frame-bottom, 0px) + 3.5rem)")} />
+        </div>
+      ),
+    },
+    ...((guest || demo) ? [{
+      // the greeting: big words resting at the bottom, over the picture
+      key: "hello", section: "message", label: ur ? "پیغام" : "A message",
+      node: (
+        <div className={`absolute inset-0 flex flex-col justify-end bg-gradient-to-t ${print.dark ? "from-black/70 via-black/25" : "from-white/80 via-white/30"} to-transparent px-7 ${pageBottom} ${storyInk}`}>
+          <p className="text-[2.6rem] leading-[1.05]" style={{ ...look.greet, color: "inherit" }}>{guest ? (ur ? `محترم ${guest}،` : `Dear ${guest},`) : ur ? "محترم مہمان،" : "Dear guest,"}</p>
+          <p className="mt-3 max-w-[22rem] text-lg font-semibold leading-snug" style={{ fontFamily: kidsType ? ROUND : "var(--nf-display), Georgia, serif" }}>
+            {ur ? "ہماری خوشی میں شریک ہوں، ہم نے آپ کے لیے جگہ رکھی ہے۔" : "It wouldn't be a party without you. We've saved you a place."}
+          </p>
+          {demo && !guest && <p className="mt-3 text-sm opacity-80">Each guest can get a link that greets them by name.</p>}
+        </div>
+      ),
+    }] : []),
+    ...(storyAge ? [{
+      // the age, huge and in the middle
+      key: "age", section: "age", label: ur ? "عمر" : "The age",
+      node: (
+        // the age stands above the picture's party, clear of any face in it
+        <div className={`absolute inset-x-0 top-0 flex flex-col items-center px-6 text-center ${pageTop} ${storyInk}`} style={{ containerType: "inline-size" }}>
+          <p className="text-2xl font-bold" style={{ fontFamily: kidsType ? FUN : "var(--nf-display), serif" }}>{content.host1} {ur ? "ہو رہے ہیں" : "is turning"}</p>
+          <div className="my-1"><Number3D value={storyAge} size={storyAge.length > 1 ? 34 : 44} face={print.dark ? "linear-gradient(180deg, #fff4c2, #ffd36e 45%, #f2a93b)" : "linear-gradient(180deg, #ffd1e4, #ff6fa8 50%, #e8457f)"} edge={print.dark ? "#a8661c" : "#a92a5c"} /></div>
+          <p className="text-xl font-bold" style={{ fontFamily: kidsType ? FUN : "var(--nf-display), serif" }}>{ur ? "سال کے!" : "Let's celebrate!"}</p>
+        </div>
+      ),
+    }] : []),
+    {
+      // the countdown at the top, the party picture showing below it
+      key: "countdown", section: "countdown", label: ur ? "الٹی گنتی" : "Countdown",
+      node: (
+        <div className={`absolute inset-x-0 top-0 px-5 ${pageTop}`}>
+          <div className={`${panelCls} px-4 pb-5 pt-6`} style={look.panelStyle}>
+            <p className={look.title} style={look.titleStyle}>{ur ? "پارٹی شروع ہونے میں" : "The party starts in"}</p>
+            <div className="mt-4"><Countdown events={ordered} ur={ur} tape={false} scratchKind={null} accent={t.accent} panel={look.cell} muted={look.muted} kind={print.countdown} /></div>
+          </div>
+        </div>
+      ),
+    },
+    ...ordered.map((e, i) => {
+      const d = new Date(`${e.date}T00:00:00`);
+      return {
+        // each event: a giant date on the left, the details and buttons in a panel at the bottom
+        key: `event-${i}`, section: `event-${fullContent.events.indexOf(e)}`, label: e.title,
+        node: (
+          <div className={`absolute inset-0 flex flex-col justify-between px-6 ${pageTop} ${pageBottom}`}>
+            <div className={storyInk}>
+              <p className="text-sm font-bold uppercase tracking-[0.3em]" style={{ fontFamily: kidsType ? ROUND : CAPS }}>{Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString(loc, { weekday: "long" })}</p>
+              <p className="text-[7.5rem] font-bold leading-[0.9]" style={{ fontFamily: kidsType ? FUN : "var(--nf-display), serif" }}>{Number.isNaN(d.getTime()) ? "" : d.getDate()}</p>
+              <p className="text-xl font-bold" style={{ fontFamily: kidsType ? FUN : "var(--nf-display), serif" }}>{Number.isNaN(d.getTime()) ? "" : d.toLocaleDateString(loc, { month: "long", year: "numeric" })}</p>
+            </div>
+            <div className={`${panelCls} px-5 pb-5 pt-5 text-center`} style={look.panelStyle}>
+              <h3 className="text-3xl leading-tight" style={ur ? { fontFamily: font } : look.names}>{e.title}</h3>
+              {seats && <p className="mt-1 text-xs font-bold uppercase tracking-[0.2em]" style={{ color: "var(--p-accent)" }}>{ur ? `${seats} مہمان مدعو` : `${seats} ${seats === 1 ? "guest" : "guests"} invited`}</p>}
+              <p className="mt-2 font-semibold">{e.time && formatEventTime(e.time)}{e.time && e.venue && " · "}{e.venue}</p>
+              {e.address && <p className={`text-sm ${look.muted}`}>{e.address}</p>}
+              {e.dressCode && <p className={`mt-1 text-sm ${look.muted}`}>{ur ? "ڈریس کوڈ: " : "Dress code: "}{e.dressCode}</p>}
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                {mapLink(e) && <a className={look.solid} style={look.solidStyle(t.accent, t.bg)} href={mapLink(e)} target="_blank" rel="noopener noreferrer"><MapPin className="size-3.5" aria-hidden />{ur ? "مقام" : "Open location"}</a>}
+                <button type="button" className={look.ghost} onClick={() => downloadIcs(e, names)}><CalendarPlus className="size-3.5" aria-hidden />{ur ? "کیلنڈر" : "Add to calendar"}</button>
+              </div>
+            </div>
+          </div>
+        ),
+      };
+    }),
+    ...(content.faq.length > 0 ? [{
+      key: "faq", section: "faq", label: ur ? "عام سوالات" : "Questions",
+      node: (
+        <div className={`absolute inset-0 overflow-y-auto px-5 ${pageTop} ${pageBottom}`}>
+          <div className={`${panelCls} px-5 pb-5 pt-6`} style={look.panelStyle}>
+            <p className={look.title} style={look.titleStyle}>{ur ? "عام سوالات" : "Good to know"}</p>
+            <dl className="mt-4 space-y-3">
+              {content.faq.map((f, i) => <div key={i}><dt className="font-bold">{f.q}</dt><dd className={`text-sm ${look.muted}`}>{f.a}</dd></div>)}
+            </dl>
+          </div>
+        </div>
+      ),
+    }] : []),
+    ...(content.rsvpEnabled ? [{
+      // the reply form: this page waits for the guest
+      key: "rsvp", section: "rsvp", label: ur ? "جواب" : "Reply", hold: true,
+      node: (
+        <div className={`story-block absolute inset-0 overflow-y-auto px-5 ${pageTop} ${pageBottom}`}>
+          <Rsvp inviteId={inviteId} demo={demo || preview} showNote={demo} guestName={guest} seats={seats} guestId={guestId} events={rsvpEvents} tape={look.dark} accent={t.accent} titleClass={look.title} titleStyle={look.titleStyle} />
+        </div>
+      ),
+    }] : []),
+    ...((content.family1 || content.family2 || content.members1.length > 0 || content.members2.length > 0) ? [{
+      key: "families", section: "families", label: ur ? "خاندان" : "The families",
+      node: (
+        <div className={`absolute inset-x-0 bottom-0 px-5 ${pageBottom}`}>
+          <div className={`${panelCls} px-4 pb-5 pt-6`} style={look.panelStyle}>
+            <p className={look.title} style={look.titleStyle}>{ur ? "دعاؤں کے ساتھ" : "With love from"}</p>
+            <div className="mt-4"><FamilyColumns content={content} ur={ur} accent={t.accent} dark={look.dark} /></div>
+          </div>
+        </div>
+      ),
+    }] : []),
+    {
+      // the end: a big thank-you, and the way back to the start
+      key: "closing", section: "closing", label: ur ? "آخر" : "See you there",
+      node: (
+        <div className={`absolute inset-0 flex flex-col items-center justify-center px-6 text-center ${storyInk}`}>
+          <p className="text-[2.8rem] leading-[1.05]" style={{ ...look.names, color: "inherit" }}>{ur ? content.closing || "آپ کی آمد کے منتظر" : "See you at the party!"}</p>
+          <p className="mt-3 text-xl font-bold" style={{ fontFamily: kidsType ? FUN : "var(--nf-display), serif" }}>{names}</p>
+          <button type="button" className={`${look.solid} mt-6`} style={look.solidStyle(t.accent, t.bg)} onClick={() => setStoryRun((n) => n + 1)}>{ur ? "دوبارہ دیکھیں" : "Watch again"}</button>
+          <p className="mt-6 text-xs opacity-80">Made with Digital Dawat</p>
+        </div>
+      ),
+    },
+  ];
+
   /** The envelope opening (Lifafa and the classic "envelope" cards): words above, the sealed envelope, the button below. */
   const envelopeCover = (ink: string) => (
     <div data-open={opened} className="cover open-envelope absolute inset-0 z-20 flex flex-col items-center justify-center gap-7 overflow-hidden px-6 text-center"
@@ -869,6 +994,13 @@ export function InviteExperience({
     </div>
   );
 
+  if (template.flow) return (
+    <FlowInvite skin={template.flow} content={content} ordered={ordered} allEvents={fullContent.events} names={names} hello={hello}
+      guest={guest} seats={seats} opened={opened} gone={gone} onOpen={open} scroller={scroller} onScroll={onScroll}
+      rsvp={{ inviteId, demo: demo || preview, showNote: demo, guestId, events: rsvpEvents }}
+      song={template.music ? { node: <audio ref={song} src={template.music.src} loop preload="none" />, off: songOff, toggle: toggleSong } : undefined} />
+  );
+
   return (
     // printed cards: the invitation waits on a dark "table" until its card has opened (otherwise the doors, fold and
     // curtain would part onto the very same artwork and the opening would be invisible)
@@ -881,9 +1013,12 @@ export function InviteExperience({
         ref={scroller}
         onScroll={onScroll}
         style={scenic ? { scrollPaddingBottom: "3.5rem" } : undefined}
-        className={`${print ? "print-stage" : ""} relative z-[1] h-full overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${opened ? "" : "overflow-hidden"} ${scenic ? `snap-y snap-proximity ${look.ink} [container-type:size]` : ""}`}
+        className={`${print ? "print-stage" : ""} relative z-[1] h-full overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${opened && !stories ? "" : "overflow-hidden"} ${scenic ? `snap-y snap-proximity ${look.ink} [container-type:size]` : ""}`}
       >
-        {scenic ? (
+        {stories ? (
+          <Stories key={storyRun} pages={storyPages} focus={focus} autoplay={autoplay && gone} light={!print?.dark}
+            onEnd={() => { setSeconds(0); setGone(false); setOpened(false); setStoryRun((n) => n + 1); }} />
+        ) : scenic ? (
         <div className="mx-auto max-w-md px-5">
           {tape ? (
             <Screen tape scene={0} section="cover" framed={false}>
@@ -1140,7 +1275,7 @@ export function InviteExperience({
                       // eslint-disable-next-line @next/next/no-img-element -- static export, photo comes from our storage
                       <img src={eventScene(e) || content.couplePhoto} alt="" className="absolute inset-0 h-full w-full object-cover" />
                     )}
-                    <p className={`relative px-4 leading-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,.35)] [text-wrap:balance] ${e.title.length > 12 ? "text-4xl" : "text-5xl"}`} style={{ fontFamily: ur ? font : "var(--nf-script), cursive" }}>{e.title}</p>
+                    <p className={`relative px-4 leading-tight text-white [text-shadow:0_2px_12px_rgba(0,0,0,.35)] [text-wrap:balance] ${e.title.length > 12 ? "text-4xl" : "text-5xl"}`} style={{ fontFamily: ur ? font : coverNames, fontWeight: kidsType ? 700 : undefined }}>{e.title}</p>
                   </div>
                 )}
                 {print?.eventStyle === "ticket" && (
@@ -1149,7 +1284,7 @@ export function InviteExperience({
                   </p>
                 )}
                 {print?.eventStyle === "polaroid" ? (
-                  <p className="text-2xl" style={{ fontFamily: ur ? font : "var(--nf-script), cursive" }}>{formatEventDate(e.date, loc)}</p>
+                  <p className={kidsType ? "text-lg font-bold" : "text-2xl"} style={{ fontFamily: ur ? font : coverNames }}>{formatEventDate(e.date, loc)}</p>
                 ) : tape ? (
                   <Tag tape label={`Tape ${pad(i + 1)} / ${pad(ordered.length)}`} accent={t.accent} />
                 ) : (
@@ -1488,7 +1623,7 @@ export function InviteExperience({
         </div>
       )}
 
-      {scenic && !tape && opened && !atEnd && (
+      {scenic && !tape && !stories && opened && !atEnd && (
         <button ref={hintRef as React.RefObject<HTMLButtonElement>} type="button" tabIndex={-1} aria-hidden onClick={() => scroller.current?.scrollBy({ top: scroller.current.clientHeight * 0.8, behavior: reducedMotion() ? "auto" : "smooth" })}
           className={`press absolute bottom-[calc(0.5rem+var(--frame-bottom,0px))] left-1/2 z-10 grid min-h-11 min-w-11 -translate-x-1/2 place-items-center outline-none transition-opacity duration-300 ${hintAway ? "pointer-events-none opacity-0" : ""}`}>
           {print ? (
@@ -1581,12 +1716,12 @@ export function InviteExperience({
             : <PrintArt art={print.art} />}
           <div className={`cover-ui relative flex h-full flex-col items-center gap-3 px-12 text-center ${print.coverAt ? "justify-start" : "justify-center"}`}
             style={{ containerType: "inline-size", paddingTop: print.coverAt ? `${print.coverAt}cqh` : undefined }}>
-            {hello && <p className="text-3xl leading-tight" style={ur ? { fontFamily: font, color: print.title } : { fontFamily: "var(--nf-script), cursive", color: print.title }}>{hello}</p>}
-            <p className="text-[12px] uppercase tracking-[0.35em]" style={{ fontFamily: CAPS, color: print.caps }}>{ur ? "آپ مدعو ہیں" : hello ? "you are invited" : "You're invited"}</p>
-            <p className="text-[min(14cqw,3.6rem)] leading-[1.1] [overflow-wrap:anywhere]" style={{ fontFamily: ur ? font : "var(--nf-script), cursive", color: print.title }}>
+            {hello && <p className="text-3xl leading-tight" style={{ fontFamily: ur ? font : coverNames, fontWeight: kidsType ? 700 : undefined, color: coverTitle }}>{hello}</p>}
+            <p className="text-[12px] uppercase tracking-[0.35em]" style={{ fontFamily: kidsType ? ROUND : CAPS, fontWeight: kidsType ? 800 : undefined, color: coverCaps }}>{ur ? "آپ مدعو ہیں" : hello ? "you are invited" : "You're invited"}</p>
+            <p className="text-[min(14cqw,3.6rem)] leading-[1.1] [overflow-wrap:anywhere]" style={{ fontFamily: ur ? font : coverNames, fontWeight: kidsType ? 700 : undefined, color: coverTitle }}>
               {content.host1}{content.host2 && <><span className="block text-[0.5em]">&amp;</span>{content.host2}</>}
             </p>
-            <p className="text-[12px] uppercase tracking-[0.3em]" style={{ fontFamily: CAPS, color: print.caps }}>{ordered[0]?.title}</p>
+            <p className="text-[12px] uppercase tracking-[0.3em]" style={{ fontFamily: kidsType ? ROUND : CAPS, fontWeight: kidsType ? 800 : undefined, color: coverCaps }}>{ordered[0]?.title}</p>
             <button type="button" onClick={open} className={`${look.solid} mt-4 min-h-12 px-7 text-xs shadow-xl`} style={look.solidStyle(t.accent, t.bg)}>
               {ur ? "کھولنے کے لیے ٹیپ کریں" : "Tap to open"}
             </button>

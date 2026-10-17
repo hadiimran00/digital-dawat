@@ -182,6 +182,23 @@ export function buildIcs(ev: InviteEvent, hosts: string): string {
     .join("\r\n");
 }
 
+/** The customer's map link, or a Google Maps search for the venue and address when they did not give one. */
+export function mapLink(e: InviteEvent) {
+  if (e.mapUrl) return e.mapUrl;
+  const q = [e.venue, e.address].filter(Boolean).join(", ");
+  return q ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}` : "";
+}
+
+/** Saves the event as an .ics file, which phones open in their calendar app. */
+export function downloadIcs(ev: InviteEvent, hosts: string) {
+  const url = URL.createObjectURL(new Blob([buildIcs(ev, hosts)], { type: "text/calendar;charset=utf-8" }));
+  const a = Object.assign(document.createElement("a"), { href: url, download: `${ev.title.replace(/[^\w]+/g, "-").toLowerCase() || "event"}.ics` });
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 export function randomSlug() {
   const alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
   const bytes = crypto.getRandomValues(new Uint8Array(8));

@@ -1,4 +1,4 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 
 :root {
   --background: #fbf7f0;
@@ -306,6 +306,24 @@ summary,
 }
 
 /* Each scene's panel rises in once, the first time its screen comes into view (ease-out, short). */
+/* Stories mode (Stories.tsx): pages cross-fade with a slight settle; the page sits above the tap zones but lets taps
+   through, except on its own buttons, links, fields and solid panels (.story-block) */
+.story-page {
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(1.03);
+  transition: opacity 320ms var(--ease-out), transform 480ms var(--ease-out);
+}
+.story-page.is-on { opacity: 1; transform: none; }
+.story-page.is-past { transform: scale(0.98); }
+.story-page.is-on :is(a, button, input, textarea, select, label, summary, .story-block) { pointer-events: auto; }
+.story-bar { transform-origin: 0 50%; transform: scaleX(0); animation: story-fill linear forwards; }
+@keyframes story-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .story-page, .story-page.is-past { transform: none; transition: opacity 200ms ease-out; }
+}
+
 /* Kids' party designs (KidsArt.tsx): continuous, gentle motion; all of it stops for reduced motion (below). */
 @keyframes kid-bob {
   0%, 100% { transform: translateY(0) rotate(calc(var(--sway, 3deg) * -1)); }
@@ -545,4 +563,45 @@ summary,
   .cover-editorial[data-open="true"] .cover-photo {
     transform: translateY(22%);
   }
+}
+
+/* Flowing-page designs (FlowInvite.tsx). A once-per-invitation opening, so it may take its time (~2.6s in all). */
+/* Hadiqa: the seal glows, golden light comes through the folds, the four flaps part outward, then all fades. */
+.flow-env { transition: opacity 600ms var(--ease-out) 1900ms; }
+.flow-env[data-open="true"] { opacity: 0; pointer-events: none; }
+.fenv-ui { transition: opacity 400ms var(--ease-out) 650ms; }
+.flow-env[data-open="true"] .fenv-ui { opacity: 0; }
+.fenv-seal { transition: transform 600ms var(--ease-out), filter 600ms var(--ease-out); }
+.fenv-light { opacity: 0; transition: opacity 900ms var(--ease-out) 350ms; }
+.fenv-hadiqa[data-open="true"] .fenv-light { opacity: 1; }
+.fenv-flap { transition: transform 1200ms var(--ease-in-out) 650ms; }
+.fenv-hadiqa[data-open="true"] .fenv-seal { transform: scale(1.08); filter: drop-shadow(0 0 18px #ffd98a) brightness(1.15); }
+.fenv-hadiqa[data-open="true"] .fenv-t { transform: translateY(-62%); }
+.fenv-hadiqa[data-open="true"] .fenv-b { transform: translateY(62%); }
+.fenv-hadiqa[data-open="true"] .fenv-l { transform: translateX(-62%); }
+.fenv-hadiqa[data-open="true"] .fenv-r { transform: translateX(62%); }
+/* Ambar: the gold seal lifts away, the flap swings up and over, the envelope sinks out of view. */
+.fenv-ambar .fenv-seal { transition: transform 500ms var(--ease-out), opacity 500ms var(--ease-out); }
+.fenv-ambar[data-open="true"] .fenv-seal { transform: translateY(-24px) scale(1.06); opacity: 0; }
+.fenv-top { transition: transform 1000ms var(--ease-in-out) 350ms, opacity 300ms var(--ease-out) 1000ms; }
+.fenv-ambar[data-open="true"] .fenv-top { transform: rotateX(180deg); opacity: 0; }
+.fenv-body { transition: transform 900ms var(--ease-in-out) 1100ms; }
+.fenv-ambar[data-open="true"] .fenv-body { transform: translateY(105%); }
+
+/* each part of the page fades up the first time it scrolls into view (FlowInvite sets data-in) */
+.flow-reveal { opacity: 0; transform: translateY(18px); transition: opacity 700ms var(--ease-out) var(--d, 0ms), transform 700ms var(--ease-out) var(--d, 0ms); }
+.flow-reveal[data-in] { opacity: 1; transform: none; }
+.flow-rsvp { animation: flow-rise 600ms var(--ease-out) both; }
+@keyframes flow-rise { from { opacity: 0; transform: translateY(14px); } }
+/* the reply form and family tabs sit on the paper instead of white cards */
+.flow-rsvp form, .flow-rsvp [role="status"] { background: rgba(255, 255, 255, 0.55); border-color: rgba(168, 131, 79, 0.45); }
+/* the swans drift a little on the lake */
+.flow-swim { animation: flow-swim 6s ease-in-out infinite; }
+@keyframes flow-swim { 50% { transform: translateY(-3px); } } /* transform, not translate: that holds the centring */
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-env, .fenv-ui { transition: opacity 400ms ease 300ms; }
+  .fenv-flap, .fenv-top, .fenv-body, .fenv-seal { transition: none; transform: none !important; }
+  .flow-reveal { transform: none; transition: opacity 400ms ease; }
+  .flow-swim, .flow-rsvp { animation: none; }
 }

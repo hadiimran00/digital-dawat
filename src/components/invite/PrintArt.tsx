@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+﻿import type { CSSProperties, ReactNode } from "react";
 import type { PrintArtId } from "@/lib/templates";
 import { KIDS_ART, KIDS_BG } from "./KidsArt";
 
@@ -542,4 +542,4 @@ export function PrintArt({ art, className = "" }: { art: PrintArtId; className?:
   );
 }
 
-export { Rings };
+export { Rings, Rose, Peony, Blossom, Leaf, Sprig, Butterfly };

@@ -106,7 +106,7 @@ function Scene({ src, style, imgStyle, flames, className = "" }: { src: string; 
 /** The big age number: a glossy toy number with a deep 3D edge, bobbing gently. */
 export function Number3D({ value, face, edge, size = 30 }: { value: string; face: string; edge: string; size?: number }) {
   const depth = Array.from({ length: 9 }, (_, i) => `${(i + 1) * size * 0.006}cqw ${(i + 1) * size * 0.007}cqw 0 ${edge}`).join(", ");
-  const font: CSSProperties = { fontFamily: "var(--nf-sans), system-ui", fontWeight: 900, fontSize: `${size}cqw`, lineHeight: 0.95, letterSpacing: "-0.04em" };
+  const font: CSSProperties = { fontFamily: "var(--nf-fun), var(--nf-sans), system-ui", fontWeight: 700, fontSize: `${size}cqw`, lineHeight: 0.95, letterSpacing: "-0.04em" };
   return (
     <div aria-hidden className="kid-anim kid-bob relative inline-block" style={{ ["--sway" as string]: "2deg", animationDuration: "4.5s" }}>
       <span className="absolute inset-0" style={{ ...font, color: edge, textShadow: `${depth}, 0 ${size * 0.08}cqw ${size * 0.1}cqw rgba(0,0,0,.3)` }}>{value}</span>
