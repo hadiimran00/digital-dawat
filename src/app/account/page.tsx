@@ -87,7 +87,7 @@ export default function Account() {
               <p className="font-semibold">{getTemplate(r.invites?.template_id ?? "")?.name ?? "Invitation"} · {formatPKR(r.amount_pkr)}</p>
               <p className="text-sm text-foreground/70">{new Date(r.created_at).toLocaleDateString("en-GB")} · {LABEL[r.status] ?? r.status}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {r.invites && (
                 <Link className="btn btn-primary" href={`/guests?s=${r.invites.slug}`}>Guests</Link>
               )}
@@ -95,6 +95,7 @@ export default function Account() {
                 <>
                   <Link className="btn btn-ghost" href={`/i?s=${r.invites.slug}`}>Open</Link>
                   <Link className="btn btn-ghost" href={`/rsvps?s=${r.invites.slug}`}>RSVPs</Link>
+                  <Link className="btn btn-ghost" href={`/video?s=${r.invites.slug}`}>Download video</Link>
                 </>
               )}
               {r.status !== "approved" && <Link className="btn btn-primary" href={`/order?id=${r.id}`}>{r.status === "pending_review" ? "View" : "Pay"}</Link>}

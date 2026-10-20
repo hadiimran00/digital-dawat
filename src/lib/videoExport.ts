@@ -571,13 +571,37 @@ export interface RenderedVideo {
   withMusic: boolean;
 }
 
+/** Diagonal rows of "PREVIEW · KABOOTAR POST" over a frame (the unpaid video). */
+function stampPreview(canvas: HTMLCanvasElement) {
+  const c = canvas.getContext("2d");
+  if (!c) return;
+  const { width: w, height: h } = canvas;
+  c.save();
+  c.translate(w / 2, h / 2);
+  c.rotate(-Math.PI / 6);
+  c.textAlign = "center";
+  c.textBaseline = "middle";
+  c.font = `700 ${Math.round(w * 0.06)}px system-ui, sans-serif`;
+  c.lineWidth = Math.max(2, w * 0.004);
+  for (let y = -h; y <= h; y += w * 0.28) {
+    c.strokeStyle = "rgba(0,0,0,0.28)";
+    c.fillStyle = "rgba(255,255,255,0.42)";
+    c.strokeText("PREVIEW · KABOOTAR POST", 0, y);
+    c.fillText("PREVIEW · KABOOTAR POST", 0, y);
+  }
+  c.restore();
+}
+
 export async function renderInviteVideo(
   template: Template,
   content: InviteContent,
   onProgress?: (p: number) => void,
   style: VideoStyle = template.motion,
+  /** before the order is paid: "PREVIEW · KABOOTAR POST" across every frame, so an unpaid video can't be shared */
+  watermark = false,
 ): Promise<RenderedVideo> {
-  const { canvas, draw, seconds } = await createAnimator(template, content, style);
+  const { canvas, draw: drawFrame, seconds } = await createAnimator(template, content, style);
+  const draw = watermark ? (sec: number) => { drawFrame(sec); stampPreview(canvas); } : drawFrame;
   const output = new Output({ format: new Mp4OutputFormat({ fastStart: "in-memory" }), target: new BufferTarget() });
   const source = new CanvasSource(canvas, { codec: "avc", bitrate: QUALITY_HIGH });
   output.addVideoTrack(source, { frameRate: FPS });

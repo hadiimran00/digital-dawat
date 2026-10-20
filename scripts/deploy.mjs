@@ -9,7 +9,7 @@
 // node_modules. First time only: `npx wrangler@4.149.0 login`, and the projects must exist
 // (`wrangler pages project create <name> --production-branch main`, run from a clean folder).
 import { spawnSync } from "node:child_process";
-import { appendFileSync, cpSync, mkdtempSync, rmSync, existsSync } from "node:fs";
+import { appendFileSync, cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, existsSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -42,6 +42,13 @@ try {
   cpSync("out", dir, { recursive: true });
   // the testing copy must never compete with the real site in search results
   if (!PROD) appendFileSync(join(dir, "_headers"), "\n/*\n  X-Robots-Tag: noindex, nofollow\n");
+  // Pages Functions (functions/i.js: link previews for invitation links), with this site's public values filled in
+  if (existsSync("functions")) {
+    const env = Object.fromEntries(readFileSync(".env.local", "utf8").split(/\r?\n/).map((l) => l.match(/^\s*([A-Z_]+)\s*=\s*(.*)\s*$/)).filter(Boolean).map((m) => [m[1], m[2]]));
+    const fill = (s) => s.replaceAll("__SUPABASE_URL__", env.NEXT_PUBLIC_SUPABASE_URL ?? "").replaceAll("__SUPABASE_ANON_KEY__", env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "").replaceAll("__SITE_URL__", SITE_URL);
+    mkdirSync(join(dir, "functions"), { recursive: true });
+    for (const f of readdirSync("functions")) writeFileSync(join(dir, "functions", f), fill(readFileSync(join("functions", f), "utf8")));
+  }
   const d = run(`npx --yes ${WRANGLER} pages deploy . --project-name ${PROJECT} --branch main`, {
     cwd: dir,
     env: { ...process.env, WRANGLER_SEND_METRICS: "false" },

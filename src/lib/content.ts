@@ -121,6 +121,7 @@ export function defaultContent(category: CategoryId, language: "en" | "ur" = "en
     coverPhoto: "",
     couplePhoto: "",
     music: "",
+    shareImage: "",
   };
 }
 

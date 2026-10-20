@@ -7,7 +7,8 @@ import type { InviteContent } from "@/lib/content";
 import { VIDEO_STYLES, canExportMp4, renderInviteVideo, type VideoStyle } from "@/lib/videoExport";
 import { musicOf } from "@/lib/music";
 
-export function VideoExport({ template, content }: { template: Template; content: InviteContent }) {
+/** `watermark`: the unpaid preview (editor); the paid invitation's video (My orders → Download video) has none. */
+export function VideoExport({ template, content, watermark = false }: { template: Template; content: InviteContent; watermark?: boolean }) {
   const [supported, setSupported] = useState<boolean | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
   const [url, setUrl] = useState<string | null>(null);
@@ -24,7 +25,7 @@ export function VideoExport({ template, content }: { template: Template; content
     setError("");
     setProgress(0);
     try {
-      const r = await renderInviteVideo(template, content, setProgress, style);
+      const r = await renderInviteVideo(template, content, setProgress, style, watermark);
       setWithMusic(r.withMusic);
       setUrl(URL.createObjectURL(r.blob));
     } catch (e) {
@@ -57,8 +58,9 @@ export function VideoExport({ template, content }: { template: Template; content
         </div>
       </fieldset>
       <button type="button" className="btn btn-ghost w-full" onClick={go} disabled={progress !== null}>
-        {progress !== null ? `Rendering ${Math.round(progress * 100)}%` : "Create video"}
+        {progress !== null ? `Rendering ${Math.round(progress * 100)}%` : watermark ? "Create a preview video" : "Create video"}
       </button>
+      {watermark && <p className="mt-2 text-xs text-foreground/70">Preview videos carry a &ldquo;Preview&rdquo; watermark. Once your order is paid, download the clean video from My orders.</p>}
       {error && <p role="alert" className="mt-2 text-sm text-red-700">{error}</p>}
       {url && (
         <div className="mt-3 space-y-2">

@@ -14,6 +14,8 @@ import { VideoExport } from "@/components/VideoExport";
 import { PhoneFrame } from "@/components/PhoneFrame";
 import { PhotoField } from "@/components/PhotoField";
 import { MusicField } from "@/components/MusicField";
+import { PreviewWatermark } from "@/components/PreviewWatermark";
+import { uploadShareImage } from "@/lib/shareImage";
 import { SupportLink } from "@/components/SupportLink";
 import { CUSTOM_DESIGN_PRICE } from "@/components/DoneForYou";
 import { Unavailable } from "@/components/TemplateLive";
@@ -43,6 +45,7 @@ function LivePreview({ template, content, focus, className }: { template: NonNul
       {scale > 0 && (
         <div className="origin-top-left" style={{ width: PHONE_W, height: `${100 / scale}%`, transform: `scale(${scale})` }}>
           <InviteExperience template={template} content={content} demo startOpen focus={focus} />
+          <PreviewWatermark />
         </div>
       )}
     </div>
@@ -186,9 +189,11 @@ export function Editor() {
         router.push(`/login?next=${encodeURIComponent(`/create?t=${template.id}`)}`);
         return;
       }
+      // the picture WhatsApp shows for their invitation link: their names and date over their design
+      const shareImage = await uploadShareImage(template, parsed.data);
       const { data: inv, error: e1 } = await sb
         .from("invites")
-        .insert({ owner_id: user.id, slug: randomSlug(), template_id: template.id, content: parsed.data })
+        .insert({ owner_id: user.id, slug: randomSlug(), template_id: template.id, content: { ...parsed.data, shareImage } })
         .select("id")
         .single();
       if (e1) throw e1;
@@ -500,7 +505,7 @@ export function Editor() {
           {/* an iPhone 15, like the template pages; a visual mirror of the form, so hidden from screen readers */}
           <div aria-hidden inert className="mx-auto w-fit">
             <PhoneFrame margin={200} maxWidth={340}>
-              <InviteExperience template={template} content={content} demo startOpen focus={focus} />
+              <div className="relative h-full w-full"><InviteExperience template={template} content={content} demo startOpen focus={focus} /><PreviewWatermark /></div>
             </PhoneFrame>
           </div>
           <p className="mt-3 text-center text-xs text-foreground/70">The preview follows what you edit.</p>
@@ -512,7 +517,7 @@ export function Editor() {
           <span className="text-sm"><span className="block font-semibold">Your invitation</span><span className="block text-foreground/70">It updates as you type. Tap to see all of it.</span></span>
         </button>
       </aside>
-      <div className="order-3"><VideoExport template={template} content={content} /></div>
+      <div className="order-3"><VideoExport template={template} content={content} watermark /></div>
 
       {/* phones: price, preview and continue always in reach */}
       <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-2 border-t border-line bg-background/95 px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] backdrop-blur lg:hidden">
@@ -536,7 +541,7 @@ export function Editor() {
         <div role="dialog" aria-modal="true" aria-label="Invitation preview" className="modal-overlay fixed inset-0 z-50 grid place-items-center bg-black/70 p-3">
           <div className="modal-panel relative">
             <PhoneFrame margin={32} plainClassName="h-[92dvh] w-[min(100vw-1.5rem,390px)] max-md:overflow-hidden max-md:rounded-[2rem] max-md:border-8 max-md:border-foreground/90">
-              <InviteExperience template={template} content={content} demo />
+              <div className="relative h-full w-full"><InviteExperience template={template} content={content} demo /><PreviewWatermark /></div>
             </PhoneFrame>
             <button ref={closeBtn} type="button" onClick={() => setPreviewing(false)} aria-label="Close preview"
               className="press absolute -right-3 -top-3 z-50 grid size-11 place-items-center rounded-full bg-black/70 text-white md:right-1 md:top-1">

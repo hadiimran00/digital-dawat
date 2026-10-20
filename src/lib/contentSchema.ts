@@ -74,6 +74,8 @@ export const ContentSchema = z.object({
   contactPhone: z.string().trim().max(20),
   coverPhoto: Photo,
   couplePhoto: Photo,
+  /** the picture WhatsApp shows for the invitation link (names and date over the design; see shareImage.ts) */
+  shareImage: Photo,
   /** "" = the design's own song, "off" = no music, or the customer's own song (a URL in our bucket, see music.ts) */
   music: z.string().trim().max(400).refine((v) => v === "" || v === "off" || isOurSong(v), "Please upload the song again").default(""),
 });
